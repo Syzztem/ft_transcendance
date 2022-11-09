@@ -1,0 +1,38 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    docker-compose.yml                                 :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: lothieve <marvin@42.fr>                    +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2022/11/04 15:02:47 by lothieve          #+#    #+#              #
+#    Updated: 2022/11/09 15:20:36 by lothieve         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
+version: '3'
+services:
+  db:
+    image: postgres
+    volumes:
+      - db:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PW}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PGDATA: ${PGDATA}
+    restart: always
+    networks:
+      - transcendance
+    container_name: db
+  nest:
+    build: nest
+    restart: always
+    networks:
+      - transcendance
+    ports:
+      - 3000:3000
+    container_name: nest
+networks:
+  transcendance:
+volumes:
+  db:
