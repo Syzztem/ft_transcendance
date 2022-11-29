@@ -6,33 +6,53 @@
 #    By: lothieve <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/04 15:02:47 by lothieve          #+#    #+#              #
-#    Updated: 2022/11/09 15:20:36 by lothieve         ###   ########.fr        #
+#    Updated: 2022/11/28 13:49:14 by lothieve         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 version: '3'
 services:
   db:
+    container_name: db
     image: postgres
     volumes:
-      - db:/var/lib/postgresql/data/
+      - db:/var/lib/postgresql/
+      - ./db/dump.sql:/docker-entrypoint-initdb.d/dump.sql
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PW}
+      POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_DB: ${POSTGRES_DB}
       PGDATA: ${PGDATA}
     restart: always
     networks:
       - transcendance
-    container_name: db
   nest:
+    container_name: nest
     build: nest
+    depends_on:
+      - db
     restart: always
     networks:
       - transcendance
     ports:
       - 3000:3000
-    container_name: nest
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    depends_on:
+      - db
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "5050:80"
+    networks:
+      - transcendance
 networks:
   transcendance:
 volumes:
   db:
+  pgadmin:
