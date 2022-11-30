@@ -31,28 +31,31 @@ services:
     build: nest
     depends_on:
       - db
-    restart: always
+    restart: on-failure
     networks:
       - transcendance
     ports:
       - 3000:3000
-  pgadmin:
-    container_name: pgadmin
-    image: dpage/pgadmin4
-    restart: always
-    depends_on:
-      - db
     volumes:
-      - pgadmin:/var/lib/pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-    ports:
-      - "5050:80"
-    networks:
-      - transcendance
+      - ./nest/backend:/back
+    # stdin_open: true
+    # tty: true 
+    # container_name: pgadmin
+    # image: dpage/pgadmin4
+    # restart: always
+    # depends_on:
+    #   - db
+    # volumes:
+    #   - pgadmin:/var/lib/pgadmin
+    # environment:
+    #   PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+    #   PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    # ports:
+    #   - "5050:80"
+    # networks:
+    #   - transcendance
 networks:
   transcendance:
 volumes:
   db:
-  pgadmin:
+  # pgadmin:
