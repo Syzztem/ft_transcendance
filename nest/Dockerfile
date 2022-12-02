@@ -6,7 +6,7 @@
 #    By: tor <tor@student.42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/09 14:36:04 by lothieve          #+#    #+#              #
-#    Updated: 2022/11/30 18:24:05 by tor              ###   ########.fr        #
+#    Updated: 2022/12/01 15:33:20 by tor              ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,7 @@ FROM node:19
 
 RUN mkdir back
 WORKDIR /back
-COPY ./backend/package.json .
+COPY ./backend/package*.json ./
 COPY ./backend/tsconfig.json .
 RUN npm install -g \
     @nestjs/cli \

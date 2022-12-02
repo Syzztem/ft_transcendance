@@ -31,6 +31,18 @@ export class AuthService {
  * 
  * Need to store th passwd 
  * Using a library
- * Ex bcrypt
+ * Ex bcrypt:
+ * 
+ * 
+ *	import * as bcrypt from 'bcrypt';
+ *	
+ *	const saltOrRounds = 10;
+ *	const password = 'random_password';
+ *	const hash = await bcrypt.hash(password, saltOrRounds);
+ *  ===> Create the hashed passwd
+ * 
+ * const isMatch = await bcrypt.compare(password, hash);
+ * ====> Compare if passwd match
+ *
  * 
  *****************************/
