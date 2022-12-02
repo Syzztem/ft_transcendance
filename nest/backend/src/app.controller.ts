@@ -6,23 +6,22 @@ import { GoogleOAuthGuard } from './auth/google-oauth.guard';
 import { AppService } from './app.service';
 
 
-
 @Controller()
 export class AppController {
-  constructor(private authService: AuthService) {}
-
+  constructor(private readonly appService: AppService, private authService: AuthService) {}
+  
   @UseGuards(LocalAuthGuard)
   @Post('auth/login')
   async login(@Request() req) {
     return this.authService.login(req.user);
   }
-
+  
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@Request() req) {
     return req.user;
   }
-
+  
   @Get()
   @UseGuards(GoogleOAuthGuard)
   async googleAuth(@Request() req) {}
@@ -30,7 +29,6 @@ export class AppController {
   @Get('google-redirect')
   @UseGuards(GoogleOAuthGuard)
   googleAuthRedirect(@Request() req) {
-    // return this.AppService.googleLogin(req);
+    return this.authService.googleLogin(req);
   }
-  
 }

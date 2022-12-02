@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 
@@ -24,6 +24,17 @@ export class AuthService {
 		access_token: this.jwtService.sign(payload),
 	  };
 	}
+	googleLogin(req) {
+		console.log("bonjour")
+		if (!req.user) {
+		  return 'No user from google'
+		}
+	
+		return {
+		  message: 'User information from google',
+		  user: req.user
+		}
+	  }
 }
 
 /******************************
