@@ -17,7 +17,6 @@ services:
     image: postgres
     volumes:
       - db:/var/lib/postgresql/
-      - ./db/dump.sql:/docker-entrypoint-initdb.d/dump.sql
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PW}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -36,6 +35,21 @@ services:
       - transcendance
     ports:
       - 3000:3000
+    # vue:
+    # build: front
+    # ports:
+    #  - "8080:8080"
+    # container_name: vue
+    # depends_on:
+    #   - nest
+    # networks:
+    #   - transcendance
+    # volumes:
+    #   - type: bind
+    #     source: front
+    #     target: /usr/src/app/front/src
+    # restart: always
+    # command: npm run serve
   pgadmin:
     container_name: pgadmin
     image: dpage/pgadmin4
