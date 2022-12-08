@@ -12,25 +12,25 @@
 
 version: '3'
 services:
-  db:
-    container_name: db
-    image: postgres
-    volumes:
-      - db:/var/lib/postgresql/
-      - ./db/dump.sql:/docker-entrypoint-initdb.d/dump.sql
-    environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PW}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_DB: ${POSTGRES_DB}
-      PGDATA: ${PGDATA}
-    restart: always
-    networks:
-      - transcendance
+  # db:
+  #   container_name: db
+  #   image: postgres
+  #   volumes:
+  #     - db:/var/lib/postgresql/
+  #     - ./db/dump.sql:/docker-entrypoint-initdb.d/dump.sql
+  #   environment:
+  #     POSTGRES_PASSWORD: ${POSTGRES_PW}
+  #     POSTGRES_USER: ${POSTGRES_USER}
+  #     POSTGRES_DB: ${POSTGRES_DB}
+  #     PGDATA: ${PGDATA}
+  #   restart: always
+  #   networks:
+  #     - transcendance
   nest:
     container_name: nest
     build: nest
-    depends_on:
-      - db
+    # depends_on:
+    #   - db
     restart: on-failure
     networks:
       - transcendance

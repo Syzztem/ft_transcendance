@@ -9,12 +9,12 @@ export class AuthService {
 	  private jwtService: JwtService
 	) {}
   
-	async validateUser(username: string, pass: string): Promise<any> {
-	  const user = await this.usersService.findOne(username);
-	  if (user && user.password === pass) {
-		const { password, ...result } = user;
-		return result;
-	  }
+	async validateUser(): Promise<any> {
+	//   const user = await this.usersService.findOne(username);
+	//   if (user && user.password === pass) {
+		// const { password, ...result } = user;
+		// return result;
+	//   }
 	  return null;
 	}
   
@@ -24,17 +24,6 @@ export class AuthService {
 		access_token: this.jwtService.sign(payload),
 	  };
 	}
-	googleLogin(req) {
-		console.log("bonjour")
-		if (!req.user) {
-		  return 'No user from google'
-		}
-	
-		return {
-		  message: 'User information from google',
-		  user: req.user
-		}
-	  }
 }
 
 /******************************

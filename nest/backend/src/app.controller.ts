@@ -1,19 +1,28 @@
-import { Controller, Request, Post, UseGuards, Get } from '@nestjs/common';
-import { JwtAuthGuard } from './auth/jwt-auth.guard';
-import { LocalAuthGuard } from './auth/local-auth.guard';
+import { Controller, Request, Post, UseGuards, Get, Redirect, Query } from '@nestjs/common';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { ftAuthGuard } from './auth/guards/ft.guard';
 import { AuthService } from './auth/auth.service';
-import { GoogleOAuthGuard } from './auth/google-oauth.guard';
 import { AppService } from './app.service';
 
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService, private authService: AuthService) {}
+  constructor(private authService: AuthService) {}
   
-  @UseGuards(LocalAuthGuard)
-  @Post('auth/login')
+  @Get()
+  @UseGuards(ftAuthGuard)
+  @Redirect('https://api.intra.42.fr/oauth/authorize', 302)
+
+
+
+  // @Get('')
+  // @UseGuards(ftAuthGuard)
+  // async ftauth(@Request() req) {}
+
+  @UseGuards(ftAuthGuard)
+  @Post('/auth/login')
   async login(@Request() req) {
-    return this.authService.login(req.user);
+    return req.user;
   }
   
   @UseGuards(JwtAuthGuard)
@@ -22,13 +31,4 @@ export class AppController {
     return req.user;
   }
   
-  @Get()
-  @UseGuards(GoogleOAuthGuard)
-  async googleAuth(@Request() req) {}
-
-  @Get('google-redirect')
-  @UseGuards(GoogleOAuthGuard)
-  googleAuthRedirect(@Request() req) {
-    return this.authService.googleLogin(req);
-  }
 }
