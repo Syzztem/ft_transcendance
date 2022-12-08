@@ -7,7 +7,7 @@ export class ChannelMessage {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column("varchar")
     content: string;
 
     @ManyToOne(() => User)
@@ -16,6 +16,6 @@ export class ChannelMessage {
     @ManyToOne(() => Channel, (channel) => channel.messages)
     channel: Channel;
 
-    @Column()
+    @Column("timestamp")
     timestamp: Timestamp;
 }

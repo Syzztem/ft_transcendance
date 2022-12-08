@@ -12,12 +12,12 @@ export class Game {
     @ManyToOne(() => User)
     player2: User;
 
-    @Column()
+    @Column("int")
     player1Score: number;
 
-    @Column()
+    @Column("int")
     player2Score: number;
 
-    @Column()
+    @Column("timestamp")
     timestamp: Timestamp;
 }

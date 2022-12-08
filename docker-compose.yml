@@ -6,7 +6,7 @@
 #    By: lothieve <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/04 15:02:47 by lothieve          #+#    #+#              #
-#    Updated: 2022/11/28 13:49:14 by lothieve         ###   ########.fr        #
+#    Updated: 2022/12/07 17:47:30 by lothieve         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -35,6 +35,12 @@ services:
       - transcendance
     ports:
       - 3000:3000
+    environment:
+      POSTGRES_PW: ${POSTGRES_PW}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./nest/backend/:/usr/app/
     # vue:
     # build: front
     # ports:

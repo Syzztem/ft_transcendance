@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, Timestamp } from "typeorm";
 import { User } from "./User";
 
 @Entity()
@@ -6,7 +6,7 @@ export class FriendMessage {
     @PrimaryGeneratedColumn()
     id: number
 
-    @Column()
+    @Column("varchar")
     content: string;
 
     @ManyToOne(() => User)
@@ -14,4 +14,7 @@ export class FriendMessage {
 
     @ManyToOne(() => User)
     receiver: User;
+
+    @Column("timestamp")
+    timestamp: Timestamp;
 }
