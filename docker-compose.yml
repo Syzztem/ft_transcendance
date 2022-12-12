@@ -24,7 +24,7 @@ services:
       PGDATA: ${PGDATA}
     restart: always
     networks:
-      - transcendance
+      - transcendence
   nest:
     container_name: nest
     build: nest
@@ -32,24 +32,23 @@ services:
       - db
     restart: always
     networks:
-      - transcendance
+      - transcendence
     ports:
       - 3000:3000
-    # vue:
-    # build: front
-    # ports:
-    #  - "8080:8080"
-    # container_name: vue
-    # depends_on:
-    #   - nest
-    # networks:
-    #   - transcendance
-    # volumes:
-    #   - type: bind
-    #     source: front
-    #     target: /usr/src/app/front/src
-    # restart: always
-    # command: npm run serve
+
+  vue:
+    container_name: vue
+    image: frontend
+    restart: unless-stopped
+    networks:
+      - transcendence
+    depends_on:
+      - db
+    volumes:
+      - ./front/app:/app
+    ports:
+    - 8080:8080
+
   pgadmin:
     container_name: pgadmin
     image: dpage/pgadmin4
@@ -64,9 +63,9 @@ services:
     ports:
       - "5050:80"
     networks:
-      - transcendance
+      - transcendence
 networks:
-  transcendance:
+  transcendence:
 volumes:
   db:
   pgadmin:
