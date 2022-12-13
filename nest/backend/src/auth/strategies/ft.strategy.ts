@@ -23,25 +23,5 @@ export class ftStrategy extends PassportStrategy(Strategy, 'ft') {
       throw new UnauthorizedException();
     }
     return user;
-    // return cb(null, user);
   }
 }
-
-//   async validate(
-//     accessToken: string,
-//     refreshToken: string,
-//     profile: any,
-//     done: VerifyCallback,
-//   ): Promise<any> {
-//     const { name, emails, photos } = profile;
-//     const user = {
-//       email: emails[0].value,
-//       firstName: name.givenName,
-//       lastName: name.familyName,
-//       picture: photos[0].value,
-//       accessToken,
-//       refreshToken,
-//     };
-    // done(null, user);
-  // }
-// }

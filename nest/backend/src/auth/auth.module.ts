@@ -7,6 +7,7 @@ import { jwtConstants } from './constants';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { AuthController } from './auth.controller';
 import { ftStrategy } from './strategies/ft.strategy';
+import { UsersService } from 'src/users/users.service';
 
 @Module({
   imports: [
@@ -17,7 +18,7 @@ import { ftStrategy } from './strategies/ft.strategy';
       signOptions: { expiresIn: '60s' },
     }),
   ],
-  providers: [AuthService, ftStrategy , JwtStrategy],
+  providers: [AuthService, ftStrategy , JwtStrategy, UsersModule],
   exports: [AuthService],
   controllers: [AuthController],
 })

@@ -6,7 +6,7 @@
 #    By: tor <tor@student.42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/09 14:36:04 by lothieve          #+#    #+#              #
-#    Updated: 2022/12/08 15:40:47 by tor              ###   ########.fr        #
+#    Updated: 2022/12/13 11:56:20 by tor              ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,4 +21,3 @@ RUN npm install -g \
     typeorm-cli
 RUN npm install; npm run build
 CMD npm run start:debug
-

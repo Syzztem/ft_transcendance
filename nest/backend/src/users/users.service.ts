@@ -1,29 +1,31 @@
 import { Injectable } from '@nestjs/common';
-
-
-/*********************
- * 
- * 	Replace with TypeORM call to the DB
- * 
- * ******************/
-export type User = any;
+import { InjectRepository } from '@nestjs/typeorm';
+import CreateUserDTO from 'src/users/dto/create-user.dto';
+import FindUserDTO from './dto/find-user.dto';
+import { User } from 'src/database/entities/User';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UsersService {
-	private readonly users = [
-		{
-		  userId: 1,
-		  username: 'john',
-		  password: 'changeme',
-		},
-		{
-		  userId: 2,
-		  username: 'maria',
-		  password: 'guess',
-		},
-	  ];
-	
-	  async findOne(username: string): Promise<User | undefined> {
-		return this.users.find(user => user.username === username);
-	  }
+    constructor(@InjectRepository(User) private userRepository: Repository<User>) {}
+
+    getUserById(dto: FindUserDTO): Promise<User> {
+        return this.userRepository.findOne({
+            select: {
+                username:   dto.username,
+                rank:       dto.rank,
+                wins:       dto.winsLosses,
+                losses:     dto.winsLosses,
+                level:      dto.level,
+                friends:    dto.friends,
+                games:      dto.games
+            },
+            where: {id: dto.id}
+        });
+    }
+
+    add(createUserDTO: CreateUserDTO) {
+        this.userRepository.create(createUserDTO);
+    }
+
 }
