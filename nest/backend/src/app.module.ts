@@ -14,7 +14,6 @@ import { UsersService } from './users/users.service';
 
 @Module({
   imports: [PassportModule, AuthModule, UsersModule, ConfigModule.forRoot({
-    envFilePath: '../.env',
     isGlobal: true,
   }),
     UsersModule,
