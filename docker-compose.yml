@@ -6,7 +6,7 @@
 #    By: lothieve <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/04 15:02:47 by lothieve          #+#    #+#              #
-#    Updated: 2022/12/07 17:47:30 by lothieve         ###   ########.fr        #
+#    Updated: 2022/12/12 21:45:42 by aedouard         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,7 +24,7 @@ services:
       PGDATA: ${PGDATA}
     restart: always
     networks:
-      - transcendance
+      - transcendence
   nest:
     container_name: nest
     build: nest
@@ -32,29 +32,41 @@ services:
       - db
     restart: on-failure
     networks:
-      - transcendance
+      - transcendence
     ports:
       - 3000:3000
+
+  vue:
+    container_name: vue
+    build: front
+    image: frontend
+    restart: unless-stopped
+    networks:
+      - transcendence
+    depends_on:
+      - db
     volumes:
-      - ./nest/backend:/back
-    # stdin_open: true
-    # tty: true 
-    # container_name: pgadmin
-    # image: dpage/pgadmin4
-    # restart: always
-    # depends_on:
-    #   - db
-    # volumes:
-    #   - pgadmin:/var/lib/pgadmin
-    # environment:
-    #   PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-    #   PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-    # ports:
-    #   - "5050:80"
-    # networks:
-    #   - transcendance
+      - ./front/app:/app
+    ports:
+    - 8080:8080
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    depends_on:
+      - db
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "5050:80"
+    networks:
+      - transcendence
 networks:
-  transcendance:
+  transcendence:
 volumes:
   db:
   # pgadmin:
