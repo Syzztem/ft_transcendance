@@ -33,13 +33,15 @@ services:
     restart: on-failure
     networks:
       - transcendence
+    volumes:
+      - ./nest/backend:/back
     ports:
       - 3000:3000
 
   vue:
     container_name: vue
     build: front
-    image: frontend
+    image: frotend
     restart: unless-stopped
     networks:
       - transcendence
@@ -69,4 +71,4 @@ networks:
   transcendence:
 volumes:
   db:
-  # pgadmin:
+  pgadmin:

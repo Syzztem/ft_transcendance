@@ -18,7 +18,7 @@ export class ftStrategy extends PassportStrategy(Strategy, 'ft') {
 
      
     }
-    console.log('this is a token: ', accessToken)
+    console.log('this is a profile: ', Profile.username)
     if (!user) {
       throw new UnauthorizedException();
     }
