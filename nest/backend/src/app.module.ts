@@ -1,3 +1,5 @@
+import { GameModule } from './game.module';
+import { ChannelModule } from './channel.module';
 import { UserModule } from './user.module';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
@@ -9,6 +11,8 @@ import { UserService } from './services/user.service';
 
 @Module({
   imports: [
+    GameModule,
+    ChannelModule,
     UserModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -24,4 +28,4 @@ import { UserService } from './services/user.service';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

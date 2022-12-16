@@ -1,4 +1,5 @@
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Channel } from './Channel';
 import { Game } from './Game';
 
 @Entity()
@@ -27,9 +28,16 @@ export class User {
   @Column("int")
   level: number;
 
+  @Column("string")
+  profilePic: URL;
+
   @ManyToMany(() => User)
   @JoinTable()
   friends: User[]
+
+  @ManyToMany(() => Channel)
+  @JoinTable()
+  channels: Channel[]
 
   @OneToMany(() => Game, (game) => game.player1)
   games: Game[]

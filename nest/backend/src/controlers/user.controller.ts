@@ -8,12 +8,12 @@ export class UserController {
     constructor(private userService: UserService) {}
 
     @Get("id")
-    async getUser(@Query() findUserDTO: FindUserDTO) {
-        this.userService.getUserById(findUserDTO);
+    getUser(@Query() findUserDTO: FindUserDTO) {
+        return this.userService.getUserById(findUserDTO);
     }
 
     @Post("new")
-    async newUser(@Body() createUserDTO: CreateUserDTO) {
-        this.userService.add(createUserDTO)
+    newUser(@Body() createUserDTO: CreateUserDTO) {
+        this.userService.add(createUserDTO);
     }
 }
