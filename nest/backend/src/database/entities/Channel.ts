@@ -7,6 +7,9 @@ export class Channel {
     @PrimaryGeneratedColumn()
     id: number
 
+    @Column("string")
+    name: string;
+
     @OneToOne(() => User)
     @JoinColumn()
     admin: User;

@@ -6,10 +6,10 @@ export class Game {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(() => User)
+    @ManyToOne(() => User, (user) => user.games)
     player1: User;
 
-    @ManyToOne(() => User)
+    @ManyToOne(() => User, (user) => user.games2)
     player2: User;
 
     @Column("int")
@@ -18,6 +18,6 @@ export class Game {
     @Column("int")
     player2Score: number;
 
-    @Column("timestamp")
+    @Column({type:"timestamp", default: () => "CURRENT_TIMESTAMP"})
     timestamp: Timestamp;
 }

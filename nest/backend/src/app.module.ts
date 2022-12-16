@@ -1,4 +1,6 @@
 import { UsersModule } from './users/users.module';
+import { GameModule } from './game/game.module';
+import { ChannelModule } from './channel/channel.module';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -17,6 +19,9 @@ import { UsersService } from './users/users.service';
     isGlobal: true,
   }),
     UsersModule,
+    GameModule,
+    ChannelModule,
+    UsersModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.POSTGRE_HOST,
@@ -31,4 +36,4 @@ import { UsersService } from './users/users.service';
   controllers: [AppController],
   providers: [AppService, AuthModule],
 })
-export class AppModule {}
+export class AppModule { }
