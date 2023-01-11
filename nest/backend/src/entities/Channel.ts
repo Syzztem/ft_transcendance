@@ -7,7 +7,7 @@ export class Channel {
     @PrimaryGeneratedColumn()
     id: number
 
-    @Column("string")
+    @Column("varchar")
     name: string;
 
     @OneToOne(() => User)

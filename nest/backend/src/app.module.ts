@@ -6,8 +6,11 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { UserController } from './controlers/user.controller';
-import { UserService } from './services/user.service';
+import { User } from './entities/User';
+import { Channel } from './entities/Channel';
+import { Game } from './entities/Game';
+import { ChannelMessage } from './entities/ChannelMessage';
+import { FriendMessage } from './entities/FriendMessage';
 
 @Module({
   imports: [
@@ -21,11 +24,13 @@ import { UserService } from './services/user.service';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PW,
       database: process.env.POSTGRES_DB,
-      entities: ["entities/*.ts"],
+      entities: [User, Channel, Game, ChannelMessage, FriendMessage],
       synchronize: true
     })
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {
+  constructor(private dataSource: DataSource) {}
+}

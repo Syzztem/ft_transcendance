@@ -1,8 +1,9 @@
-import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, Unique } from 'typeorm';
 import { Channel } from './Channel';
 import { Game } from './Game';
 
 @Entity()
+@Unique(["username", "email", "token"])
 export class User {
   @PrimaryGeneratedColumn()
   id :number;
@@ -14,22 +15,22 @@ export class User {
   email: string;
 
   @Column("int")
-  rank: number;
+  rank: number = 0;
 
   @Column("varchar")
   token: string;
 
   @Column("int")
-  wins: number;
+  wins: number = 0;
   
   @Column("int")
-  losses: number;
+  losses: number = 0;
 
   @Column("int")
-  level: number;
+  level: number = 0;
 
-  @Column("string")
-  profilePic: URL;
+  @Column({nullable: true, type:'varchar'})
+  profilePic: string;
 
   @ManyToMany(() => User)
   @JoinTable()

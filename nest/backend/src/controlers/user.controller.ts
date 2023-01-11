@@ -7,6 +7,17 @@ import { UserService } from 'src/services/user.service';
 export class UserController {
     constructor(private userService: UserService) {}
 
+    @Get()
+    testNewUser() {
+        let def: CreateUserDTO = {
+            username: "toto",
+            email: "toto@tata.fr",
+            token: "lwknef",
+        }
+        this.userService.add(def);
+        return this.userService.getUserByName("toto");
+    }
+
     @Get("id")
     getUser(@Query() findUserDTO: FindUserDTO) {
         return this.userService.getUserById(findUserDTO);
