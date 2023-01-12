@@ -6,33 +6,67 @@
 #    By: lothieve <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/04 15:02:47 by lothieve          #+#    #+#              #
-#    Updated: 2022/11/09 15:20:36 by lothieve         ###   ########.fr        #
+#    Updated: 2022/12/12 21:45:42 by aedouard         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 version: '3'
 services:
   db:
+    container_name: db
     image: postgres
     volumes:
-      - db:/var/lib/postgresql/data/
+      - db:/var/lib/postgresql/
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PW}
+      POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_DB: ${POSTGRES_DB}
       PGDATA: ${PGDATA}
     restart: always
     networks:
-      - transcendance
-    container_name: db
+      - transcendence
   nest:
+    container_name: nest
     build: nest
+    depends_on:
+      - db
     restart: always
     networks:
-      - transcendance
+      - transcendence
     ports:
       - 3000:3000
-    container_name: nest
+
+  vue:
+    container_name: vue
+    build: front
+    image: frontend
+    restart: unless-stopped
+    networks:
+      - transcendence
+    depends_on:
+      - db
+    volumes:
+      - ./front/app:/app
+    ports:
+    - 8080:8080
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    depends_on:
+      - db
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "5050:80"
+    networks:
+      - transcendence
 networks:
-  transcendance:
+  transcendence:
 volumes:
   db:
+  pgadmin:
