@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import CreateChannelDTO from 'src/dto/create-channel.dto';
 import GetChannelDTO from 'src/dto/get-channel.dto';
 import GetMessageDTO from 'src/dto/get-message.dto';
+import PostMessageDTO from 'src/dto/post-message.dto';
 import { Channel } from 'src/entities/Channel';
 import { ChannelMessage } from 'src/entities/ChannelMessage';
 import { ChannelService } from 'src/services/channel.service';
@@ -18,6 +19,11 @@ export class ChannelController {
     @Get("page")
     getPage(@Query() getMessageDTO: GetMessageDTO) : Promise<ChannelMessage[]> {
         return this.channelService.getMessagePage(getMessageDTO);
+    }
+
+    @Get("newmsg")
+    newMessage(@Body() postMessageDTO: PostMessageDTO) {
+        this.channelService.postMessage(postMessageDTO);
     }
 
     @Post("new")
