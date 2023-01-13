@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, Timestamp } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
 import { Channel } from "./Channel";
 import { User } from "./User";
 
@@ -16,6 +16,6 @@ export class ChannelMessage {
     @ManyToOne(() => Channel, (channel) => channel.messages)
     channel: Channel;
 
-    @Column("timestamp")
-    timestamp: Timestamp;
+    @Column({type:"timestamp", default: () => "CURRENT_TIMESTAMP"})
+    timestamp: Date;
 }

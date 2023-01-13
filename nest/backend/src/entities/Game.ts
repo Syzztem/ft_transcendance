@@ -19,5 +19,5 @@ export class Game {
     player2Score: number;
 
     @Column({type:"timestamp", default: () => "CURRENT_TIMESTAMP"})
-    timestamp: Timestamp;
+    timestamp: Date;
 }
