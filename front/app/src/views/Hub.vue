@@ -30,13 +30,14 @@ export default defineComponent({
     <button id="startGameButton" @click="$router.push('game')">START</button>
   </div>
   <div>
-    <h1>Choose game mode:</h1>
-    <button id="originalModeButton" @click="originalModeToggle" :class="[showOriginal ? 'active' : '']">Original Pong</button>
-    <button id="powerUpsModeButton" @click="powerUpsModeToggle" :class="[showOriginal ? '' : 'active']">Poké Pong</button>
+    <h1>Choose game mode:<br><br></h1>
+    <button id="originalModeButton" @click="originalModeToggle" :class="[showOriginal ? 'active' : '']">Old<br><br>Pong</button>
+    <button id="powerUpsModeButton" @click="powerUpsModeToggle" :class="[showOriginal ? '' : 'active']">Poké<br><br>Pong</button>
   </div>
 </template>
   
 <style scoped>
+
 h1 {
   font-family: "pokemon";
   font-size: 70px;
@@ -58,28 +59,33 @@ button {
   background-image: url('/src/assets/pokeball_button.png');
   background-size: cover;
   background-repeat: no-repeat;
+  filter: drop-shadow(0 0 2rem rgb(25, 0, 250));
 }
 
 @media screen and (min-height: 581px) {
   button {
+    font-family: "pokemon";
     font-size: 40px;
   }
 }
 
 @media screen and (max-height: 580px) and (min-height: 301px) {
   button {
+    font-family: "pokemon";
     font-size: 20px;
   }
 }
 
 @media screen and (max-height: 300px) {
   button {
+    font-family: "pokemon";
     font-size: 10px;
   }
 }
 
 button:focus {
   outline: none;
+  font-family: "pokemon";
 }
 
 .active {

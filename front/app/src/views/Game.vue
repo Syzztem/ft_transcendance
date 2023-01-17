@@ -137,14 +137,18 @@ export default defineComponent({
 
 <style scoped>
 #gameCanvas {
-  position: absolute;
-  top: 22%;
-  left: 28%;
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  width: 800px;
+  margin-top: 12%;
 }
 
 #modeButton {
   position: absolute;
-  top: 80%;
+  top: 85%;
   left: 45%;
 }
 </style>

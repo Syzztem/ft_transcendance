@@ -1,8 +1,9 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
-import Game from '../views/Game.vue'
-import Hub from '../views/Hub.vue'
-import Chat from '../views/Chat.vue'
-import Home from '../views/Home.vue'
+import Game from '@/views/Game.vue'
+import Hub from '@/views/Hub.vue'
+import Chat from '@/views/Chat.vue'
+import Home from '@/views/Home.vue'
+import Options from '@/views/Options.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
