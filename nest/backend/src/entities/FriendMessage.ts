@@ -15,6 +15,6 @@ export class FriendMessage {
     @ManyToOne(() => User)
     receiver: User;
 
-    @Column("timestamp")
-    timestamp: Timestamp;
+    @Column({type:"timestamp", default: () => "CURRENT_TIMESTAMP"})
+    timestamp: Date;
 }

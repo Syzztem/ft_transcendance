@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Query } from '@nestjs/common';
 import CreateChannelDTO from 'src/dto/create-channel.dto';
 import GetChannelDTO from 'src/dto/get-channel.dto';
 import GetMessageDTO from 'src/dto/get-message.dto';
@@ -24,6 +24,18 @@ export class ChannelController {
     @Get("newmsg")
     newMessage(@Body() postMessageDTO: PostMessageDTO) {
         this.channelService.postMessage(postMessageDTO);
+    }
+
+    @Delete("msg/:id")
+    @HttpCode(HttpStatus.NO_CONTENT)
+    deleteMessage(@Param('id') id: number) {
+        this.channelService.deleteMessage(id)
+    }
+
+    @Delete("channel/:id")
+    @HttpCode(HttpStatus.NO_CONTENT)
+    deleteChannel(@Param ('id') id: number) {
+        this.channelService.deleteChannel(id)
     }
 
     @Post("new")

@@ -1,14 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { channel } from 'diagnostics_channel';
-import { TimeoutError, timestamp } from 'rxjs';
 import CreateChannelDTO from 'src/dto/create-channel.dto';
 import GetChannelDTO from 'src/dto/get-channel.dto';
 import GetMessageDTO from 'src/dto/get-message.dto';
 import PostMessageDTO from 'src/dto/post-message.dto';
 import { Channel } from 'src/entities/Channel';
 import { ChannelMessage } from 'src/entities/ChannelMessage';
-import { Repository, Timestamp } from 'typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ChannelService {
@@ -56,6 +54,18 @@ export class ChannelService {
             sender: dto.sender,
             channel: dto.channel,
         }).execute();
+    }
+
+    async deleteChannel(id: number) {
+        if (await this.channelRepository.countBy({id}) == 0)
+            return null;
+        return this.channelRepository.delete(id);
+    }
+
+    async deleteMessage(id: number) {
+        if (await this.messageRepository.countBy({id}) == 0)
+            return null;
+        return this.messageRepository.delete(id)
     }
 
     async createChannel(dto: CreateChannelDTO) : Promise<Channel>{

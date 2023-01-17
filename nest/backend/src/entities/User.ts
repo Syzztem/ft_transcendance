@@ -34,7 +34,11 @@ export class User {
 
   @ManyToMany(() => User)
   @JoinTable()
-  friends: User[]
+  friends: User[];
+
+  @ManyToMany(() => User)
+  @JoinTable()
+  blocked: User[];
 
   @ManyToMany(() => Channel)
   @JoinTable()
