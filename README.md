@@ -127,6 +127,21 @@ Revoque le banissement ou la mise en sourdine de l'utilisateur pointe par `uid` 
 `NOT_FOUND` L'utilisateur n'est ni bani ni muet sur le channel ou n'existe pas et/ou le channel n'existe pas  
 ___
 
+`PATCH` `join/<chanId>/<uid>`  
+L'utilisateur pointe par `uid` rejoint le channel pointe par `chanId`
+#### http codes:
+`OK` : Succes  
+`FORBIDDEN` : L'utilisateur est banni du Channel  
+`NOT_FOUND` : L'utilisateur et/ou le channel n'existent pas  
+___
+
+`PATCH` `leave/<chanId>/<uid>`  
+L'utilisateur pointe par `uid` quitte le channel pointe par `chanId`
+#### http codes:
+`OK`: Succes  
+`NOT_FOUND` : L'utilisateur et/ou le channel n'existent pas, ou l'utilisateur n'est pas present sur le channel  
+___
+
 `DELETE` `<msg/<ID>`  
 Supprime le message pointe par ID
 #### http codes:
