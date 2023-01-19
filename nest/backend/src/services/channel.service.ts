@@ -1,4 +1,4 @@
-import { HttpCode, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import CreateChannelDTO from 'src/dto/create-channel.dto';
 import GetChannelDTO from 'src/dto/get-channel.dto';
@@ -7,13 +7,15 @@ import PostMessageDTO from 'src/dto/post-message.dto';
 import { BanAndMute } from 'src/entities/BanAndMute';
 import { Channel } from 'src/entities/Channel';
 import { ChannelMessage } from 'src/entities/ChannelMessage';
+import { User } from 'src/entities/User';
 import { Repository } from 'typeorm';
 
 @Injectable()
 export class ChannelService {
     constructor(@InjectRepository(Channel) private channelRepository: Repository<Channel>,
                 @InjectRepository(ChannelMessage) private messageRepository: Repository<ChannelMessage>,
-                @InjectRepository(BanAndMute) private bansAndMutesRepository: Repository<BanAndMute>) {}
+                @InjectRepository(BanAndMute) private bansAndMutesRepository: Repository<BanAndMute>,
+                @InjectRepository(User) private userRepository: Repository<User>) {}
 
     async getChannelById(dto: GetChannelDTO) : Promise<Channel> {
         return this.channelRepository.findOne({
@@ -50,7 +52,8 @@ export class ChannelService {
         const chan: Channel = await this.channelRepository.findOneBy({id: dto.channelId})
         if (!chan) return HttpStatus.NOT_FOUND;
         const user = chan.users.find(user => user.id === dto.senderId);
-        if (!user) return HttpStatus.FORBIDDEN;
+        if (!user || chan.isMuted(dto.senderId))
+            return HttpStatus.FORBIDDEN;
         this.messageRepository.createQueryBuilder()
         .insert()
         .into(ChannelMessage)
@@ -65,6 +68,7 @@ export class ChannelService {
     async banUser(chanId: number, userId: number, date: Date) : Promise<number> {
         const chan = await this.channelRepository.findOneBy({id: chanId});
         if (!chan) return HttpStatus.NOT_FOUND;
+        if (chan.isBanned(userId)) return HttpStatus.NO_CONTENT;
         const user = chan.users.find(user => user.id === userId);
         if (!user) return HttpStatus.NOT_FOUND;
         const banAndMute = this.bansAndMutesRepository.create({
@@ -73,7 +77,7 @@ export class ChannelService {
             expires: date,
             isBanned: true
         })
-        chan.users.filter(usr => usr.id = userId);
+        chan.removeUser(userId);
         this.channelRepository.save(chan);
         this.bansAndMutesRepository.save(banAndMute);
         return HttpStatus.OK;
@@ -84,6 +88,7 @@ export class ChannelService {
         if (!chan) return HttpStatus.NOT_FOUND;
         const user = chan.users.find(user => user.id === userId);
         if (!user) return HttpStatus.NOT_FOUND;
+        if (chan.isMuted(userId)) return HttpStatus.NO_CONTENT;
         const banAndMute = this.bansAndMutesRepository.create({
             user: user,
             channel: chan,
@@ -99,9 +104,26 @@ export class ChannelService {
         const ban = await this.bansAndMutesRepository.findOneBy({
             channel: {id: chanId},
             user: {id: uid}
-        })
+        });
         if (!ban) return HttpStatus.NOT_FOUND;
         this.bansAndMutesRepository.delete(ban.id);
+        return HttpStatus.OK;
+    }
+
+    async joinChannel(chanId: number, uid: number) : Promise<number> {
+        const chan = await this.channelRepository.findOneBy({id: chanId});
+        if (!chan) return HttpStatus.NOT_FOUND;
+        if(chan.isBanned(uid)) return HttpStatus.FORBIDDEN;
+        const user = await this.userRepository.findOneBy({id: uid});
+        if (!user) return HttpStatus.NOT_FOUND;
+        chan.users.push(user);
+        return HttpStatus.OK;
+    }
+
+    async leaveChannel(chanId: number, uid: number) : Promise<number> {
+        const chan = await this.channelRepository.findOneBy({id: chanId});
+        if (!chan || !chan.removeUser(uid))
+            return HttpStatus.NOT_FOUND;
         return HttpStatus.OK;
     }
 

@@ -11,6 +11,7 @@ import { Channel } from './entities/Channel';
 import { Game } from './entities/Game';
 import { ChannelMessage } from './entities/ChannelMessage';
 import { FriendMessage } from './entities/FriendMessage';
+import { BanAndMute } from './entities/BanAndMute';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { FriendMessage } from './entities/FriendMessage';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PW,
       database: process.env.POSTGRES_DB,
-      entities: [User, Channel, Game, ChannelMessage, FriendMessage],
+      entities: [User, Channel, Game, ChannelMessage, FriendMessage, BanAndMute],
       synchronize: true
     })
   ],

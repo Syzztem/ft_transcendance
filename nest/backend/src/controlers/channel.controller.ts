@@ -33,6 +33,20 @@ export class ChannelController {
         res.status(await this.channelService.postMessage(postMessageDTO)).send();
     }
 
+    @Patch("join/:chanId:/uid")
+    async joinChannel(@Param('chanId') chanId: number,
+                      @Param('uid') uid:number,
+                      @Response() res: any) {
+        res.status(await this.channelService.joinChannel(chanId, uid)).send();
+    }
+
+    @Patch("leave/:chanId:/uid")
+    async leaveChannel(@Param('chanId') chanId: number,
+                      @Param('uid') uid:number,
+                      @Response() res: any) {
+        res.status(await this.channelService.leaveChannel(chanId, uid)).send();
+    }
+
     @Patch("ban/:chanId/:uid/:date")
     async banUser(@Param('chanId') chanId: number,
                   @Param('uid') uid:number,
@@ -69,8 +83,8 @@ export class ChannelController {
     }
 
     @Post("new")
-    async createChannel(@Body() createChannelDTO: CreateChannelDTO,
-                        @Response() res : any) {
-        res.status(await this.channelService.createChannel(createChannelDTO)).send();
+    @HttpCode(HttpStatus.OK)
+    createChannel(@Body() createChannelDTO: CreateChannelDTO) {
+        this.channelService.createChannel(createChannelDTO);
     }
 }

@@ -1,4 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BanAndMute } from "./BanAndMute";
 import { ChannelMessage } from "./ChannelMessage";
 import { User } from "./User";
 
@@ -18,7 +19,7 @@ export class Channel {
     @JoinColumn()
     users: User[]
 
-    @OneToMany(() => ChannelMessage, (message) => message.channel)
+    @OneToMany(() => ChannelMessage, message => message.channel)
     @JoinColumn()
     messages: ChannelMessage[]
 
@@ -27,4 +28,32 @@ export class Channel {
 
     @Column("varchar")
     password: string;
+
+    @OneToMany(() => BanAndMute, ban => ban.channel)
+    @JoinColumn()
+    bannedOrMuted: BanAndMute[];
+
+    public isBanned(userId: number) : boolean {
+        if (this.bannedOrMuted.find(ban => ban.user.id === userId && ban.isBanned))
+            return true;
+        return false;
+    }
+
+    public isMuted(userId: number) : boolean {
+        if (this.bannedOrMuted.find(ban => ban.user.id === userId && !ban.isBanned))
+            return true;
+        return false;
+    }
+
+    public isOn(userId: number) : boolean {
+        if (this.users.find(user => user.id === userId))
+            return true;
+        return false;
+    }
+
+    public removeUser(userId: number) : boolean {
+        if (!this.isOn(userId)) return false;
+        this.users.filter(user => user.id !== userId)
+        return true;
+    }
 }

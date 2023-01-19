@@ -98,9 +98,9 @@ export class UserService {
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
         if (user1.friends.includes(user2))
             return HttpStatus.NO_CONTENT;
+        if(user1.blocked.includes(user2) || user2.blocked.includes(user1))
+            return HttpStatus.FORBIDDEN
         user1.friends.push(user2);
-        user2.friends.push(user1);
-        this.userRepository.save(user1);
         this.userRepository.save(user2);
         return HttpStatus.OK;
     }
