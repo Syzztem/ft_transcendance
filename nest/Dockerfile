@@ -13,4 +13,4 @@
 FROM node:19
 
 WORKDIR /usr/app/
-CMD npm install; npm run build; npm run dev
+CMD npm install; npm run build; npm run start

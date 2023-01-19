@@ -21,4 +21,10 @@ export class Channel {
     @OneToMany(() => ChannelMessage, (message) => message.channel)
     @JoinColumn()
     messages: ChannelMessage[]
+
+    @Column("boolean")
+    isPrivate: boolean;
+
+    @Column("varchar")
+    password: string;
 }

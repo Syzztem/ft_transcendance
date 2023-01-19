@@ -4,9 +4,10 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Channel } from 'diagnostics_channel';
 import { ChannelMessage } from './entities/ChannelMessage';
+import { BanAndMute } from './entities/BanAndMute';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Channel, ChannelMessage])],
+    imports: [TypeOrmModule.forFeature([Channel, ChannelMessage, BanAndMute])],
     controllers: [ChannelController,],
     providers: [ChannelService,],
 })
