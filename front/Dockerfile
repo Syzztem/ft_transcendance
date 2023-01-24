@@ -1,6 +1,8 @@
-FROM node:19
+FROM node:lts
 
-WORKDIR /usr/src/app/front
-COPY ./vue .
-RUN npm install; npm run build
-CMD npm run start
+WORKDIR /app
+
+RUN apt-get update
+RUN npm -g add @vue/cli
+
+ENTRYPOINT ["/bin/sh", "-c", "npm i -g npm@latest && exec npm run prod"]

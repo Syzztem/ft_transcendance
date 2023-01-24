@@ -6,7 +6,7 @@
 #    By: lothieve <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/04 15:02:47 by lothieve          #+#    #+#              #
-#    Updated: 2022/12/07 17:47:30 by lothieve         ###   ########.fr        #
+#    Updated: 2023/01/24 14:03:26 by lothieve         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,7 +24,7 @@ services:
       PGDATA: ${PGDATA}
     restart: always
     networks:
-      - transcendance
+      - transcendence
   nest:
     container_name: nest
     build: nest
@@ -32,7 +32,7 @@ services:
       - db
     restart: always
     networks:
-      - transcendance
+      - transcendence
     ports:
       - 3000:3000
     environment:
@@ -41,21 +41,19 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - ./nest/backend/:/usr/app/
-    # vue:
-    # build: front
-    # ports:
-    #  - "8080:8080"
-    # container_name: vue
-    # depends_on:
-    #   - nest
-    # networks:
-    #   - transcendance
-    # volumes:
-    #   - type: bind
-    #     source: front
-    #     target: /usr/src/app/front/src
-    # restart: always
-    # command: npm run serve
+#  vue:
+#    container_name: vue
+#    build: front
+#    image: frontend
+#    restart: unless-stopped
+#    networks:
+#      - transcendence
+#    depends_on:
+#      - db
+#    volumes:
+#      - ./front/app:/app
+#    ports:
+#    - 8080:8080
   pgadmin:
     container_name: pgadmin
     image: dpage/pgadmin4
@@ -70,9 +68,9 @@ services:
     ports:
       - "5050:80"
     networks:
-      - transcendance
+      - transcendence
 networks:
-  transcendance:
+  transcendence:
 volumes:
   db:
   pgadmin:
