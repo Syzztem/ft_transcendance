@@ -6,12 +6,20 @@ export default ({
 
 <template>
   <v-container>
-    <v-row>
-      <v-col class="d-flex justify-center" cols="12">
-        <v-btn router :to="'/chat'" class="btn" style="color: #F6D42A;" dark tile x-large depressed color="#121212" width="295" height="90">CHAT</v-btn>
+    <v-row class="mt-2">
+      <v-col class="d-flex justify-center" cols="12" id="col">
+        <v-btn router :to="'/hub'" class="btn" style="color: #FFC800; font-size: 300%;" rounded color="rgb(0, 15, 255, 0.5)" flat width="50vw" max-width="500" height="15vh" max-height="200" min-height="100">
+          <p class="p">
+            GAME
+          </p>
+        </v-btn>
       </v-col>
-      <v-col class="d-flex justify-center" cols="12">
-        <v-btn router :to="'/hub'" class="btn" style="color: #F6D42A;" dark tile x-large depressed color="#121212" width="295" height="90">GAME</v-btn>
+      <v-col class="d-flex justify-center mt-16" cols="12" id="col">
+        <v-btn router :to="'/chat'" class="btn" style="color: #FFC800; font-size: 300%;" rounded color="rgb(0, 15, 255, 0.5)" flat width="50vw" max-width="500" height="15vh" max-height="200" min-height="100">
+          <p class="p">
+            CHAT
+          </p>
+        </v-btn>
       </v-col>
     </v-row>
   </v-container>
@@ -26,40 +34,15 @@ html, body {
 
 .btn {
   font-family: "pokemon";
-  color: rgb(255, 200, 0);
   text-shadow: 2px 2px 4px rgb(0, 4, 255), 0 0 1em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
-  width: 30vh;
-  height: 30vh;
-  max-width: 200px;
-  max-height: 200px;
-  border: none;
-  background-color: transparent;
-  overflow: hidden;
-  background-image: url('/src/assets/pokeball_button.png');
-  background-size: cover;
-  background-repeat: no-repeat;
 }
 
-@media screen and (min-height: 581px) {
-  btn {
-    font-size: 40px;
-  }
+.btn:hover .p {
+  color: rgb(255, 233, 0);
 }
 
-@media screen and (max-height: 580px) and (min-height: 301px) {
-  btn {
-    font-size: 20px;
-  }
-}
-
-@media screen and (max-height: 300px) {
-  btn {
-    font-size: 10px;
-  }
-}
-
-btn:focus {
-  outline: none;
+.p:hover {
+  color: rgb(255, 233, 0);
 }
 
 </style>

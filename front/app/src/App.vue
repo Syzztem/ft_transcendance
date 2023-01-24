@@ -9,20 +9,21 @@ export default defineComponent({
   },
   methods: {
     resize() {
-      const img = document.querySelectorAll<HTMLElement>('.master');
+      const img = document.querySelectorAll<HTMLElement>('.master')
       img.forEach((img) => {
-        var pos = Math.random() * (window.innerWidth - 150);
-        pos = Math.floor(pos);
-        img.style.left = pos + "px";
-        const width = Math.floor(Math.random() * 200 + 100)
-        img.style.width = width + "px";
-        img.style.animationDelay = Math.floor(Math.random() * 10) + "s";
-        img.style.animationDuration = Math.floor(Math.random() * 5 + 3) + "s";
-        img.style.filter = "blur(" + Math.pow(width / 125, 2) + "px)";
-        img.style.animationTimingFunction = "linear";
-        img.style.animationIterationCount = "infinite";
-      });
-    },
+        let pos = Math.random() * (window.innerWidth - 150)
+        pos = Math.floor(pos)
+        img.style.left = pos + "px"
+        let dir = Math.floor(Math.random() * 2) ? true : false
+        let width = Math.floor(Math.random() * 200 + 100)
+        img.style.width = width + "px"
+        img.style.animationDelay = Math.floor(Math.random() * 10) + "s"
+        img.style.animationDuration = Math.floor(Math.random() * 5 + 3) + "s"
+        img.style.filter = "blur(" + Math.pow(width / 125, 2) + "px)"
+        img.style.animationTimingFunction = "linear"
+        img.style.animationIterationCount = "infinite"
+      })
+    }
   },
   created() {
     window.addEventListener('resize', this.resize);
@@ -34,7 +35,8 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-app style="background-color: #FFF000;">
+<v-container id="background" fluid>
+  <v-app style="background: rgba(0,0,0,0);">
     <div style="overflow: hidden;">
       <img v-for="n in 2" :key="n" src="@/assets/pikachu.png" class="master" style=""/>
       <img v-for="n in 2" :key="n" src="@/assets/bulbizarre.png" class="master" style=""/>
@@ -53,6 +55,7 @@ export default defineComponent({
       </transition>
     </v-main>
   </v-app>
+</v-container>
 </template>
 
 <style scoped>
@@ -60,12 +63,16 @@ html, body {
   overflow: hidden !important;
 }
 
+#background {
+  background: url('@/assets/pokemons_background.png') no-repeat center ,radial-gradient(pink, blue);
+  background-size: 100%;
+}
 .master {
   position: absolute;
   top: -200px;
   height: auto;
   overflow: hidden !important;
-  animation: chute 4s infinite linear;
+  animation: pokemons 4s infinite linear;
 }
 
 .fade-enter-active, .fade-leave-active {
@@ -77,35 +84,31 @@ html, body {
 }
 
 .bounce-enter-active {
-  animation: bounce-in 0.5s;
+  animation: pop 0.5s;
 }
 
 .bounce-leave-active {
-  animation: bounce-in 0.2s reverse;
+  animation: pop 0.2s reverse;
 }
 
-@keyframes bounce-in {
-  0% {
+@keyframes pop {
+  from {
     transform: scale(0);
   }
   50% {
-    transform: scale(1.05);
+    transform: scale(1.1);
   }
-  100% {
+  to {
     transform: scale(1);
   }
 }
 
-@keyframes chute {
-  0% {
-    transform: translateY(0);
+@keyframes pokemons {
+  50% {
+    transform: translateY(calc(100vh + 500px)) rotate(720deg);
   }
-  75% {
-    transform: translateY(calc(75vh + 150px));
-  }
-  100% {
-    transform: translateY(calc(100vh + 200px));
+  to {
+    transform: translateY(0) rotate(1540deg);
   }
 }
-
 </style>
