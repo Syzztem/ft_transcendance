@@ -4,6 +4,10 @@ import Footer from './components/Footer.vue'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  data() {
+    return {
+    }
+  },
   components: {
     Header,
   },
@@ -19,7 +23,6 @@ export default defineComponent({
         img.style.width = width + "px"
         img.style.animationDelay = Math.floor(Math.random() * 10) + "s"
         img.style.animationDuration = Math.floor(Math.random() * 5 + 3) + "s"
-        img.style.filter = "blur(" + Math.pow(width / 125, 2) + "px)"
         img.style.animationTimingFunction = "linear"
         img.style.animationIterationCount = "infinite"
       })
@@ -38,6 +41,7 @@ export default defineComponent({
 <v-container id="background" fluid>
   <v-app style="background: rgba(0,0,0,0);">
     <div style="overflow: hidden;">
+      <img v-for="n in 1" :key="n" src="@/assets/lorenzo_head.png" class="master" style=""/>
       <img v-for="n in 2" :key="n" src="@/assets/pikachu.png" class="master" style=""/>
       <img v-for="n in 2" :key="n" src="@/assets/bulbizarre.png" class="master" style=""/>
       <img v-for="n in 2" :key="n" src="@/assets/evoli.png" class="master" style=""/>
