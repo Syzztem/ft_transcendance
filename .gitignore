@@ -1,6 +1,8 @@
 # compiled output
 /dist
-/node_modules
+/front/app/yarn.lock
+/front/app/node_modules
+/nest/backend/package-lock.json
 
 # Logs
 logs
