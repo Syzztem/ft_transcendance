@@ -4,6 +4,7 @@
 /front/app/node_modules
 /front/app/src/views/Sandbox.vue
 /front/app/yarn.lock
+/nest/backend/package-lock.json
 
 # Logs
 logs
