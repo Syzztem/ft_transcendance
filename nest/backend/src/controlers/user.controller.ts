@@ -2,22 +2,23 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post
 import CreateUserDTO from 'src/dto/create-user.dto';
 import FindUserDTO from 'src/dto/find-user.dto';
 import SendDMDTO from 'src/dto/send-dm.dto';
+import FindUserByNameDTO from 'src/dto/find-user-by-name.dto';
 import { UserService } from 'src/services/user.service';
 
 @Controller('user')
 export class UserController {
     constructor(private userService: UserService) {}
 
-    @Get()
-    testNewUser() {
-        let def: CreateUserDTO = {
-            username: "toto",
-            email: "toto@tata.fr",
-            token: "lwknef",
-        }
-        this.userService.add(def);
-        return this.userService.getUserByName("toto");
-    }
+    // @Get()
+    // testNewUser() {
+    //     let def: CreateUserDTO = {
+    //         username: "toto",
+    //         email: "toto@tata.fr",
+    //         token: "lwknef",
+    //     }
+    //     this.userService.add(def);
+    //     return this.userService.getUserByName("toto");
+    // }
 
     @Get("id")
     async getUser(@Query() findUserDTO: FindUserDTO,
@@ -27,14 +28,21 @@ export class UserController {
         res.status(HttpStatus.OK).send();
         return user;
     }
-
+    
     @Post("new")
     async newUser(@Body() createUserDTO: CreateUserDTO,
                   @Response() res: any) {
         const user = await this.userService.add(createUserDTO)
-        if (!user) return res.status(HttpStatus.CONFLICT);
-        res.status(HttpStatus.OK).send();
-        return user;
+        if (!user) return res.status(HttpStatus.CONFLICT).send();
+        return res.status(HttpStatus.OK).send();
+    }
+
+    @Post("login")
+    async login(@Body() findUserByNameDTO: FindUserByNameDTO,
+                    @Response() res: any) {
+        const user = await this.userService.getUserByName(findUserByNameDTO)
+        if (!user) return res.status(HttpStatus.NOT_FOUND).send();
+        return res.status(HttpStatus.OK).json({user})
     }
 
     @Patch("friend/:id1/:id2")
