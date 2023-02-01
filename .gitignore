@@ -2,7 +2,8 @@
 /dist
 /node_modules
 /front/app/node_modules
-front/app/src/views/Sandbox.vue
+/front/app/src/views/Sandbox.vue
+/front/app/yarn.lock
 
 # Logs
 logs
