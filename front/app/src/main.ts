@@ -2,18 +2,19 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
-import { store } from '@/store'
+import store from '@/store'
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
-import 'material-design-icons-iconfont/dist/material-design-icons.css'
-import { aliases } from 'vuetify/lib/iconsets/mdi'
 
 const vuetify = createVuetify({
   components,
   directives,
-  aliases
 })
 
 createApp(App).use(vuetify).use(store).use(router).mount('#app')
+
+//App.config.globalProperties.$store=store
+
+//App.config.globalProperties.$store=store

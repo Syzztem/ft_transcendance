@@ -8,6 +8,16 @@ import { Game } from '../controllers/Game'
 import IPlayer from '@/models/IPlayer'
 import { defineComponent } from "vue" 
 
+
+// power ups     : pokemons
+
+// fake ball     : amphinobi
+// hide screen   : smogogo
+// little paddle : ptiravi
+// big paddle    : ronflex
+// shield        : zamazenta (legendary so less spawn | add 1 shield (max 1 shield / 2 players), shield protect of 1 loss ball and disappears)
+
+
 export default defineComponent({
   data() {
     return {
@@ -129,10 +139,16 @@ export default defineComponent({
 </script>
 
 <template>
-    <canvas id='gameCanvas'></canvas>
-  <div>
-    <button id="modeButton" @click="modeButtonClick">{{ modeButtonText }}</button>
-  </div>
+  <v-container>
+    <v-row justify="center">
+      <v-card height="800" color="transparent" class="mt-16" outlined flat black>
+        <canvas id='gameCanvas'></canvas>
+        <div>
+          <v-btn id="modeButton" color="#000FFF" @click="modeButtonClick">{{ modeButtonText }}</v-btn>
+        </div>
+      </v-card>
+      </v-row>
+  </v-container>
 </template>
 
 <style scoped>
@@ -150,5 +166,6 @@ export default defineComponent({
   position: absolute;
   top: 85%;
   left: 45%;
+  color: white;
 }
 </style>

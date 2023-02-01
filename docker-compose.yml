@@ -35,8 +35,13 @@ services:
       - transcendence
     ports:
       - 3000:3000
-
-  vue:
+    environment:
+      POSTGRES_PW: ${POSTGRES_PW}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./nest/backend/:/usr/app/
+  vue: 
     container_name: vue
     build: front
     image: frontend
@@ -49,7 +54,6 @@ services:
       - ./front/app:/app
     ports:
     - 8080:8080
-
   pgadmin:
     container_name: pgadmin
     image: dpage/pgadmin4
