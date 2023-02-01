@@ -47,8 +47,9 @@ function UpdateMessages(e: KeyboardEvent)
 							<v-card-title class="Userstitle">
 								Users
 							</v-card-title>
+							<v-card height="75vh" id="Userscontent">
 							<v-list-item v-for="user in state.users">
-								<v-card id="usercard" class="d-flex align-center justify-center mt-4">
+								<v-card id="Usercard" class="d-flex align-center justify-center mt-4">
 									<v-badge class="mt-2" dot location="top right" color="green"> 
 									<v-badge location="bottom end" class="mb-2">
 										<template v-slot:badge>
@@ -68,6 +69,7 @@ function UpdateMessages(e: KeyboardEvent)
 									</v-card-text>
 								</v-card>
 							</v-list-item>
+							</v-card>
 						</v-card>
 					</v-col>
 					<v-spacer></v-spacer>
@@ -91,15 +93,17 @@ function UpdateMessages(e: KeyboardEvent)
 									</div>
 								</v-card>
 								<!--Message Input -->
-								<v-card class="d-flex rounded-xl" color="green" height="10vh" width="50vw">
-									<v-text-field id="Inputfield" class="mt-4 ml-10" autofocus v-model="state.currentMessage" @keydown="UpdateMessages">
-									</v-text-field>
-									<v-card-actions>
-										<v-btn id="Btnsend" @click = "UpdateMessagesButton">
-											Envoyer
-										</v-btn>
-									</v-card-actions>
-								</v-card>
+								<v-row justify="center">
+									<v-card id="Inputbox" class="d-flex rounded-xl" height="10vh" width="50vw">
+										<v-text-field  id="Inputfield" class="mt-4 ml-10" autofocus v-model="state.currentMessage" @keydown="UpdateMessages">
+										</v-text-field>
+										<v-card-actions>
+											<v-btn id="Btnsend" height="5vh" width="7vw" @click = "UpdateMessagesButton">
+												Send
+											</v-btn>
+										</v-card-actions>
+									</v-card>
+								</v-row>
 							</v-row>
 						</v-card>
 					</v-col>
@@ -107,21 +111,29 @@ function UpdateMessages(e: KeyboardEvent)
 
 					<!-- Channels -->
 					<v-col cols="2">
-						<v-card id="Channels" align="center" height="80vh" class="mt-2 mb-2 rounded-xl">
+						<v-card id="Channels" class="mt-2 mb-2 rounded-xl" align="center" height="80vh" >
 							<v-card-title class ="Channelstitle">
 								channels
 							</v-card-title>
-							<v-card class="justify-center" id="Channelcreate">
-								<v-btn>
+							<v-card id="Channelcreate" class="justify-center">
+								<v-btn id="Btnchannel" class="mt-4">
 									create channel
 								</v-btn>
 							</v-card>
-							<v-card height="65vh" id="Channelscontent">
+							<v-card id="Channelscontent" height="65vh" >
 								<v-list-item v-for="channel in state.channels">
-									{{channel.name}}
-								</v-list-item>	
+									<v-card id="Channelcard" class="d-flex align-center justify-center mt-4" height="5vh">
+										{{channel.name}}
+									</v-card>
+								</v-list-item>
 							</v-card>
-							<v-card-actions><v-btn>leave/join channel</v-btn></v-card-actions>
+							<v-card id="Channelactions">
+								<v-card-actions class="justify-center">
+									<v-btn id="Btnchannel">
+										leave/join
+									</v-btn>
+								</v-card-actions>
+							</v-card>
 						</v-card>
 					</v-col>
 				</v-row>
@@ -139,11 +151,22 @@ function UpdateMessages(e: KeyboardEvent)
 	font-family:		"Pokemon";
 	color:				rgb(255, 200, 0);
 	text-shadow:		2px 2px 4px rgb(0, 4, 255), 0 0 1em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
+	overflow-y:			scroll;
+	scrollbar-color:	gold;
+	scrollbar-width :	auto;
 }
 
-#usercard
+#Userscontent
 {
-	background-color:	rgb(200, 164, 128);
+	background-color:	rgb(0, 0, 128);
+	overflow-y:			scroll;
+	scrollbar-color:	gold;
+	scrollbar-width :	auto;
+}
+
+#Usercard
+{
+	background-color:	rgb(82, 88, 122);
 	color:				rgb(255, 200, 0);
 }
 
@@ -172,13 +195,7 @@ function UpdateMessages(e: KeyboardEvent)
 	text-shadow:		2px 2px 4px rgb(0, 4, 255), 0 0 1em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
 }
 
-#Inputfield
-{
-	/* bg-color="rgb(255, 255, 255)" */
-	background-color:	rgb(255, 255, 255);
-	font-family: 		"Pokemon";
-	color:  			rgb(233, 150, 122);
-}
+
 
 .Messagesscroller {
 	height:				80vh;
@@ -189,12 +206,31 @@ function UpdateMessages(e: KeyboardEvent)
 	scrollbar-width :	auto;
 }
 
+#Inputbox
+{
+	background-color:	rgb(47, 79, 79);
+}
+
+#Inputfield
+{
+	background-color:	rgb(255, 255, 255);
+	font-family: 		"Pokemon";
+	color:  			black;
+}
+
 #Btnsend
 {
-	background-color:	blueviolet;
+	background-color:	rgb(0, 0, 128);
 	font-family:		"Pokemon";
 	color:				rgb(255, 200, 0);
 	text-shadow:		2px 2px 4px rgb(0, 4, 255), 0 0 1em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
+}
+
+#Btnchannel
+{
+	background-color:	rgb(255, 200, 0);
+	font-family:		"Pokemon";
+	color:				black
 }
 
 #Channels
@@ -213,17 +249,31 @@ function UpdateMessages(e: KeyboardEvent)
 	text-shadow: 		2px 2px 4px rgb(0, 4, 255), 0 0 1em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
 }
 
+#Channelcard
+{
+	background-color:	rgb(82, 88, 122);
+	color:				rgb(255, 200, 0);
+}
+
 #Channelscontent
 {
 	background-color:	rgb(0, 0, 128);
 	font-family:		"Pokemon";
 	color:				rgb(255, 200, 0);
 	text-shadow:		2px 2px 4px rgb(0, 4, 255), 0 0 1em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
+	overflow-y:			scroll;
+	scrollbar-color:	gold;
+	scrollbar-width :	auto;
 }
 
-.Channelcreate
+#Channelcreate
 {
-	background-color:	moccasin;
+	background-color:	grey;
+}
+
+#Channelactions
+{
+	background-color:	grey;
 }
 
 
