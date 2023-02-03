@@ -39,7 +39,7 @@ export class UserController {
     @Post("new")
     async newUser(@Body() createUserDTO: CreateUserDTO,
                   @Response() res: any) {
-        const user = await this.userService.add(createUserDTO)
+        const user = await this.userService.add(createUserDTO);
         if (!user) return res.status(HttpStatus.CONFLICT).send();
         res.status(HttpStatus.OK).send();
         return user;
