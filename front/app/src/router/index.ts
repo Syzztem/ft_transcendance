@@ -4,13 +4,21 @@ import Hub from '@/views/Hub.vue'
 import Chat from '@/views/Chat.vue'
 import Home from '@/views/Home.vue'
 import Options from '@/views/Options.vue'
+import ChangeUsername from '@/views/ChangeUsername.vue'
+import ChangeAvatar from '@/views/ChangeAvatar.vue'
+import TwoFactor from '@/views/TwoFactor.vue'
 import Hall from '@/views/Hall.vue'
 import Login from '@/views/Login.vue'
+import Profil from '@/views/Profil.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/login',
     component: Login
+  },
+  {
+    path: '/profil',
+    component: Profil
   },
   {
     path: '/game',
@@ -27,6 +35,22 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/hall',
     component: Hall
+  },
+  {
+    path: '/options',
+    component: Options
+  },
+  {
+    path: '/username',
+    component: ChangeUsername
+  },
+  {
+    path: '/avatar',
+    component: ChangeAvatar
+  },
+  {
+    path: '/twofactor',
+    component: TwoFactor
   },
   {
     path: '/',

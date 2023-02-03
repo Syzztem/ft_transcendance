@@ -1,90 +1,113 @@
-import { createStore, Store, useStore as baseUseStore } from 'vuex'
-import IPlayer from '../models/IPlayer'
-import IBall from '../models/IBall'
-import IPaddle from '../models/IPaddle'
-import IScore from '../models/IScore'
-import ITable from '../models/ITable'
-import IGameConfig from '../models/IGameConfig'
-import { InjectionKey } from 'vue'
+import { createStore } from 'vuex'
 
-export interface State {
-  player:  {
-    id: number,
-    pseudo: string,
-  },
-  IGPlayers: IPlayer[],
-  gameConfig: {},
-  ball: {},
-  ownerPaddle: {},
-  adversePaddle: {},
-  ownerScore: {},
-  adverseScore: {},
-  table: {}
+const axios = require('axios')
+
+const instance = axios.create({
+  baseURL: "http://rcorenti.fr:3000"
+})
+
+let user: any = localStorage.getItem('user')
+if (!user) {
+  user = {
+    id: -1,
+    token: ''
+  }
+}
+else {
+  try {
+    user = JSON.parse(user)
+  } catch (ex) {
+    user = {
+      id: -1,
+      token: ''
+    }
+  }
 }
 
-export const key: InjectionKey<Store<State>> = Symbol()
-
-export const store = createStore<State>({
-    state: {
-      player: <IPlayer> {
-        id: 0,
-        pseudo: ''
-    },
-    IGPlayers: <Array<IPlayer>>[],
-    gameConfig: <IGameConfig>{},
-    ball: <IBall>{},
-    ownerPaddle: <IPaddle>{},
-    adversePaddle: <IPaddle>{},
-    ownerScore: <IScore>{},
-    adverseScore: <IScore>{},
-    table: <ITable>{}
+const store = createStore({
+  state: {
+    status: '',
+    user: user,
+    userInfos: {
+      picture: '',
+      username: ''
+    }
   },
-  getters: {
-    getPlayer: get => get.player,
-    getIGPlayers: get => get.IGPlayers,
-    getGameConfig: get => get.gameConfig,
-    getBall: get => get.ball,
-    getOwnerPaddle: get => get.ownerPaddle,
-    getAdversePaddle: get => get.adversePaddle,
-    getOwnerScore: get => get.ownerScore,
-    getAdverseScore: get => get.adverseScore,
-    getTable: get => get.table
-  },
-    mutations: {
-      setPlayer(set, player) {
-        set.player = player
+  mutations: {
+    setStatus(state, status) {
+      state.status = status
     },
-    setIGPlayers(set, IGPlayers) {
-        set.IGPlayers = IGPlayers
+    logUser(state, user) {
+      localStorage.setItem('user', JSON.stringify(user))
+      state.user = user
     },
-    setGameConfig(set, gameConfig) {
-        set.gameConfig = gameConfig
+    userInfos(state, userInfos) {
+      state.userInfos = userInfos
     },
-    setBall(set, ball) {
-        set.ball = ball
-    },
-    setOwnerPaddle(set, ownerPaddle) {
-        set.ownerPaddle = ownerPaddle
-    },
-    setAdversePaddle(set, adversePaddle) {
-        set.adversePaddle = adversePaddle
-    },
-    setOwnerScore(set, ownerScore) {
-        set.ownerScore = ownerScore
-    },
-    setAdverseScore(set, adverseScore) {
-        set.adverseScore = adverseScore
-    },
-    setTable(set, table) {
-        set.table = table
+    logout(state) {
+      state.user = {
+        id: -1,
+        token: ''
+      }
+      localStorage.removeItem('user')
     }
   },
   actions: {
-  },
-  modules: {
+    createAccount({commit}, userInfos) {
+      commit('setStatus', 'loading_create')
+      return new Promise((resolve, reject) => {
+        commit
+        instance.post("/user/new", userInfos)
+        .then((response: any) => {
+          commit('setStatus', 'created')
+          resolve(response)
+        })
+        .catch((error: any) => {
+          commit('setStatus', 'error_create')
+          reject(error)
+        })
+      })
+    },
+    login({commit}, userInfos) {
+      commit('setStatus', 'loading_login')
+      return new Promise((resolve, reject) => {
+        instance.post("/user/login", userInfos)
+        .then((response: any) => {
+          commit('setStatus', '')
+          commit('logUser', response.data)
+          resolve(response)
+        })
+        .catch((error: any) => {
+          commit('setStatus', 'error_login')
+          reject(error)
+        })
+      })
+    },
+    getUserInfos({commit}, userInfos) {
+      return new Promise((resolve, reject) => {
+        instance.post("/user/infos", userInfos)
+        .then((response: any) => {
+          commit('userInfos', response.data)
+          resolve(response)
+        })
+        .catch((error: any) => {
+          reject(error)
+        })
+      })
+    },
+    changeUsername({commit}, userInfos) {
+      return new Promise((resolve, reject) => {
+        instance.patch("/user/username", userInfos)
+        .then((response: any) => {
+          commit('userInfos', response.data)
+          resolve(response)
+        })
+        .catch((error: any) => {
+          reject(error)
+        })
+      })
+    }
   }
 })
 
-export function useStore () {
-  return baseUseStore(key)
-}
+export default store

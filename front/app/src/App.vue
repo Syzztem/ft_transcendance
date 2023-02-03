@@ -5,8 +5,6 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
   data() {
-    return {
-    }
   },
   components: {
     Header,
@@ -18,7 +16,6 @@ export default defineComponent({
         let pos = Math.random() * (window.innerWidth - 150)
         pos = Math.floor(pos)
         img.style.left = pos + "px"
-        let dir = Math.floor(Math.random() * 2) ? true : false
         let width = Math.floor(Math.random() * 200 + 100)
         img.style.width = width + "px"
         img.style.animationDelay = Math.floor(Math.random() * 10) + "s"
@@ -51,7 +48,7 @@ export default defineComponent({
       <img v-for="n in 2" :key="n" src="@/assets/salameche.png" class="master" style=""/>
       <img v-for="n in 2" :key="n" src="@/assets/carapuce.png" class="master" style=""/>
     </div>
-    <Header/>
+      <Header v-if="$store.state.user.id != -1 && $route.path != '/game'"/>
     <v-main>
       <transition name="bounce" mode="out-in">
         <router-view>
@@ -73,7 +70,7 @@ html, body {
 }
 .master {
   position: absolute;
-  top: -200px;
+  top: -300px;
   height: auto;
   overflow: hidden !important;
   animation: pokemons 4s infinite linear;

@@ -1,6 +1,7 @@
 <script lang="ts">
 import IGameConfig from '../models/IGameConfig'
 import { defineComponent } from 'vue'
+import store from '@/store'
 
 export default defineComponent({
   data() {
@@ -23,6 +24,12 @@ export default defineComponent({
       this.route = ""
       this.showPowerUps = true
       this.showOriginal = false
+    }
+  },
+  mounted() {
+    if (store.state.user.id == -1) {
+        this.$router.push('/login')
+        return
     }
   }
 })

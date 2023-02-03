@@ -1,6 +1,9 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import ChangeUserDTO from 'src/dto/change-user.dto';
 import CreateUserDTO from 'src/dto/create-user.dto';
+import FindUserByNameDTO from 'src/dto/find-user-by-name.dto';
+import FindUserByTokenDTO from 'src/dto/find-user-by-token.dto';
 import FindUserDTO from 'src/dto/find-user.dto';
 import SendDMDTO from 'src/dto/send-dm.dto';
 import { FriendMessage } from 'src/entities/FriendMessage';
@@ -11,6 +14,16 @@ import { Repository } from 'typeorm';
 export class UserService {
     constructor(@InjectRepository(User) private userRepository: Repository<User>,
                 @InjectRepository(FriendMessage) private messageRepository: Repository<FriendMessage>) {}
+
+    async getUserByName(dto: FindUserByNameDTO): Promise<User> {
+        return this.userRepository.findOne({
+            select: {
+                id:         dto.id,
+                token:      dto.token
+            },
+            where: {username: dto.username}
+        })
+    }
 
     async getUserById(dto: FindUserDTO): Promise<User> {
         return this.userRepository.findOne({
@@ -31,11 +44,31 @@ export class UserService {
         });
     }
 
+    async getUserByToken(dto: FindUserByTokenDTO): Promise<User> {
+        return this.userRepository.findOne({
+            select: {
+                id:         dto.id,
+                profilePic: dto.profilePic,
+                username: dto.username
+            },
+            where: {token: dto.token}
+        })
+    }
+
     async add(createUserDTO: CreateUserDTO) : Promise<User> {
         if (await this.userRepository.count({ where: { username: createUserDTO.username } }) != 0)
             return null;
         const user = this.userRepository.create(createUserDTO);
         return this.userRepository.save(user);
+    }
+
+    async changeUsername(dto: ChangeUserDTO): Promise<number> {
+        const user = await this.userRepository.findOneBy({ token: dto.token })
+
+        if (await this.userRepository.findOneBy({ username: dto.username })) return HttpStatus.CONFLICT
+        user.username = dto.username
+        await this.userRepository.save(user)
+        return HttpStatus.OK
     }
 
     async delete(id: number) : Promise<number> {
@@ -118,15 +151,4 @@ export class UserService {
         this.userRepository.save(user2);
         return HttpStatus.OK;
     }
-    
-    async getUserByName(name: string): Promise<User> {
-        return this.userRepository.findOne({
-            select: {
-                id:         true,
-                username:   true
-            },
-            where: {username: name}
-        })
-    }
-
 }
