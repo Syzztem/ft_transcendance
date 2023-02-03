@@ -28,11 +28,19 @@ export class UserController {
         return user;
     }
 
+    @Post("verify/:id")
+    async verifyToken(@Body() token: string,
+                      @Param('id') id: number,
+                      @Response() res: any) {
+        
+        res.status(await this.userService.verifyToken(id, token)).send();
+    }
+
     @Post("new")
     async newUser(@Body() createUserDTO: CreateUserDTO,
                   @Response() res: any) {
         const user = await this.userService.add(createUserDTO)
-        if (!user) return res.status(HttpStatus.CONFLICT);
+        if (!user) return res.status(HttpStatus.CONFLICT).send();
         res.status(HttpStatus.OK).send();
         return user;
     }
