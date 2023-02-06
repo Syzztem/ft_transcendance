@@ -10,13 +10,13 @@
                             </p>
                         </v-row>
                     </v-card-title>
-                    <v-form class="mt-10">
+                    <v-form v-on:submit.prevent class="mt-10">
                         <v-col>
                             <p>
                                 <label>
                                     USERNAME : 
                                 </label>
-                                <input type="text" v-model="loginUsername" spellcheck="false">
+                                <input type="text" v-on:keyup.enter="login" v-model="loginUsername" spellcheck="false">
                             </p>
                         </v-col>
                         <v-col>
@@ -50,7 +50,7 @@
                                 <label>
                                     USERNAME : 
                                 </label>
-                                <input type="text" v-model="signinUsername" spellcheck="false">
+                                <input type="text" v-on:keyup.enter="createAccount" v-model="signinUsername" spellcheck="false">
                             </p>
                         </v-col>
                         <v-col class="mt-10">
@@ -58,7 +58,7 @@
                                 <label>
                                     EMAIL :
                                 </label>
-                                <input type="text" v-model="email" spellcheck="false">
+                                <input type="text" v-on:keyup.enter="createAccount" v-model="email" spellcheck="false">
                             </p>
                         </v-col>
                         <v-col>
@@ -93,12 +93,20 @@ export default defineComponent({
             signinUsername: ""
         }
     },
+    mounted() {
+        if (this.$store.state.user.id != -1) {
+            this.$router.push('/')
+            return
+        }
+    },
     methods: {
         createAccount() {
+            if (this.signinUsername == '' || this.email == '')
+                return
             this.$store.dispatch('createAccount', {
                 username: this.signinUsername,
                 email: this.email,
-                token: "test"
+                token: this.makeToken()
             }).then(() => {
                 this.loginUsername = this.signinUsername
                 this.login()
@@ -107,12 +115,21 @@ export default defineComponent({
             })
         },
         login() {
+            if (this.loginUsername == '')
+                return
             this.$store.dispatch('login', { username: this.loginUsername })
             .then(() => {
                 this.$router.push('/')
             }, (error) => {
                 console.log(error)
             })
+        },
+        makeToken() {
+            let res = ''
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+            for (let i = 0; i < 16; i++)
+                res += chars.charAt(Math.floor(Math.random() * chars.length))
+            return res
         }
     },
     computed: {

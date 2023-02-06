@@ -6,12 +6,31 @@ const instance = axios.create({
   baseURL: "http://rcorenti.fr:3000"
 })
 
+let user: any = localStorage.getItem('user')
+if (!user) {
+  user = {
+    id: -1,
+    token: ''
+  }
+}
+else {
+  try {
+    user = JSON.parse(user)
+  } catch (ex) {
+    user = {
+      id: -1,
+      token: ''
+    }
+  }
+}
+
 const store = createStore({
   state: {
     status: '',
-    user: {
-       id: -1,
-       token: ''
+    user: user,
+    userInfos: {
+      picture: '',
+      username: ''
     }
   },
   mutations: {
@@ -19,7 +38,18 @@ const store = createStore({
       state.status = status
     },
     logUser(state, user) {
+      localStorage.setItem('user', JSON.stringify(user))
       state.user = user
+    },
+    userInfos(state, userInfos) {
+      state.userInfos = userInfos
+    },
+    logout(state) {
+      state.user = {
+        id: -1,
+        token: ''
+      }
+      localStorage.removeItem('user')
     }
   },
   actions: {
@@ -49,6 +79,30 @@ const store = createStore({
         })
         .catch((error: any) => {
           commit('setStatus', 'error_login')
+          reject(error)
+        })
+      })
+    },
+    getUserInfos({commit}, userInfos) {
+      return new Promise((resolve, reject) => {
+        instance.post("/user/infos", userInfos)
+        .then((response: any) => {
+          commit('userInfos', response.data)
+          resolve(response)
+        })
+        .catch((error: any) => {
+          reject(error)
+        })
+      })
+    },
+    changeUsername({commit}, userInfos) {
+      return new Promise((resolve, reject) => {
+        instance.patch("/user/username", userInfos)
+        .then((response: any) => {
+          commit('userInfos', response.data)
+          resolve(response)
+        })
+        .catch((error: any) => {
           reject(error)
         })
       })

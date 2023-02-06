@@ -1,13 +1,18 @@
 <script lang="ts">
+import store from '@/store';
+import { defineComponent } from 'vue';
 
-export default ({
+export default defineComponent({
   data() {
     return {
     }
   },
-  //mounted() {
-  //  this.$store.getters.
-  //}
+  mounted() {
+    if (store.state.user.id == -1) {
+        this.$router.push('/login')
+        return
+    }
+  }
 })
 </script>
 

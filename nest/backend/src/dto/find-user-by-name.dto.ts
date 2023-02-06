@@ -1,3 +1,5 @@
 export default class FindUserByNameDTO {
-    username: string
+    username: string;
+    id = true;
+    token = true;
 }
