@@ -14,7 +14,6 @@ export class UserController {
     // testNewUser() {
     //     let def: CreateUserDTO = {
     //         username: "toto",
-    //         email: "toto@tata.fr",
     //         token: "lwknef",
     //     }
     //     this.userService.add(def);

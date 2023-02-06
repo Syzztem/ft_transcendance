@@ -12,12 +12,14 @@ import { Game } from './entities/Game';
 import { ChannelMessage } from './entities/ChannelMessage';
 import { FriendMessage } from './entities/FriendMessage';
 import { BanAndMute } from './entities/BanAndMute';
+import { SocketModule } from './socket/socket.module';
 
 @Module({
   imports: [
     GameModule,
     ChannelModule,
     UserModule,
+    SocketModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'db',

@@ -16,12 +16,12 @@
                                 <label>
                                     USERNAME : 
                                 </label>
-                                <input type="text" v-on:keyup.enter="login" v-model="loginUsername" spellcheck="false">
+                                <input type="text" v-on:keyup.enter="createAccount" v-model="username" spellcheck="false">
                             </p>
                         </v-col>
                         <v-col>
                             <p v-if="status == 'error_login'">
-                                Invalid Username
+                                Username Too Long (8 Chars max)
                             </p>
                         </v-col>
                         <v-col class="mt-10">
@@ -29,49 +29,7 @@
                                 <input value="Loading..." type="button" disabled style="background-color: black;">
                             </p>
                             <p v-else>
-                                <input value="LOGIN" type="button" @click="login" :disabled="!loginValidatedFields" style="background-color: black;">
-                            </p>
-                        </v-col>
-                    </v-form>
-                </v-card>
-            </v-col>
-            <v-col class="d-flex justify-center mt-2" cols="12" id="col">
-                <v-card black color="rgb(0, 75, 255, 0.8)" width="100vw" height="40vh">
-                    <v-card-title>
-                        <v-row justify="center" class="mt-2">
-                            <p>
-                                SIGNIN
-                            </p>
-                        </v-row>
-                    </v-card-title>
-                    <v-form class="mt-10">
-                        <v-col>
-                            <p>
-                                <label>
-                                    USERNAME : 
-                                </label>
-                                <input type="text" v-on:keyup.enter="createAccount" v-model="signinUsername" spellcheck="false">
-                            </p>
-                        </v-col>
-                        <v-col class="mt-10">
-                            <p>
-                                <label>
-                                    EMAIL :
-                                </label>
-                                <input type="text" v-on:keyup.enter="createAccount" v-model="email" spellcheck="false">
-                            </p>
-                        </v-col>
-                        <v-col>
-                            <p v-if="status == 'error_create'">
-                                Username Already Use
-                            </p>
-                        </v-col>
-                        <v-col class="mt-10">
-                            <p v-if="status == 'loading_create'">
-                                <input value="Loading..." type="button" disabled style="background-color: black;">
-                            </p>
-                            <p v-else>
-                                <input value="SIGNIN" type="button" @click="createAccount" :disabled="!signinValidatedFields" style="background-color: black;">
+                                <input value="LOGIN" type="button" @click="createAccount" :disabled="!loginValidatedFields" style="background-color: black;">
                             </p>
                         </v-col>
                     </v-form>
@@ -88,9 +46,7 @@ import { mapState } from 'vuex'
 export default defineComponent({
     data() {
         return {
-            email: "",
-            loginUsername: "",
-            signinUsername: ""
+            username: ""
         }
     },
     mounted() {
@@ -101,23 +57,25 @@ export default defineComponent({
     },
     methods: {
         createAccount() {
-            if (this.signinUsername == '' || this.email == '')
+            if (this.username == '')
                 return
+            if (this.username.length > 8) {
+                this.$store.state.status = 'error_login'
+                return
+            }
             this.$store.dispatch('createAccount', {
-                username: this.signinUsername,
-                email: this.email,
+                username: this.username,
                 token: this.makeToken()
             }).then(() => {
-                this.loginUsername = this.signinUsername
                 this.login()
-            }, (error) => {
-                console.log(error)
+            }, () => {
+                this.login()
             })
         },
         login() {
-            if (this.loginUsername == '')
+            if (this.username == '')
                 return
-            this.$store.dispatch('login', { username: this.loginUsername })
+            this.$store.dispatch('login', { username: this.username })
             .then(() => {
                 this.$router.push('/')
             }, (error) => {
@@ -134,13 +92,13 @@ export default defineComponent({
     },
     computed: {
         loginValidatedFields() {
-            if (this.loginUsername != "")
+            if (this.username != "")
                 return true
             else
                 return false
         },
         signinValidatedFields() {
-            if (this.email != "" && this.signinUsername != "")
+            if (this.username != "")
                 return true
             else
                 return false

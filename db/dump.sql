@@ -2,7 +2,6 @@ CREATE TABLE "User"
 (
  "id"       bigserial NOT NULL,
  username varchar(8) NOT NULL,
- email    varchar(254) NOT NULL,
  "rank"     int NOT NULL,
  "token"    char(50) NOT NULL,
  wins     int NOT NULL,

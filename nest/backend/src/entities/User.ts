@@ -3,16 +3,13 @@ import { Channel } from './Channel';
 import { Game } from './Game';
 
 @Entity()
-@Unique(["username", "email", "token"])
+@Unique(["username", "token"])
 export class User {
   @PrimaryGeneratedColumn()
   id :number;
 
   @Column("varchar", {length: 8})
   username: string;
-
-  @Column("varchar", {length: 254})
-  email: string;
 
   @Column("int")
   rank: number = 0;
