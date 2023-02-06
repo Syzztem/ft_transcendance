@@ -1,65 +1,59 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
-import IPlayer from '../models/IPlayer'
-import IBall from '../models/IBall'
-import IPaddle from '../models/IPaddle'
-import IScore from '../models/IScore'
-import ITable from '../models/ITable'
-import IGameConfig from '../models/IGameConfig'
+import { createStore } from 'vuex'
 
-export default new Vuex.Store({
-    state: {
-        player: <IPlayer> {
-            id: 0,
-            pseudo: ''
-        },
-        IGPlayers: <Array<IPlayer>>[],
-        gameConfig: <IGameConfig>{},
-        ball: <IBall>{},
-        ownerPaddle: <IPaddle>{},
-        adversePaddle: <IPaddle>{},
-        ownerScore: <IScore>{},
-        adverseScore: <IScore>{},
-        table: <ITable>{}
-    },
-    mutations: {
-        setPlayer(set, player) {
-            set.player = player
-        },
-        setIGPlayers(set, IGPlayers) {
-            set.IGPlayers = IGPlayers
-        },
-        setGameConfig(set, gameConfig) {
-            set.gameConfig = gameConfig
-        },
-        setBall(set, ball) {
-            set.ball = ball
-        },
-        setOwnerPaddle(set, ownerPaddle) {
-            set.ownerPaddle = ownerPaddle
-        },
-        setAdversePaddle(set, adversePaddle) {
-            set.adversePaddle = adversePaddle
-        },
-        setOwnerScore(set, ownerScore) {
-            set.ownerScore = ownerScore
-        },
-        setAdverseScore(set, adverseScore) {
-            set.adverseScore = adverseScore
-        },
-        setTable(set, table) {
-            set.table = table
-        }
-    },
-    getters: {
-        getPlayer: get => get.player,
-        getIGPlayers: get => get.IGPlayers,
-        getGameConfig: get => get.gameConfig,
-        getBall: get => get.ball,
-        getOwnerPaddle: get => get.ownerPaddle,
-        getAdversePaddle: get => get.adversePaddle,
-        getOwnerScore: get => get.ownerScore,
-        getAdverseScore: get => get.adverseScore,
-        getTable: get => get.table
-    }
+const axios = require('axios')
+
+const instance = axios.create({
+  baseURL: "http://rcorenti.fr:3000"
 })
+
+const store = createStore({
+  state: {
+    status: '',
+    user: {
+       id: -1,
+       token: ''
+    }
+  },
+  mutations: {
+    setStatus(state, status) {
+      state.status = status
+    },
+    logUser(state, user) {
+      state.user = user
+    }
+  },
+  actions: {
+    createAccount({commit}, userInfos) {
+      commit('setStatus', 'loading_create')
+      return new Promise((resolve, reject) => {
+        commit
+        instance.post("/user/new", userInfos)
+        .then((response: any) => {
+          commit('setStatus', 'created')
+          resolve(response)
+        })
+        .catch((error: any) => {
+          commit('setStatus', 'error_create')
+          reject(error)
+        })
+      })
+    },
+    login({commit}, userInfos) {
+      commit('setStatus', 'loading_login')
+      return new Promise((resolve, reject) => {
+        instance.post("/user/login", userInfos)
+        .then((response: any) => {
+          commit('setStatus', '')
+          commit('logUser', response.data)
+          resolve(response)
+        })
+        .catch((error: any) => {
+          commit('setStatus', 'error_login')
+          reject(error)
+        })
+      })
+    }
+  }
+})
+
+export default store

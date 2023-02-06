@@ -7,7 +7,6 @@ import { jwtConstants } from './constants';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { AuthController } from './auth.controller';
 import { ftStrategy } from './strategies/ft.strategy';
-import { UsersService } from 'src/users/users.service';
 
 @Module({
   imports: [

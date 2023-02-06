@@ -6,6 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "dev": "nest start",
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -36,6 +37,7 @@
     "dotenv": "^16.0.3",
     "googleapis": "^109.0.1",
     "install": "^0.13.0",
+    "cors": "^2.8.5",
     "mysql2": "^2.3.3",
     "passport": "^0.6.0",
     "passport-42": "^1.2.6",

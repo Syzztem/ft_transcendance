@@ -10,7 +10,8 @@ export class GameService {
     constructor(@InjectRepository(Game) private gameRepository: Repository<Game>) {}
 
     async newGame(dto: CreateGameDTO) {
-        this.gameRepository.create(dto);
+        let game: Game = this.gameRepository.create(dto);
+        return this.gameRepository.save(game);
     }
 
     async getGameById(dto: GetGameDTO) : Promise<Game> {
@@ -18,7 +19,7 @@ export class GameService {
             select: {
                 player1Score: dto.scores,
                 player2Score: dto.scores,
-//                timestamp: dto.timestamp      //ne fonctionne pas + ca m'a saoule
+                timestamp: dto.timestamp
             },
             relations: {
                 player1: dto.players,

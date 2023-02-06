@@ -3,6 +3,4 @@ export default class GetChannelDTO {
     name = true;
     admin = true;
     users = true;
-    messages = true;
-    msgPage = 0;
 }

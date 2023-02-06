@@ -11,8 +11,13 @@ import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { UsersController } from './users/users.controller';
-import { UsersService } from './users/users.service';
 
+import { User } from './database/entities/User';
+import { Channel } from './database/entities/Channel';
+import { Game } from './database/entities/Game';
+import { ChannelMessage } from './database/entities/ChannelMessage';
+import { FriendMessage } from './database/entities/FriendMessage';
+import { BanAndMute } from './database/entities/BanAndMute';
 
 @Module({
   imports: [PassportModule, AuthModule, UsersModule, ConfigModule.forRoot({
@@ -24,16 +29,18 @@ import { UsersService } from './users/users.service';
     UsersModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.POSTGRE_HOST,
+      host: process.env.POSTGRES_HOST,
       port: 5432,
-      username: process.env.POSTGRE_USER,
-      password: process.env.POSTGRE_PW,
-      database: process.env.POSTGRE_DB,
-      entities: ["./database/entities/*.ts"],
+      username: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PW,
+      database: process.env.POSTGRES_DB,
+      entities: [User, Channel, Game, ChannelMessage, FriendMessage, BanAndMute],
       synchronize: true
     })
   ],
   controllers: [AppController],
   providers: [AppService, AuthModule],
 })
-export class AppModule { }
+export class AppModule {
+  constructor(private dataSource: DataSource) {}
+}

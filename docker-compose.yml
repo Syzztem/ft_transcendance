@@ -6,7 +6,7 @@
 #    By: lothieve <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/04 15:02:47 by lothieve          #+#    #+#              #
-#    Updated: 2022/12/12 21:45:42 by aedouard         ###   ########.fr        #
+#    Updated: 2023/01/24 14:03:26 by lothieve         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,12 +33,15 @@ services:
     restart: on-failure
     networks:
       - transcendence
-    volumes:
-      - ./nest/backend:/back
     ports:
       - 3000:3000
-
-  vue:
+    environment:
+      POSTGRES_PW: ${POSTGRES_PW}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./nest/backend/:/usr/app/
+  vue: 
     container_name: vue
     build: front
     image: frotend
@@ -51,7 +54,6 @@ services:
       - ./front/app:/app
     ports:
     - 8080:8080
-
   pgadmin:
     container_name: pgadmin
     image: dpage/pgadmin4
