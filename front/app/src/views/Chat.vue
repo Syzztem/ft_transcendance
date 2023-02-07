@@ -1,39 +1,74 @@
-<script setup lang="ts">
+<script lang="ts">
 
 import vuetify from "@/plugins/vuetify";
 import {reactive, ref, onMounted} from "vue";
 import IMessage from '../models/IMessage'
 import IChannel from "@/models/IChannel";
 import IUser from "@/models/IUser";
+import store from "@/store";
+import { defineComponent } from 'vue';
 
-const state = reactive
-	<{
-	  messages: [IMessage],
-	  channels: [IChannel],
-	  users: [IUser],
-	  currentMessage: string,
-	  UserName: string,
-	}>
-	({
-	  messages: [{content: '', sender: ''}],
-	  users:[{name: 'user1', channel_status:0}, {name: 'user2', channel_status:1},{name: 'user3', channel_status:1}],
-	  channels: [{name: 'channel1'}, {name: 'channel2'},{name: 'channel3'}],
-	  currentMessage: '',
-	  UserName:'JHoWn',
-	})
+export default defineComponent({
+	data() {
+		return {
+		}
+	},
+	methods: {
 
-function UpdateMessagesButton()
-{
-	var message = new IMessage(state.currentMessage, state.UserName);
-	state.messages.push(message);
-	state.currentMessage = '';
-}
+	},
+    computed: {
+		channels() {
+			return this.$store.state.channels
+		},
+		joined_channels() {
+			return this.$store.state.joined_channels
+		},
+		current_channel() {
+			return this.$store.state.current_channel
+		},
+		blocked_users() {
+			return this.$store.state.blocked_users
+		}
+	},
+	mounted() {
+		console.log('Mounted:', this.channels, this.joined_channels, this.current_channel, this.blocked_users)
 
-function UpdateMessages(e: KeyboardEvent)
-{
-  if (e.key === 'Enter')
-	  UpdateMessagesButton();
-}
+	},
+
+})
+
+
+
+// const state = reactive
+// 	<{
+// 	  messages: [IMessage],
+// 	  channels: [IChannel],
+// 	  users: [IUser],
+// 	  currentMessage: string,
+// 	  UserName: string,
+// 	}>
+// 	({
+// 	  messages: [{content: '', sender: ''}],
+// 	  users:[{name: 'user1', channel_status:0}, {name: 'user2', channel_status:1},{name: 'user3', channel_status:1}],
+// 	  channels: [{name: 'channel1'}, {name: 'channel2'},{name: 'channel3'}],
+// 	  currentMessage: '',
+// 	  UserName:'JHoWn',
+// 	})
+
+// function UpdateMessagesButton()
+// {
+// 	var message = new IMessage(state.currentMessage, state.UserName);
+// 	state.messages.push(message);
+// 	state.currentMessage = '';
+// }
+
+// function UpdateMessages(e: KeyboardEvent)
+// {
+//   if (e.key === 'Enter')
+// 	  UpdateMessagesButton();
+// }
+
+
 </script>
 
 <template>
@@ -48,7 +83,7 @@ function UpdateMessages(e: KeyboardEvent)
 								Users
 							</v-card-title>
 							<v-card height="75vh" id="Userscontent">
-							<v-list-item v-for="user in state.users">
+							<v-list-item>
 								<v-card id="Usercard" class="d-flex align-center justify-center mt-4">
 									<v-badge class="mt-2" dot location="top right" color="green"> 
 									<v-badge location="bottom end" class="mb-2">
@@ -65,7 +100,7 @@ function UpdateMessages(e: KeyboardEvent)
 									</v-badge>
 									</v-badge>
 									<v-card-text>
-										{{user.name}}
+										<!-- {{user.name}} -->
 									</v-card-text>
 								</v-card>
 							</v-list-item>
@@ -84,21 +119,21 @@ function UpdateMessages(e: KeyboardEvent)
 									</v-card-title>
 									<div class ="Messagesscroller" align="left">
 										<v-card-text>
-											<div v-for="message in state.messages">
+											<!-- <div v-for="message in state.messages">
 												<li v-if="message.content != ''">
 													{{message.sender}}: {{message.content}}
 												</li>
-											</div>
+											</div> -->
 										</v-card-text>
 									</div>
 								</v-card>
 								<!--Message Input -->
 								<v-row justify="center">
 									<v-card id="Inputbox" class="d-flex rounded-xl" height="10vh" width="50vw">
-										<v-text-field  id="Inputfield" class="mt-4 ml-10" autofocus v-model="state.currentMessage" @keydown="UpdateMessages">
-										</v-text-field>
+										<!-- <v-text-field  id="Inputfield" class="mt-4 ml-10" autofocus v-model="state.currentMessage" @keydown="UpdateMessages">
+										</v-text-field> -->
 										<v-card-actions>
-											<v-btn id="Btnsend" height="5vh" width="7vw" @click = "UpdateMessagesButton">
+											<!-- <v-btn id="Btnsend" height="5vh" width="7vw" @click = "UpdateMessagesButton"> -->
 												Send
 											</v-btn>
 										</v-card-actions>
@@ -121,7 +156,7 @@ function UpdateMessages(e: KeyboardEvent)
 								</v-btn>
 							</v-card>
 							<v-card id="Channelscontent" height="65vh" >
-								<v-list-item v-for="channel in state.channels">
+								<v-list-item v-for="channel in channels.name">
 									<v-card id="Channelcard" class="d-flex align-center justify-center mt-4" height="5vh">
 										{{channel.name}}
 									</v-card>

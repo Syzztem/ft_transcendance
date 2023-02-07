@@ -1,3 +1,4 @@
+import IChannel from '@/models/IChannel'
 import { createStore } from 'vuex'
 
 const axios = require('axios')
@@ -31,7 +32,15 @@ const store = createStore({
     userInfos: {
       picture: '',
       username: ''
+      
+    },
+    chat: {
+      channels:         Array<IChannel>(),
+      joined_channels:  Array<IChannel>(),
+      current_channel:  "test_channel",
+      blocked_users:    [],
     }
+
   },
   mutations: {
     setStatus(state, status) {
