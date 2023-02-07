@@ -1,8 +1,8 @@
 FROM node:lts
 
-WORKDIR /app
+WORKDIR app
 
-RUN apt-get update
-RUN npm -g add @vue/cli
+RUN apt-get update && apt-get upgrade -y
+RUN yarn global add @vue/cli
 
-ENTRYPOINT ["/bin/sh", "-c", "npm i -g npm@latest && exec npm run prod"]
+ENTRYPOINT ["/bin/sh", "-c", "yarn install --non-interactive && exec yarn prod"]

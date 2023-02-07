@@ -1,6 +1,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import CreateUserDTO from 'src/dto/create-user.dto';
+import FindUserByNameDTO from 'src/dto/find-user-by-name.dto';
 import FindUserDTO from 'src/dto/find-user.dto';
 import SendDMDTO from 'src/dto/send-dm.dto';
 import { FriendMessage } from 'src/entities/FriendMessage';
@@ -11,6 +12,16 @@ import { Repository } from 'typeorm';
 export class UserService {
     constructor(@InjectRepository(User) private userRepository: Repository<User>,
                 @InjectRepository(FriendMessage) private messageRepository: Repository<FriendMessage>) {}
+
+    async getUserByName(dto: FindUserByNameDTO): Promise<User> {
+        return this.userRepository.findOne({
+            select: {
+                id:         true,
+                token:      true
+            },
+            where: {username: dto.username}
+        })
+    }
 
     async getUserById(dto: FindUserDTO): Promise<User> {
         return this.userRepository.findOne({
@@ -125,16 +136,6 @@ export class UserService {
         this.userRepository.save(user1);
         this.userRepository.save(user2);
         return HttpStatus.OK;
-    }
-    
-    async getUserByName(name: string): Promise<User> {
-        return this.userRepository.findOne({
-            select: {
-                id:         true,
-                username:   true
-            },
-            where: {username: name}
-        })
     }
 
 }

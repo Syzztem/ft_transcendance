@@ -3,6 +3,7 @@ import CreateUserDTO from 'src/dto/create-user.dto';
 import FindUserDTO from 'src/dto/find-user.dto';
 import SendDMDTO from 'src/dto/send-dm.dto';
 import { User } from 'src/entities/User';
+import FindUserByNameDTO from 'src/dto/find-user-by-name.dto';
 import { UserService } from 'src/services/user.service';
 import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -11,16 +12,16 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class UserController {
     constructor(private userService: UserService) {}
 
-    @Get()
-    testNewUser() {
-        let def: CreateUserDTO = {
-            username: "toto",
-            email: "toto@tata.fr",
-            token: "lwknef",
-        }
-        this.userService.add(def);
-        return this.userService.getUserByName("toto");
-    }
+    // @Get()
+    // testNewUser() {
+    //     let def: CreateUserDTO = {
+    //         username: "toto",
+    //         email: "toto@tata.fr",
+    //         token: "lwknef",
+    //     }
+    //     this.userService.add(def);
+    //     return this.userService.getUserByName("toto");
+    // }
 
     @Get("id")
     async getUser(@Query() findUserDTO: FindUserDTO,
@@ -65,6 +66,14 @@ export class UserController {
         if (!user) return res.status(HttpStatus.CONFLICT).send();
         res.status(HttpStatus.OK).send();
         return user;
+    }
+
+    @Post("login")
+    async login(@Body() findUserByNameDTO: FindUserByNameDTO,
+                    @Response() res: any) {
+        const user = await this.userService.getUserByName(findUserByNameDTO)
+        if (!user) return res.status(HttpStatus.NOT_FOUND).send();
+        return res.status(HttpStatus.OK).json({user})
     }
 
     @Patch("friend/:id1/:id2")
