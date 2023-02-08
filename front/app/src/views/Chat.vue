@@ -36,7 +36,7 @@ export default defineComponent({
 		store.commit('initChannels');
 		store.commit('addChannel', {name: 'Addedchan'});
 		store.commit('removeChannel', 'InitChan');
-		store.commit('updateCurrentChannel', {name: 'Addedchan', users: [{name :'user44'}]});
+		store.commit('updateCurrentChannel', {name: 'Addedchan', users: [{name :'user44'}], messages:[{sender:'sender',content:'message'}]});
 		console.log('Mounted:', this.channels, this.joined_channels, this.current_channel, this.blocked_users)
 	},
 })
@@ -121,11 +121,11 @@ export default defineComponent({
 									</v-card-title>
 									<div class ="Messagesscroller" align="left">
 										<v-card-text>
-											<!-- <div v-for="message in state.messages">
+											<div v-for="message in current_channel.messages">
 												<li v-if="message.content != ''">
 													{{message.sender}}: {{message.content}}
 												</li>
-											</div> -->
+											</div>
 										</v-card-text>
 									</div>
 								</v-card>

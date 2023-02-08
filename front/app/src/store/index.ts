@@ -62,7 +62,7 @@ const store = createStore({
       localStorage.removeItem('user')
     },
     initChannels(state) {
-      state.chat.joined_channels = [{name: 'InitChan', users: [{name :'user44'}]}];
+      state.chat.joined_channels = [{name: 'InitChan', users: [{name :'user44'}], messages:[{sender: 'oyo', content: 'aya'}]}];
     },
     addChannel(state, newchan) {
       state.chat.joined_channels.push(newchan);
