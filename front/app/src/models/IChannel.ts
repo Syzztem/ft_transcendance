@@ -3,7 +3,7 @@ import IUser from "./IUser"
 
 interface IChannel {
     name:     string,
-    messages: Array<IMessage>,
+    // messages: Array<IMessage>,
     users:    Array<IUser>
   }
 

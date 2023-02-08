@@ -7,10 +7,12 @@ import IChannel from "@/models/IChannel";
 import IUser from "@/models/IUser";
 import store from "@/store";
 import { defineComponent } from 'vue';
+import { mapActions } from "vuex";
 
 export default defineComponent({
 	data() {
 		return {
+
 		}
 	},
 	methods: {
@@ -18,26 +20,26 @@ export default defineComponent({
 	},
     computed: {
 		channels() {
-			return this.$store.state.channels
+			return this.$store.state.chat.channels
 		},
 		joined_channels() {
-			return this.$store.state.joined_channels
+			return this.$store.state.chat.joined_channels
 		},
 		current_channel() {
-			return this.$store.state.current_channel
+			return this.$store.state.chat.current_channel
 		},
 		blocked_users() {
-			return this.$store.state.blocked_users
-		}
+			return this.$store.state.chat.blocked_users
+		},
 	},
 	mounted() {
+		store.commit('initChannels');
+		store.commit('addChannel', {name: 'Addedchan'});
+		store.commit('removeChannel', 'InitChan');
+		store.commit('updateCurrentChannel', {name: 'Addedchan', users: [{name :'user44'}]});
 		console.log('Mounted:', this.channels, this.joined_channels, this.current_channel, this.blocked_users)
-
 	},
-
 })
-
-
 
 // const state = reactive
 // 	<{
@@ -83,7 +85,7 @@ export default defineComponent({
 								Users
 							</v-card-title>
 							<v-card height="75vh" id="Userscontent">
-							<v-list-item>
+							<v-list-item v-for="user in current_channel.users">
 								<v-card id="Usercard" class="d-flex align-center justify-center mt-4">
 									<v-badge class="mt-2" dot location="top right" color="green"> 
 									<v-badge location="bottom end" class="mb-2">
@@ -100,7 +102,7 @@ export default defineComponent({
 									</v-badge>
 									</v-badge>
 									<v-card-text>
-										<!-- {{user.name}} -->
+										{{user.name}}
 									</v-card-text>
 								</v-card>
 							</v-list-item>
@@ -115,7 +117,7 @@ export default defineComponent({
 							<v-row>
 								<v-card id="Messagebox" color="rgb(0, 0, 51, 0.87)" height="75vh" width="58vw">
 									<v-card-title id="Messageboxtitle" class="mt-2 mb-2">
-										JHoWn's channel
+										{{current_channel.name}}
 									</v-card-title>
 									<div class ="Messagesscroller" align="left">
 										<v-card-text>
@@ -130,10 +132,10 @@ export default defineComponent({
 								<!--Message Input -->
 								<v-row justify="center">
 									<v-card id="Inputbox" class="d-flex rounded-xl" height="10vh" width="50vw">
-										<!-- <v-text-field  id="Inputfield" class="mt-4 ml-10" autofocus v-model="state.currentMessage" @keydown="UpdateMessages">
-										</v-text-field> -->
+										<v-text-field  id="Inputfield" class="mt-4 ml-10" autofocus>
+										</v-text-field>
 										<v-card-actions>
-											<!-- <v-btn id="Btnsend" height="5vh" width="7vw" @click = "UpdateMessagesButton"> -->
+											<v-btn id="Btnsend" height="5vh" width="7vw">
 												Send
 											</v-btn>
 										</v-card-actions>
@@ -156,7 +158,7 @@ export default defineComponent({
 								</v-btn>
 							</v-card>
 							<v-card id="Channelscontent" height="65vh" >
-								<v-list-item v-for="channel in channels.name">
+								<v-list-item v-for="channel in joined_channels">
 									<v-card id="Channelcard" class="d-flex align-center justify-center mt-4" height="5vh">
 										{{channel.name}}
 									</v-card>

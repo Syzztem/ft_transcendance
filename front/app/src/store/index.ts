@@ -37,8 +37,9 @@ const store = createStore({
     chat: {
       channels:         Array<IChannel>(),
       joined_channels:  Array<IChannel>(),
-      current_channel:  "test_channel",
+      current_channel:  <IChannel> {},
       blocked_users:    [],
+      current_message:  "",
     }
 
   },
@@ -59,7 +60,20 @@ const store = createStore({
         token: ''
       }
       localStorage.removeItem('user')
-    }
+    },
+    initChannels(state) {
+      state.chat.joined_channels = [{name: 'InitChan', users: [{name :'user44'}]}];
+    },
+    addChannel(state, newchan) {
+      state.chat.joined_channels.push(newchan);
+    },
+    removeChannel(state, channelName) {
+      state.chat.joined_channels = state.chat.joined_channels.filter(c => c.name !== channelName);
+    },
+    updateCurrentChannel (state, current){
+      state.chat.current_channel = current;
+    },
+    
   },
   actions: {
     createAccount({commit}, userInfos) {
