@@ -12,5 +12,6 @@
 
 FROM node:19
 
+RUN mkdir /profilepics
 WORKDIR /usr/app/
 CMD npm install; npm run build; npm run start

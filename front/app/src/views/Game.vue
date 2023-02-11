@@ -7,6 +7,7 @@ import ITable from '../models/ITable'
 import { Game } from '../controllers/Game'
 import IPlayer from '@/models/IPlayer'
 import { defineComponent } from "vue" 
+import store from '@/store'
 
 
 // power ups     : pokemons
@@ -77,6 +78,10 @@ export default defineComponent({
     ///
   },
   mounted() {
+    if (store.state.user.id == -1) {
+        this.$router.push('/login')
+        return
+  }
     // 
     // temporaire, est censé recevoir les données depuis le backend
     //

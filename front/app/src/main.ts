@@ -16,4 +16,4 @@ const vuetify = createVuetify({
 
 createApp(App).use(vuetify).use(store).use(router).mount('#app')
 
-//App.config.globalProperties.$store=store
+App.config.globalProperties.$store=store
