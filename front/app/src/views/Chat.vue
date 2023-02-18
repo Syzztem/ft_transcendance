@@ -8,6 +8,9 @@ import IUser from "@/models/IUser";
 import store from "@/store";
 import { defineComponent } from 'vue';
 import { mapActions } from "vuex";
+import {io} from 'socket.io-client';
+
+const socket = io('http://localhost:3000');
 
 export default defineComponent({
 	data() {
@@ -19,6 +22,10 @@ export default defineComponent({
 
 	},
     computed: {
+		username()
+		{
+			return this.$store.state.userInfos.username;
+		},
 		channels() {
 			return this.$store.state.chat.channels
 		},
@@ -34,10 +41,11 @@ export default defineComponent({
 	},
 	mounted() {
 		store.commit('initChannels');
-		store.commit('addChannel', {name: 'Addedchan'});
-		store.commit('removeChannel', 'InitChan');
+		store.commit('addChannel', {name: 'Addedchan', users: [{name :'user96'}], messages:[{sender:'sender2',content:'added_channel_message'}]} );
+		// store.commit('removeChannel', 'InitChan');
 		store.commit('updateCurrentChannel', {name: 'Addedchan', users: [{name :'user44'}], messages:[{sender:'sender',content:'message'}]});
-		console.log('Mounted:', this.channels, this.joined_channels, this.current_channel, this.blocked_users)
+		// console.log('Mounted:', this.channels, this.joined_channels, this.current_channel, this.blocked_users)
+		console.log('username:', this.username)
 	},
 })
 

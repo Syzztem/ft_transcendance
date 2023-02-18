@@ -4,7 +4,7 @@ import { createStore } from 'vuex'
 const axios = require('axios')
 
 const instance = axios.create({
-  baseURL: "http://rcorenti.fr:3000"
+  baseURL: "http://localhost:3000"
 })
 
 let user: any = localStorage.getItem('user')
@@ -73,7 +73,6 @@ const store = createStore({
     updateCurrentChannel (state, current){
       state.chat.current_channel = current;
     },
-    
   },
   actions: {
     createAccount({commit}, userInfos) {

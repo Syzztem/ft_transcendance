@@ -10,7 +10,10 @@
 interface	IMessage
 {
 	sender:string,
-	content:string
+	content:string,
+	// sender:User,
+	// channel:Channel,
+	// timestamp:Date
 }
 
 export default IMessage
