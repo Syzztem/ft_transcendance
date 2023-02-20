@@ -31,8 +31,16 @@ export class MessagesGateway {
   joinRoom(
     @MessageBody('name') name: string, 
     @ConnectedSocket() client : Socket,
-  )
-  {
+  ){
     return this.messagesService.identify(name, client.id);
+  }
+
+  @SubscribeMessage('typing')
+  async typing(
+    @MessageBody('isTyping') isTyping : Boolean,
+    @ConnectedSocket() client: Socket,
+  ){
+    const name = await this.messagesService.getClientName(client.id);
+    client.broadcast.emit('typing', {name , isTyping});
   }
 }
