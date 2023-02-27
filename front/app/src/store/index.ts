@@ -1,4 +1,6 @@
 import IChannel from '@/models/IChannel'
+import IMessage from '@/models/IMessage'
+import IUser from '@/models/IUser'
 import { createStore } from 'vuex'
 
 const axios = require('axios')
@@ -35,13 +37,11 @@ const store = createStore({
       
     },
     chat: {
-      channels:         Array<IChannel>(),
-      joined_channels:  Array<IChannel>(),
-      current_channel:  <IChannel> {},
+      joined_channels:  [] as IChannel[],
+      current_channel:  null as IChannel | null,
       blocked_users:    [],
       current_message:  "",
     }
-
   },
   mutations: {
     setStatus(state, status) {
@@ -61,16 +61,16 @@ const store = createStore({
       }
       localStorage.removeItem('user')
     },
-    initChannels(state) {
-      state.chat.joined_channels = [{name: 'InitChan', users: [{name :'user44'}], messages:[{sender: 'oyo', content: 'aya'}]}];
-    },
+	setChannels(state , channels: IChannel[]) {
+		state.chat.joined_channels = channels;
+	},
     addChannel(state, newchan) {
       state.chat.joined_channels.push(newchan);
     },
     removeChannel(state, channelName) {
       state.chat.joined_channels = state.chat.joined_channels.filter(c => c.name !== channelName);
     },
-    updateCurrentChannel (state, current){
+    updateCurrentChannel (state, current : IChannel){
       state.chat.current_channel = current;
     },
   },
@@ -128,7 +128,19 @@ const store = createStore({
           reject(error)
         })
       })
-    }
+    },
+	getUserChannels({commit}, id) {
+		return new Promise((resolve, reject) => {
+			instance.get("/channels", id)
+			.then((res: any) => {
+				commit('setChannels', res.data)
+				resolve(res)
+			})
+			.catch((error: any) => {
+				reject(error)
+			})
+		})
+	}
   }
 })
 

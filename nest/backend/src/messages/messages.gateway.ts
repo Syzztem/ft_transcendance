@@ -29,7 +29,7 @@ export class MessagesGateway {
 
   @SubscribeMessage('join')
   joinRoom(
-    @MessageBody('name') name: string, 
+    @MessageBody('name') name: string, //TODO : replace this by socket's token inside the header
     @ConnectedSocket() client : Socket,
   ){
     return this.messagesService.identify(name, client.id);

@@ -1,15 +1,17 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, Response } from '@nestjs/common';
 import CreateChannelDTO from 'src/dto/create-channel.dto';
+import FindUserDTO from 'src/dto/find-user.dto';
 import GetChannelDTO from 'src/dto/get-channel.dto';
 import GetMessageDTO from 'src/dto/get-message.dto';
 import PostMessageDTO from 'src/dto/post-message.dto';
 import { Channel } from 'src/entities/Channel';
 import { ChannelMessage } from 'src/entities/ChannelMessage';
 import { ChannelService } from 'src/services/channel.service';
+import { UserService } from 'src/services/user.service';
 
 @Controller()
 export class ChannelController {
-    constructor(private channelService: ChannelService) {}
+    constructor(private channelService: ChannelService, private userService: UserService) {}
 
     @Get("id")
     async getChannel(@Query() getChannelDTO: GetChannelDTO,
@@ -86,5 +88,13 @@ export class ChannelController {
     @HttpCode(HttpStatus.OK)
     createChannel(@Body() createChannelDTO: CreateChannelDTO) {
         this.channelService.createChannel(createChannelDTO);
+    }
+
+    @Get("channels")
+    async getChannels(@Query() findUserDTO: FindUserDTO,
+                    @Response() res: any) {
+        const user = await this.userService.getUserById(findUserDTO)
+        if (!user || !user.channels) return res.status(HttpStatus.NOT_FOUND).send()
+        return user.channels;
     }
 }

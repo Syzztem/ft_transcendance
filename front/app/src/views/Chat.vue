@@ -12,10 +12,30 @@ import {io} from 'socket.io-client';
 
 const socket = io('http://localhost:3000');
 
+/*
+	TODO :
+
+	- clickable profile on user -> opens 	OPTIONS PANEL	:	dm, profile page, add to friends, remove from friend block user, unblock user
+											ADVANCED PANEL	:	promote/demote/ban/kick/unban
+	- v-if (blocked) -> display red block icon
+	- clickable channels  -> SELECT CURRENT
+	- research channels button
+	- v-if leave/join if currently selected != current_channel
+	- v-if display only available options (don t block if already blocked etc)
+*/
+
 export default defineComponent({
 	data() {
 		return {
-
+			options: 
+			[
+				{ title: 'Send PM' },
+				{ title: 'profile page' },
+				{ title: 'add friend' },
+				{ title: 'remove friend' },
+				{ title: 'block user' },
+				{ title: 'unblock user' },
+			],
 		}
 	},
 	methods: {
@@ -38,14 +58,25 @@ export default defineComponent({
 		blocked_users() {
 			return this.$store.state.chat.blocked_users
 		},
+		user_id() {
+			return this.$store.state.user.id
+		},
 	},
 	mounted() {
-		store.commit('initChannels');
-		store.commit('addChannel', {name: 'Addedchan', users: [{name :'user96'}], messages:[{sender:'sender2',content:'added_channel_message'}]} );
+		console.log('user id :' + this.user_id);
+		store.dispatch('getUserChannels', {
+			id: this.user_id
+		});
+		// store.commit('setChannels', [{name: 'general'}]);
+		store.commit('updateCurrentChannel', {name: 'Addedchan', users: [{name :'user44'}, {name: 'user35'}], messages:[{sender:'sender',content:'message'}]});
+		socket.emit('findAllMessages', {}, (response : any) => {
+			console.log(response);
+		})
+		// store.commit('addChannel', {name: 'Addedchan', users: [{name :'user96'}], messages:[{sender:'sender2',content:'added_channel_message'}]} );
 		// store.commit('removeChannel', 'InitChan');
-		store.commit('updateCurrentChannel', {name: 'Addedchan', users: [{name :'user44'}], messages:[{sender:'sender',content:'message'}]});
+		// store.commit('updateCurrentChannel', {name: 'Addedchan', users: [{name :'user44'}], messages:[{sender:'sender',content:'message'}]});
 		// console.log('Mounted:', this.channels, this.joined_channels, this.current_channel, this.blocked_users)
-		console.log('username:', this.username)
+		// console.log('username:', this.username)
 	},
 })
 
@@ -111,6 +142,17 @@ export default defineComponent({
 									</v-badge>
 									<v-card-text>
 										{{user.name}}
+										<v-menu activator="parent">
+											<v-list>
+												<v-list-item
+												v-for="(item, index) in options"
+												:key="index"
+												:value="index"
+												>
+												<v-list-item-title>{{ item.title }}</v-list-item-title>
+												</v-list-item>
+											</v-list>
+											</v-menu>
 									</v-card-text>
 								</v-card>
 							</v-list-item>
@@ -196,7 +238,6 @@ export default defineComponent({
 	font-family:		"Pokemon";
 	color:				rgb(255, 200, 0);
 	text-shadow:		2px 2px 4px rgb(0, 4, 255), 0 0 1em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
-	overflow-y:			scroll;
 	scrollbar-color:	gold;
 	scrollbar-width :	auto;
 }
