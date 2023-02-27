@@ -1,7 +1,8 @@
-import { Controller, UseGuards, Post, Request , Get, Query, Body, Redirect } from "@nestjs/common";
+import { Controller, UseGuards, Post, Request , Get, Query, Body, Redirect, Res } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { AuthGuard } from "@nestjs/passport";
 import { ftAuthGuard } from "./guards/ft.guard";
+import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 
 @Controller('auth')
 export class AuthController {
@@ -10,27 +11,34 @@ export class AuthController {
   
   @UseGuards(ftAuthGuard)
   @Get()
-  async getFtAuthCode(){
+  async ftlogin(){
   }
   
-  @UseGuards(ftAuthGuard)
   @Get('42/callback')
-  async ftlogin() {
+  @UseGuards(ftAuthGuard)
+  async redirect(@Request() req, @Res() res) {
+    const access_token = this.authService.login(req.user)
+    res.cookie('jwt', access_token, {sameSite: "Lax"})
+    res.redirect('http://localhost:8080')
   }
-  
-  // @UseGuards(AuthGuard('google'))
-  // @Get('google')
-  // async signInWithGoogle() {}
-  
-  // @UseGuards(AuthGuard('google'))
-  // @Get('google-redirect')
-  // async signInWithGoogleRedirect(@Req() req) {
-    // return this.authService.googleLogin(req);
-    // }
 
-    // @UseGuards(ftAuthGuard)
-    // @Post('login')
-    // async login(@Request() req) {
-    //   return req.user;
-    // }
+  @UseGuards(ftAuthGuard)
+  @Get('profile')
+  getProfile(@Request() req) {
+    return req.user;
   }
+
+  // @UseGuards(ftAuthGuard)
+  // @Post('login')
+  // async login(@Request() req) {
+  //   return this.authService.login(req.user);
+  // }
+
+
+  @UseGuards(ftAuthGuard)
+  @Post('auth/logout')
+  async logout(@Request() req, @Res() res) {
+    res.clearCookie('jwt', {sameSite: "Lax"})
+    res.send("logged out")
+  }
+}

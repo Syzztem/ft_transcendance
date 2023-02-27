@@ -1,7 +1,8 @@
-import { Column, Entity, JoinColumn, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, Column, Entity, JoinColumn, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { BanAndMute } from "./BanAndMute";
 import { ChannelMessage } from "./ChannelMessage";
 import { User } from "./User";
+import * as bcrypt from 'bcrypt';
 
 @Entity()
 export class Channel {
@@ -26,12 +27,22 @@ export class Channel {
     @Column("boolean")
     isPrivate: boolean;
 
-    @Column("varchar")
+    @Column({type: "varchar", nullable: true, default: null})
     password: string;
 
     @OneToMany(() => BanAndMute, ban => ban.channel)
     @JoinColumn()
     bannedOrMuted: BanAndMute[];
+
+
+    @BeforeInsert()
+    async hashPassword() {
+        this.password = await bcrypt.hash(this.password, 15);
+    }
+
+    async verifyPassword(password: string) {
+        return bcrypt.compare(password, this.password);
+    }
 
     public isBanned(userId: number) : boolean {
         if (this.bannedOrMuted.find(ban => ban.user.id === userId && ban.isBanned))

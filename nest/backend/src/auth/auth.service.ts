@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { UserService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
+import { jwtConstants } from './constants';
 
 @Injectable()
 export class AuthService {
@@ -9,40 +10,16 @@ export class AuthService {
 	  private jwtService: JwtService
 	) {}
   
-	async validateUser(): Promise<any> {
-	//   const user = await this.usersService.findOne(username);
-	//   if (user && user.password === pass) {
-		// const { password, ...result } = user;
-		// return result;
-	//   }
-	  return null;
+	async validateUser(token: string): Promise<any> {
+	return this.jwtService.verify(token, {secret: jwtConstants.secret})
+
 	}
   
 	async login(user: any) {
+		console.log('Sign JWT')
 	  const payload = { username: user.username, sub: user.userId };
-	  return {
+	  return { 
 		access_token: this.jwtService.sign(payload),
 	  };
 	}
 }
-
-/******************************
- * 
- * 
- * Need to store th passwd 
- * Using a library
- * Ex bcrypt:
- * 
- * 
- *	import * as bcrypt from 'bcrypt';
- *	
- *	const saltOrRounds = 10;
- *	const password = 'random_password';
- *	const hash = await bcrypt.hash(password, saltOrRounds);
- *  ===> Create the hashed passwd
- * 
- * const isMatch = await bcrypt.compare(password, hash);
- * ====> Compare if passwd match
- *
- * 
- *****************************/

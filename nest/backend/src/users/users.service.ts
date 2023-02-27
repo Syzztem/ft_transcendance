@@ -23,6 +23,12 @@ export class UserService {
         })
     }
 
+    async findByLogin(login: string): Promise<User> {
+        return this.userRepository.findOne({
+          where: { login42: login }
+        });
+      }
+
     async getUserById(dto: FindUserDTO): Promise<User> {
         return this.userRepository.findOne({
             select: {
@@ -42,7 +48,15 @@ export class UserService {
         });
     }
 
+    async verifyToken(id: number, token: string) : Promise<number> {
+        const user = await this.userRepository.findOneBy({id});
+        if (!user) return HttpStatus.NOT_FOUND;
+        if (user.verifyToken(token)) return HttpStatus.OK;
+        else return HttpStatus.UNAUTHORIZED;
+    }
+
     async add(createUserDTO: CreateUserDTO) : Promise<User> {
+        if (createUserDTO.username == 'default') return null;
         if (await this.userRepository.count({ where: { username: createUserDTO.username } }) != 0)
             return null;
         const user = this.userRepository.create(createUserDTO);

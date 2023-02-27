@@ -9,16 +9,6 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(private authService: AuthService) {}
   
-  @Get()
-  @UseGuards(ftAuthGuard)
-  @Redirect('https://api.intra.42.fr/oauth/authorize', 302)
-
-
-
-  // @Get('')
-  // @UseGuards(ftAuthGuard)
-  // async ftauth(@Request() req) {}
-
   @UseGuards(ftAuthGuard)
   @Post('/auth/login')
   async login(@Request() req) {
