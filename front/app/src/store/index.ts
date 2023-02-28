@@ -1,6 +1,7 @@
 import IChannel from '@/models/IChannel'
 import IMessage from '@/models/IMessage'
 import IUser from '@/models/IUser'
+import { resolveComponent } from 'vue'
 import { createStore } from 'vuex'
 
 const axios = require('axios')
@@ -129,18 +130,32 @@ const store = createStore({
         })
       })
     },
-	getUserChannels({commit}, id) {
-		return new Promise((resolve, reject) => {
-			instance.get("/channels", id)
-			.then((res: any) => {
-				commit('setChannels', res.data)
-				resolve(res)
-			})
-			.catch((error: any) => {
-				reject(error)
-			})
-		})
-	}
+    getUserChannels({commit}, id) {
+      return new Promise((resolve, reject) => {
+        instance.get("/channels", id)
+        .then((res: any) => {
+          commit('setChannels', res.data)
+          resolve(res)
+        })
+        .catch((error: any) => {
+          reject(error)
+        })
+      })
+    },
+    createChannel({commit}, channel_name)
+    {
+      return new Promise((resolve,reject) => {
+        instance.get("/new", channel_name)
+        .then((res : any) => 
+        {
+          commit('createChannel', res.data)
+          resolve(res)
+        })
+        .catch((error : any) => {
+          reject(error)
+        })
+      })
+    }
   }
 })
 

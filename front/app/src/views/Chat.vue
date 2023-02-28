@@ -15,12 +15,13 @@ const socket = io('http://localhost:3000');
 /*
 	TODO :
 
+	- clickable channels  -> makes it be currently selected in the store.
+	- get all current channels / add channels
+	- research channels button
+	- v-if leave/join if currently selected != current_channel
 	- clickable profile on user -> opens 	OPTIONS PANEL	:	dm, profile page, add to friends, remove from friend block user, unblock user
 											ADVANCED PANEL	:	promote/demote/ban/kick/unban
 	- v-if (blocked) -> display red block icon
-	- clickable channels  -> SELECT CURRENT
-	- research channels button
-	- v-if leave/join if currently selected != current_channel
 	- v-if display only available options (don t block if already blocked etc)
 */
 
@@ -29,7 +30,7 @@ export default defineComponent({
 		return {
 			options: 
 			[
-				{ title: 'Send PM' },
+				{ title: 'Send DM' },
 				{ title: 'profile page' },
 				{ title: 'add friend' },
 				{ title: 'remove friend' },
@@ -67,7 +68,9 @@ export default defineComponent({
 		store.dispatch('getUserChannels', {
 			id: this.user_id
 		});
-		// store.commit('setChannels', [{name: 'general'}]);
+		let channels = [];
+		channels.push({name: 'test_channel00'});
+		store.commit('setChannels', channels);
 		store.commit('updateCurrentChannel', {name: 'Addedchan', users: [{name :'user44'}, {name: 'user35'}], messages:[{sender:'sender',content:'message'}]});
 		socket.emit('findAllMessages', {}, (response : any) => {
 			console.log(response);
@@ -144,15 +147,13 @@ export default defineComponent({
 										{{user.name}}
 										<v-menu activator="parent">
 											<v-list>
-												<v-list-item
-												v-for="(item, index) in options"
-												:key="index"
-												:value="index"
-												>
-												<v-list-item-title>{{ item.title }}</v-list-item-title>
+												<v-list-item v-for="(item, index) in options" :key="index" :value="index">
+													<v-list-item-title>
+														{{ item.title }}
+													</v-list-item-title>
 												</v-list-item>
 											</v-list>
-											</v-menu>
+										</v-menu>
 									</v-card-text>
 								</v-card>
 							</v-list-item>
@@ -204,7 +205,10 @@ export default defineComponent({
 							</v-card-title>
 							<v-card id="Channelcreate" class="justify-center">
 								<v-btn id="Btnchannel" class="mt-4">
-									create channel
+									+
+								</v-btn>
+								<v-btn id="Btnchannel" class="mt-4">
+									🔎
 								</v-btn>
 							</v-card>
 							<v-card id="Channelscontent" height="65vh" >
@@ -217,7 +221,7 @@ export default defineComponent({
 							<v-card id="Channelactions">
 								<v-card-actions class="justify-center">
 									<v-btn id="Btnchannel">
-										leave/join
+										leave channel
 									</v-btn>
 								</v-card-actions>
 							</v-card>
