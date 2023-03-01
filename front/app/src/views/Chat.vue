@@ -7,7 +7,7 @@ import IChannel from "@/models/IChannel";
 import IUser from "@/models/IUser";
 import store from "@/store";
 import { defineComponent } from 'vue';
-import { mapActions } from "vuex";
+import { mapActions ,mapState} from "vuex";
 import {io} from 'socket.io-client';
 
 const socket = io('http://localhost:3000');
@@ -40,6 +40,7 @@ export default defineComponent({
 		}
 	},
 	methods: {
+		...mapActions(["selectChannel"]),
 
 	},
     computed: {
@@ -62,20 +63,19 @@ export default defineComponent({
 		user_id() {
 			return this.$store.state.user.id
 		},
+		// ...mapState(["joined_channels", "current_channel"]),
 	},
 	mounted() {
-		console.log('user id :' + this.user_id);
-		store.dispatch('getUserChannels', {
-			id: this.user_id
-		});
-		let channels = [];
-		channels.push({name: 'test_channel00'});
-		store.commit('setChannels', channels);
-		store.commit('updateCurrentChannel', {name: 'Addedchan', users: [{name :'user44'}, {name: 'user35'}], messages:[{sender:'sender',content:'message'}]});
-		socket.emit('findAllMessages', {}, (response : any) => {
-			console.log(response);
-		})
-		// store.commit('addChannel', {name: 'Addedchan', users: [{name :'user96'}], messages:[{sender:'sender2',content:'added_channel_message'}]} );
+		store.commit('addChannel', {name: 'channel1', id : 0, users: [{name :'user1'}], messages:[{sender:'user1',content:'salut'}]} );
+		store.commit('addChannel', {name: 'channel2', id: 1, users: [{name :'user42'}], messages:[{sender:'user42',content:'pouet'}]} );
+		store.commit('addChannel', {name: 'channel3', id: 2, users: [{name :'user99'}], messages:[{sender:'user99',content:'yo'}]} );
+		// store.dispatch('getUserChannels', {
+		// 	id: this.user_id
+		// });
+		// store.commit('setChannels', channels);
+		// socket.emit('findAllMessages', {}, (response : any) => {
+		// 	console.log(response);
+		// })
 		// store.commit('removeChannel', 'InitChan');
 		// store.commit('updateCurrentChannel', {name: 'Addedchan', users: [{name :'user44'}], messages:[{sender:'sender',content:'message'}]});
 		// console.log('Mounted:', this.channels, this.joined_channels, this.current_channel, this.blocked_users)
@@ -212,8 +212,13 @@ export default defineComponent({
 								</v-btn>
 							</v-card>
 							<v-card id="Channelscontent" height="65vh" >
-								<v-list-item v-for="channel in joined_channels">
-									<v-card id="Channelcard" class="d-flex align-center justify-center mt-4" height="5vh">
+								<v-list-item v-for="channel in joined_channels" :key="channel.id">
+									<v-card 
+										id="Channelcard" 
+										class="d-flex align-center justify-center mt-4" 
+										height="5vh"
+										@click="selectChannel(channel)"
+									>
 										{{channel.name}}
 									</v-card>
 								</v-list-item>

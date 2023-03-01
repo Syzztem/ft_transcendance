@@ -62,18 +62,19 @@ const store = createStore({
       }
       localStorage.removeItem('user')
     },
-	setChannels(state , channels: IChannel[]) {
-		state.chat.joined_channels = channels;
-	},
+
     addChannel(state, newchan) {
       state.chat.joined_channels.push(newchan);
     },
-    removeChannel(state, channelName) {
-      state.chat.joined_channels = state.chat.joined_channels.filter(c => c.name !== channelName);
+    setCurrentChannel(state, channel) {
+      state.chat.current_channel = channel;
     },
-    updateCurrentChannel (state, current : IChannel){
-      state.chat.current_channel = current;
-    },
+    // setChannels(state , channels: IChannel[]) {
+    //   state.chat.joined_channels = channels;
+    // },
+    // removeChannel(state, channelName) {
+    //   state.chat.joined_channels = state.chat.joined_channels.filter(c => c.name !== channelName);
+    // },
   },
   actions: {
     createAccount({commit}, userInfos) {
@@ -130,32 +131,39 @@ const store = createStore({
         })
       })
     },
-    getUserChannels({commit}, id) {
-      return new Promise((resolve, reject) => {
-        instance.get("/channels", id)
-        .then((res: any) => {
-          commit('setChannels', res.data)
-          resolve(res)
-        })
-        .catch((error: any) => {
-          reject(error)
-        })
-      })
+    selectChannel({ commit }, channel) {
+      commit("setCurrentChannel", channel);
     },
-    createChannel({commit}, channel_name)
-    {
-      return new Promise((resolve,reject) => {
-        instance.get("/new", channel_name)
-        .then((res : any) => 
-        {
-          commit('createChannel', res.data)
-          resolve(res)
-        })
-        .catch((error : any) => {
-          reject(error)
-        })
-      })
-    }
+    // getUserChannels({commit}, id) {
+    //   return new Promise((resolve, reject) => {
+    //     instance.get("/channels", id)
+    //     .then((res: any) => {
+    //       commit('setChannels', res.data)
+    //       resolve(res)
+    //     })
+    //     .catch((error: any) => {
+    //       reject(error)
+    //     })
+    //   })
+    // },
+    // createChannel({commit}, channel_name)
+    // {
+    //   return new Promise((resolve,reject) => {
+    //     instance.get("/new", channel_name)
+    //     .then((res : any) => 
+    //     {
+    //       commit('createChannel', res.data)
+    //       resolve(res)
+    //     })
+    //     .catch((error : any) => {
+    //       reject(error)
+    //     })
+    //   })
+    // },
+    //   setCurrentChannel({ commit }, channel) {
+    //     commit('setCurrentChannel', channel);
+    // },
+
   }
 })
 
