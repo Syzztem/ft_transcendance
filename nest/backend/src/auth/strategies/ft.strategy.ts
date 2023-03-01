@@ -23,7 +23,8 @@ export class ftStrategy extends PassportStrategy(Strategy, 'ft') {
         username: profile.username, // WARNING Boolean needed
         login42: profile.username,
         email: "", // besoin reel ?
-        token: accessToken
+        token: accessToken,
+        twofaActivated: false,
       }
       user = await this.userService.add(newUser);
     }

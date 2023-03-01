@@ -12,6 +12,7 @@
 
 FROM node:19
 
+RUN mkdir /profilepics
 WORKDIR /usr/app/
 COPY ./backend/package*.json ./
 COPY ./backend/tsconfig.json .

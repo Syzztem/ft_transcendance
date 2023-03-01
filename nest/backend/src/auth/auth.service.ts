@@ -2,6 +2,9 @@ import { Injectable, BadRequestException, ForbiddenException } from '@nestjs/com
 import { UserService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from './constants';
+import { User } from 'src/database/entities/User';
+import { authenticator } from 'otplib';
+import { toDataURL } from 'qrcode';
 
 @Injectable()
 export class AuthService {
@@ -22,4 +25,41 @@ export class AuthService {
 		access_token: this.jwtService.sign(payload),
 	  };
 	}
+
+	async generateTwoFactorAuthenticationSecret(user: User) {
+		const secret = authenticator.generateSecret();
+	
+		const otpauthUrl = authenticator.keyuri(user.email, 'AUTH_APP_NAME', secret);
+	
+		await this.usersService.setTwoFactorAuthenticationSecret(secret, user.id);
+	
+		return {
+		  secret,
+		  otpauthUrl
+		}
+	  }
+
+	  async generateQrCodeDataURL(otpAuthUrl: string) {
+		return toDataURL(otpAuthUrl);
+	  }	
+
+	  isTwoFactorAuthenticationCodeValid(twoFactorAuthenticationCode: string, user: User) {
+        return authenticator.verify({
+          token: twoFactorAuthenticationCode,
+          secret: user.twoFactorAuthenticationSecret,
+        });
+      }
+
+	  async loginWith2fa(userWithoutPsw: Partial<User>) {
+		const payload = {
+		  email: userWithoutPsw.email,
+		  isTwoFactorAuthenticationEnabled: !!userWithoutPsw.twofaActivated,
+		  isTwoFactorAuthenticated: true,
+		};
+	
+		return {
+		  email: payload.email,
+		  access_token: this.jwtService.sign(payload),
+		};
+	  }
 }

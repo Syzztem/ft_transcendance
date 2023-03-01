@@ -36,6 +36,12 @@ export class User {
   @Column({nullable: true, type:'varchar'})
   profilePic: string;
 
+  @Column({nullable: true, type:'varchar'})
+  twoFactorAuthenticationSecret: string;
+
+  @Column({type:'boolean'})
+  twofaActivated : boolean = false;
+  
   @ManyToMany(() => User)
   @JoinTable()
   friends: User[];

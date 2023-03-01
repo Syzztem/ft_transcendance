@@ -3,10 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import CreateUserDTO from 'src/users/dto/create-user.dto';
 import FindUserByNameDTO from 'src/dto/find-user-by-name.dto';
 import FindUserDTO from 'src/users/dto/find-user.dto';
+import FindUserByTokenDTO from 'src/dto/Find-user-by-token.dto'
+import ChangeUserDTO from 'src/dto/change-user.dto';
 import SendDMDTO from 'src/dto/send-dm.dto';
 import { FriendMessage } from 'src/database/entities/FriendMessage';
 import { User } from 'src/database/entities/User';
 import { Repository } from 'typeorm';
+import { authenticator } from 'otplib';
+import * as fs from 'fs'
 
 @Injectable()
 export class UserService {
@@ -23,6 +27,14 @@ export class UserService {
         })
     }
 
+    async findOne(username: string): Promise<User | undefined> {
+        return this.userRepository.findOne({
+            where: {
+                username: username,
+            }
+        });
+      }
+
     async findByLogin(login: string): Promise<User> {
         return this.userRepository.findOne({
           where: { login42: login }
@@ -38,14 +50,17 @@ export class UserService {
                 losses:     dto.winsLosses,
                 level:      dto.level,
             },
-            relations: {
-                friends:    dto.friends,
-                blocked:    true,
-                channels:   dto.channels,
-                games:      dto.games
-            },
             where: {id: dto.id}
         });
+    }
+
+    async getUserByToken(dto: FindUserByTokenDTO): Promise<User> {
+        return this.userRepository.findOne({
+            select: {
+                username:   true
+            },
+            where: {token: dto.token}
+        })
     }
 
     async verifyToken(id: number, token: string) : Promise<number> {
@@ -61,6 +76,15 @@ export class UserService {
             return null;
         const user = this.userRepository.create(createUserDTO);
         return this.userRepository.save(user);
+    }
+
+    async changeUsername(dto: ChangeUserDTO): Promise<number> {
+        const user = await this.userRepository.findOneBy({ token: dto.token })
+
+        if (await this.userRepository.findOneBy({ username: dto.username })) return HttpStatus.CONFLICT
+        user.username = dto.username
+        await this.userRepository.save(user)
+        return HttpStatus.OK
     }
 
     async delete(id: number) : Promise<number> {
@@ -143,5 +167,19 @@ export class UserService {
         this.userRepository.save(user2);
         return HttpStatus.OK;
     }
+
+    async setTwoFactorAuthenticationSecret(secret: string, userId: number) {
+        this.userRepository.update(
+            {id: userId},
+            {twoFactorAuthenticationSecret: secret}
+        )
+      }    
+
+      async turnOnTwoFactorAuthentication(userId: number) {
+        this.userRepository.update(
+            {id: userId},
+            {twofaActivated: true}
+        )
+      }
 
 }
