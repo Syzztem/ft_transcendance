@@ -156,3 +156,13 @@ Supprime le channel pointe par ID
 `NO_CONTENT` : Succes  
 `NOT_FOUND` : Le channel n'existe pas  
 ___
+
+## Controller les channels via une passerelle de prises de toile
+
+### Messages recus:
+
+`username@chanId:message` Message envoye par `username` dans le channel pointe par`chanId`   
+
+`!messageId` Le message pointe par `messageId` a ete supprime  
+
+`/chanId:message` L'utilisateur a quitte ou a ete banni du channel pointe par chanId, ou ce dernier a ete supprime  
