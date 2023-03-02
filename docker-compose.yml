@@ -38,12 +38,15 @@ services:
     volumes: 
       - profilepics:/profilepics/
       - ./nest/backend/defaultpp.jpg:/defaultpp.jpg
+      - ./nest/backend/:/usr/app/
     environment:
       POSTGRES_PW: ${POSTGRES_PW}
       POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_DB: ${POSTGRES_DB}
-    volumes:
-      - ./nest/backend/:/usr/app/
+      FT_ID: ${FT_ID}
+      FT_SECRET: ${FT_SECRET}
+      URL: ${URL}
   vue: 
     container_name: vue
     build: front
@@ -55,6 +58,8 @@ services:
       - db
     volumes:
       - ./front/app:/app
+    environment:
+      VUE_APP_URL: ${URL}
     ports:
     - 8080:8080
   pgadmin:

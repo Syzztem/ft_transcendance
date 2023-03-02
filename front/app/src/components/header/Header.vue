@@ -5,8 +5,8 @@
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <img id="profilePic" :src="$store.state.userInfos.profilePic"/>
-        <v-btn class="btn" router :to="'/profil'">
-                {{ user.username }}
+        <v-btn class="btn" router :to="'/profil/' + $store.state.user.id">
+                {{ username }}
         </v-btn>
         <v-btn v-if="$router.currentRoute.value.path == '/options'" @click="$router.go(-1)">
             <img id="optionsImg" src="@/assets/optionsButton.png"/>
@@ -18,15 +18,22 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import { mapState } from 'vuex';
+import { defineComponent, ref } from 'vue';
+import { mapState, useStore } from 'vuex';
 import store from '@/store';
+import { computed } from '@vue/reactivity';
 
 export default defineComponent({
     computed: {
         ...mapState({
             user: 'userInfos'
         })
+    },
+    setup() {
+        const store = useStore()
+        return {
+            username: computed(() => store.getters.getUsername)
+        }
     },
     mounted() {
         this.$store.dispatch('getUserInfos')

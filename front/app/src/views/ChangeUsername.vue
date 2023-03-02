@@ -5,11 +5,14 @@
                 <h1>
                     CHANGE USERNAME :
                 </h1>
+                <h1>
+                    {{ username }}
+                </h1>
             </v-row>
         </v-card>
         <v-card color="transparent" class="mt-12" flat>
-            <input type="text" v-on:keyup.enter="changeUsername" v-model="username" spellcheck="false"/>
-            <v-btn @click="changeUsername" class="ml-4">
+            <input type="text" v-on:keyup.enter="updateUsername" v-model="newUsername" spellcheck="false"/>
+            <v-btn @click="updateUsername" class="ml-4">
                 Change Username
             </v-btn>
         </v-card>
@@ -17,28 +20,30 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 import store from '@/store';
+import { useStore } from 'vuex';
+import { computed } from '@vue/reactivity';
 
 export default defineComponent({
-    data() {
-        return {
-            username: ''
+    setup() {
+        const store = useStore()
+        const newUsername = ref('')
+        const updateUsername = async () => {
+            await store.dispatch('changeUsername', {username: newUsername.value, token: store.state.user.token})
         }
-    },
-    methods: {
-        changeUsername() {
-            if (this.username == '')
-                return
-            this.$store.dispatch('changeUsername', {username: this.username, token: store.state.user.token})
+        return {
+            username: computed(() => store.getters.getUsername),
+            newUsername,
+            updateUsername
         }
     },
     mounted() {
-    if (store.state.user.id == -1) {
-        this.$router.push('/login')
-        return
+        if (store.state.user.id == -1) {
+            this.$router.push('/login')
+            return
+        }
     }
-  }
 })
 </script>
 

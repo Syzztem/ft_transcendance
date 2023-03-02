@@ -10,14 +10,19 @@ import TwoFactor from '@/views/TwoFactor.vue'
 import Hall from '@/views/Hall.vue'
 import Login from '@/views/Login.vue'
 import Profil from '@/views/Profil.vue'
+import FirstConnection from '@/views/FirstConnection.vue'
 
 const routes: Array<RouteRecordRaw> = [
+  {
+    path: '/userinfos',
+    component: FirstConnection
+  },
   {
     path: '/login',
     component: Login
   },
   {
-    path: '/profil',
+    path: '/profil/:id',
     component: Profil
   },
   {
