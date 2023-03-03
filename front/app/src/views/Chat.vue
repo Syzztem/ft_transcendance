@@ -15,10 +15,10 @@ const socket = io('http://localhost:3000');
 /*
 	TODO :
 
-	- clickable channels  -> makes it be currently selected in the store.
-	- get all current channels / add channels
-	- research channels button
-	- v-if leave/join if currently selected != current_channel
+	- add highlight to current channel
+	- add channel function
+	- merge la branche de louis
+	- implementer create_channel via l api.
 	- clickable profile on user -> opens 	OPTIONS PANEL	:	dm, profile page, add to friends, remove from friend block user, unblock user
 											ADVANCED PANEL	:	promote/demote/ban/kick/unban
 	- v-if (blocked) -> display red block icon
@@ -40,7 +40,7 @@ export default defineComponent({
 		}
 	},
 	methods: {
-		...mapActions(["selectChannel"]),
+		...mapActions(["selectChannel", "rmChannel"]),
 
 	},
     computed: {
@@ -121,7 +121,7 @@ export default defineComponent({
 			<v-main>
 				<!-- Users -->
 				<v-row class="mt-2 mb-2">
-					<v-col cols="2">
+					<v-col>
 						<v-card id="Users" align="center" height="80vh" width="17vw" class="rounded-xl">
 							<v-card-title class="Userstitle">
 								Users
@@ -163,27 +163,25 @@ export default defineComponent({
 					<v-spacer></v-spacer>
 
 					<!-- Messages -->
-					<v-col cols="7" class="ml-2 mr-2">
-						<v-card id="Messagewrapper" height="85vh" width="58vw" class="d-flex rounded-xl" align="center" color="transparent" bordered="0" flat>
-							<v-row>
-								<v-card id="Messagebox" color="rgb(0, 0, 51, 0.87)" height="75vh" width="58vw">
-									<v-card-title id="Messageboxtitle" class="mt-2 mb-2">
+					<v-col>
+						<v-card :overflow-hidden="false" height="89vh" width="58vw" class="d-flex" align="center" color="transparent" bordered="0" flat>
+							<v-row id = "RowMessagebox">
+								<v-card id="Messagebox" class="rounded-xl mb-4" color="rgb(0, 0, 51, 0.87)" height="75vh" width="58vw">
+									<v-card-title id="Messageboxtitle" class="align-item-center ">
 										{{current_channel.name}}
 									</v-card-title>
-									<div class ="Messagesscroller" align="left">
-										<v-card-text>
+										<v-card-text class="Messagesscroller" align="left">
 											<div v-for="message in current_channel.messages">
 												<li v-if="message.content != ''">
 													{{message.sender}}: {{message.content}}
 												</li>
 											</div>
 										</v-card-text>
-									</div>
 								</v-card>
 								<!--Message Input -->
 								<v-row justify="center">
-									<v-card id="Inputbox" class="d-flex rounded-xl" height="10vh" width="50vw">
-										<v-text-field  id="Inputfield" class="mt-4 ml-10" autofocus>
+									<v-card id="Inputbox" class="d-flex rounded-xl" height="10vh" width="50vw" elevation="8">
+										<v-text-field variant="plain" id="Inputfield" autofocus>
 										</v-text-field>
 										<v-card-actions>
 											<v-btn id="Btnsend" height="5vh" width="7vw">
@@ -198,8 +196,8 @@ export default defineComponent({
 					<v-spacer></v-spacer>
 
 					<!-- Channels -->
-					<v-col cols="2">
-						<v-card id="Channels" class="mt-2 mb-2 rounded-xl" align="center" height="80vh" >
+					<v-col>
+						<v-card id="Channels" class=" rounded-xl" align="center" height="80vh" width="17vw" >
 							<v-card-title class ="Channelstitle">
 								channels
 							</v-card-title>
@@ -218,6 +216,7 @@ export default defineComponent({
 										class="d-flex align-center justify-center mt-4" 
 										height="5vh"
 										@click="selectChannel(channel)"
+										v-bind:class="{ 'highlight': current_channel && current_channel.id == channel.id}"
 									>
 										{{channel.name}}
 									</v-card>
@@ -225,7 +224,10 @@ export default defineComponent({
 							</v-card>
 							<v-card id="Channelactions">
 								<v-card-actions class="justify-center">
-									<v-btn id="Btnchannel">
+									<v-btn
+										id="Btnchannel"
+										@click="rmChannel(current_channel.id)"
+									>
 										leave channel
 									</v-btn>
 								</v-card-actions>
@@ -245,6 +247,7 @@ export default defineComponent({
 #Users {
 	background-color:	rgb(0, 0, 128);
 	font-family:		"Pokemon";
+	overflow:			hidden!important;
 	color:				rgb(255, 200, 0);
 	text-shadow:		2px 2px 4px rgb(0, 4, 255), 0 0 1em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
 	scrollbar-color:	gold;
@@ -261,21 +264,27 @@ export default defineComponent({
 
 #Usercard
 {
-	background-color:	rgb(82, 88, 122);
+	background-color:	#4f60c1;
 	color:				rgb(255, 200, 0);
 }
 
 .Userstitle
 {
-	background-color:	rgb(47, 79, 79);
+	background-color:	#4f60c1;
 	font-family:		"Pokemon";
 	color:				rgb(255, 200, 0);
 	text-shadow:		2px 2px 4px rgb(0, 4, 255), 0 0 1em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
 }
 
+#RowMessagebox
+{
+	margin: 0;
+}
+
 #Messagebox
 {
 	background-color:	moccasin;
+	overflow:			hidden!important;
 	font-family:		"Pokemon";
 	color:				rgb(255, 200, 0);
 	text-shadow:		2px 2px 4px rgb(0, 4, 255), 0 0 1em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
@@ -285,31 +294,28 @@ export default defineComponent({
 {
 	height:				5vh;
 	background-color:	rgb(0, 0, 128);
+	text-align:			inherit;
 	font-family:		"Pokemon";
 	color:				rgb(255, 200, 0);
 	text-shadow:		2px 2px 4px rgb(0, 4, 255), 0 0 1em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
 }
 
-
-
 .Messagesscroller {
-	height:				80vh;
+	height:				70vh;
 	display:			flex;
+	overflow:			auto;
 	flex-direction:		column-reverse;
-	overflow-y:			scroll;
-	scrollbar-color:	gold;
-	scrollbar-width :	auto;
 }
 
 #Inputbox
 {
-	background-color:	rgb(47, 79, 79);
+	background-color:	#4f60c1;
 }
 
 #Inputfield
 {
 	background-color:	rgb(255, 255, 255);
-	font-family: 		"Pokemon";
+	font-family: 		"monospace";
 	color:  			black;
 }
 
@@ -330,15 +336,16 @@ export default defineComponent({
 
 #Channels
 {
-	background-color:	rgb(47, 79, 79);
+	background-color: #4f60c1;
 	font-family:		"Pokemon";
+	overflow: hidden!important;
 	color:				rgb(255, 200, 0);
 	text-shadow:		2px 2px 4px rgb(0, 4, 255), 0 0 1em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
 }
 
 .Channelstitle
 {
-	background-color:	rgb(47, 79, 79);
+	background-color: #4f60c1;
 	font-family: 		"Pokemon";
 	color:				 rgb(255, 200, 0);
 	text-shadow: 		2px 2px 4px rgb(0, 4, 255), 0 0 1em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
@@ -346,8 +353,8 @@ export default defineComponent({
 
 #Channelcard
 {
-	background-color:	rgb(82, 88, 122);
-	color:				rgb(255, 200, 0);
+    background-color: #4f60c1;
+    color: #ffd483;
 }
 
 #Channelscontent
@@ -363,12 +370,17 @@ export default defineComponent({
 
 #Channelcreate
 {
-	background-color:	grey;
+	background-color: #283aa3;
 }
 
 #Channelactions
 {
-	background-color:	grey;
+	background-color: #283aa3;
+}
+
+.highlight {
+    color: #f1c23b!important;
+    background-color: #283aa3!important;
 }
 
 

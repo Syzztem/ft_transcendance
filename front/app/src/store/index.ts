@@ -69,12 +69,14 @@ const store = createStore({
     setCurrentChannel(state, channel) {
       state.chat.current_channel = channel;
     },
+    removeChannel(state, id) {
+      state.chat.joined_channels = state.chat.joined_channels.filter(c => c.id !== id);
+      state.chat.current_channel = null;
+    },
     // setChannels(state , channels: IChannel[]) {
     //   state.chat.joined_channels = channels;
     // },
-    // removeChannel(state, channelName) {
-    //   state.chat.joined_channels = state.chat.joined_channels.filter(c => c.name !== channelName);
-    // },
+
   },
   actions: {
     createAccount({commit}, userInfos) {
@@ -133,6 +135,9 @@ const store = createStore({
     },
     selectChannel({ commit }, channel) {
       commit("setCurrentChannel", channel);
+    },
+    rmChannel({ commit }, id) {
+      commit("removeChannel", id);
     },
     // getUserChannels({commit}, id) {
     //   return new Promise((resolve, reject) => {
