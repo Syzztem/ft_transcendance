@@ -3,7 +3,6 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '../auth.service';
 import { Profile, Strategy } from 'passport-42';
 import { UserService } from 'src/users/users.service';
-import FindUserByNameDTO from 'src/dto/find-user-by-name.dto';
 import CreateUserDTO from 'src/users/dto/create-user.dto';
 
 @Injectable()
@@ -12,7 +11,7 @@ export class ftStrategy extends PassportStrategy(Strategy, 'ft') {
     super({
       clientID: process.env.FT_ID,
       clientSecret: process.env.FT_SECRET,
-      callbackURL: "http://" + process.env.URL + ":3000/auth/42/callback",
+      callbackURL: "http://127.0.0.1:3000/auth/42/callback",
     });
   }
 
@@ -27,6 +26,6 @@ export class ftStrategy extends PassportStrategy(Strategy, 'ft') {
       }
       user = await this.userService.add(newUser);
     }
-    return { user: user, token: accessToken };
+    return user;
   }
 }

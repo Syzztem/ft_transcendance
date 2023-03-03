@@ -1,14 +1,16 @@
 import CreateUserDTO from './dto/create-user.dto';
 import FindUserDTO from './dto/find-user.dto';
 import ChangeUserDTO from './dto/change-user.dto';
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, Res, Response, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {Req, Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, Res, Response, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import SendDMDTO from 'src/dto/send-dm.dto';
 import { User } from '../database/entities/User';
 import FindUserByNameDTO from 'src/dto/find-user-by-name.dto';
 import { UserService } from './users.service';
 import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ftAuthGuard } from 'src/auth/guards/ft.guard';
 
+@UseGuards(ftAuthGuard)
 @Controller('user')
 export class UsersController {
     constructor(private userService: UserService) {}
@@ -79,9 +81,9 @@ export class UsersController {
 
     @Patch("username")
     @HttpCode(HttpStatus.OK)
-    async changeUsername(@Body() changeUserDTO: ChangeUserDTO,
-                            @Response() res: any) {
-        const user = await this.userService.getUserById(changeUserDTO.id)
+    async changeUsername( @Req() req,  @Body() changeUserDTO: ChangeUserDTO, @Response() res: any) {
+        // console.log("ID ?: ", req)
+        const user = await this.userService.getUserById(req.user.id)
         if (!user) return res.status(HttpStatus.NOT_FOUND).send()
         const oldPath = '/usr/app/profilepics/' + user.username + '.jpg'
         const newPath = '/usr/app/profilepics/' + changeUserDTO.username + '.jpg'
