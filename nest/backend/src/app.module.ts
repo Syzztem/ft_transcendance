@@ -11,7 +11,7 @@ import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { UsersController } from './users/users.controller';
-import { CorsMiddleware } from './cors.middlewar';
+// import { CorsMiddleware } from './cors.middlewar';
 import { User } from './database/entities/User';
 import { Channel } from './database/entities/Channel';
 import { Game } from './database/entities/Game';
@@ -43,10 +43,10 @@ import { BanAndMute } from './database/entities/BanAndMute';
 })
 export class AppModule {
   constructor(private dataSource: DataSource) {}
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(CorsMiddleware).forRoutes({
-      path: '*',
-      method: RequestMethod.ALL
-    })
+  // configure(consumer: MiddlewareConsumer) {
+  //   consumer.apply(CorsMiddleware).forRoutes({
+  //     path: '*',
+  //     method: RequestMethod.ALL
+  //   })
   }
-}
+// }

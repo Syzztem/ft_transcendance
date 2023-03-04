@@ -10,7 +10,7 @@ import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ftAuthGuard } from 'src/auth/guards/ft.guard';
 
-@UseGuards(ftAuthGuard)
+// @UseGuards(ftAuthGuard)
 @Controller('user')
 export class UsersController {
     constructor(private userService: UserService) {}
@@ -82,7 +82,7 @@ export class UsersController {
     @Patch("username")
     @HttpCode(HttpStatus.OK)
     async changeUsername( @Req() req,  @Body() changeUserDTO: ChangeUserDTO, @Response() res: any) {
-        // console.log("ID ?: ", req)
+        console.log("ID ?: ", req.user)
         const user = await this.userService.getUserById(req.user.id)
         if (!user) return res.status(HttpStatus.NOT_FOUND).send()
         const oldPath = '/usr/app/profilepics/' + user.username + '.jpg'

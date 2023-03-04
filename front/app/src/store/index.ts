@@ -15,7 +15,7 @@ if (!user) {
 }
 else {
   try {
-    user = JSON.parse(user)
+    instance.defaults.headers.common.Authorization = `Bearer ${user.token}`;
   } catch (ex) {
     user = {
       id: -1,

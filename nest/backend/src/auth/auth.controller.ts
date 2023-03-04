@@ -15,14 +15,14 @@ export class AuthController {
   async redirect(@Request() req, @Res() res) {
     const access_token = await this.authService.login(req.user)
     console.log("token callback: ", access_token);
-    const url = new URL('http://' + process.env.URL)
-    url.port = '8080'
-    url.pathname = 'userInfos'
-    res.cookie('token', access_token)
-    res.cookie('id', req.user.id)
-    res.redirect(url.href)
-    // res.status(302).redirect(url.href)
-  }
+    // const url = new URL('http://' + process.env.URL)
+    // url.port = '8080'
+    // url.pathname = 'userInfos'
+    // res
+    res.json({token: access_token})
+    // res.redirect(url.href)
+    // res.redirect(url.href)
+  } //retourne JSON avec JWT Token
 
   @UseGuards(ftAuthGuard)
   @Get('profile')
