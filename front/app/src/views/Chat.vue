@@ -15,7 +15,7 @@ const socket = io('http://localhost:3000');
 /*
 	TODO :
 
-	- add highlight to current channel
+	- create a dialog for add channel and search channels
 	- add channel function
 	- merge la branche de louis
 	- implementer create_channel via l api.
@@ -37,10 +37,23 @@ export default defineComponent({
 				{ title: 'block user' },
 				{ title: 'unblock user' },
 			],
+			dialog: false,
+			newChannel: {
+			name: '',
+			description: ''
+			}
 		}
 	},
 	methods: {
 		...mapActions(["selectChannel", "rmChannel"]),
+		createChannel() {
+      // call Vuex action to create the channel with this.newChannel data
+      // reset the form fields
+      this.newChannel.name = '';
+      this.newChannel.description = '';
+      // close the dialog
+      this.dialog = false;
+    }
 
 	},
     computed: {
@@ -63,21 +76,15 @@ export default defineComponent({
 		user_id() {
 			return this.$store.state.user.id
 		},
-		// ...mapState(["joined_channels", "current_channel"]),
 	},
 	mounted() {
 		store.commit('addChannel', {name: 'channel1', id : 0, users: [{name :'user1'}], messages:[{sender:'user1',content:'salut'}]} );
 		store.commit('addChannel', {name: 'channel2', id: 1, users: [{name :'user42'}], messages:[{sender:'user42',content:'pouet'}]} );
 		store.commit('addChannel', {name: 'channel3', id: 2, users: [{name :'user99'}], messages:[{sender:'user99',content:'yo'}]} );
-		// store.dispatch('getUserChannels', {
-		// 	id: this.user_id
-		// });
 		// store.commit('setChannels', channels);
 		// socket.emit('findAllMessages', {}, (response : any) => {
 		// 	console.log(response);
 		// })
-		// store.commit('removeChannel', 'InitChan');
-		// store.commit('updateCurrentChannel', {name: 'Addedchan', users: [{name :'user44'}], messages:[{sender:'sender',content:'message'}]});
 		// console.log('Mounted:', this.channels, this.joined_channels, this.current_channel, this.blocked_users)
 		// console.log('username:', this.username)
 	},
@@ -180,8 +187,8 @@ export default defineComponent({
 								</v-card>
 								<!--Message Input -->
 								<v-row justify="center">
-									<v-card id="Inputbox" class="d-flex rounded-xl" height="10vh" width="50vw" elevation="8">
-										<v-text-field variant="plain" id="Inputfield" autofocus>
+									<v-card id="Inputbox" class="d-flex justify-center align-center rounded-xl" height="10vh" width="50vw" elevation="8">
+										<v-text-field hide-details variant="plain" id="Inputfield" class = "ml-5" autofocus>
 										</v-text-field>
 										<v-card-actions>
 											<v-btn id="Btnsend" height="5vh" width="7vw">
@@ -202,10 +209,29 @@ export default defineComponent({
 								channels
 							</v-card-title>
 							<v-card id="Channelcreate" class="justify-center">
-								<v-btn id="Btnchannel" class="mt-4">
+								<v-btn id="Btnchannel" class="mt-2 mr-4 mb-2" @click="dialog = true">
 									+
 								</v-btn>
-								<v-btn id="Btnchannel" class="mt-4">
+								<v-dialog v-model="dialog" persistent max-width="500px">
+								<v-card>
+									<v-card-title>
+									Create a New Channel
+									</v-card-title>
+
+									<v-card-text>
+									<v-text-field label="Channel Name" v-model="newChannel.name"></v-text-field>
+									<v-text-field label="Description" v-model="newChannel.description"></v-text-field>
+									<!-- add any other form fields here -->
+									</v-card-text>
+
+									<v-card-actions>
+									<v-spacer></v-spacer>
+									<v-btn color="error" text @click="dialog = false">Cancel</v-btn>
+									<v-btn color="primary" @click="createChannel()">Create</v-btn>
+									</v-card-actions>
+								</v-card>
+								</v-dialog>
+								<v-btn id="Btnchannel" class="mt-2 mb-2">
 									🔎
 								</v-btn>
 							</v-card>
@@ -336,9 +362,9 @@ export default defineComponent({
 
 #Channels
 {
-	background-color: #4f60c1;
+	background-color:	#4f60c1;
 	font-family:		"Pokemon";
-	overflow: hidden!important;
+	overflow: 			hidden!important;
 	color:				rgb(255, 200, 0);
 	text-shadow:		2px 2px 4px rgb(0, 4, 255), 0 0 1em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
 }
@@ -379,8 +405,8 @@ export default defineComponent({
 }
 
 .highlight {
-    color: #f1c23b!important;
-    background-color: #283aa3!important;
+    color:				#f1c23b!important;
+    background-color:	#283aa3!important;
 }
 
 

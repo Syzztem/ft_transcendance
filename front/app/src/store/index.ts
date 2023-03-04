@@ -76,7 +76,6 @@ const store = createStore({
     // setChannels(state , channels: IChannel[]) {
     //   state.chat.joined_channels = channels;
     // },
-
   },
   actions: {
     createAccount({commit}, userInfos) {
@@ -139,6 +138,10 @@ const store = createStore({
     rmChannel({ commit }, id) {
       commit("removeChannel", id);
     },
+    createChannel({commit}, channel)
+    {
+      commit("addChannel", channel);
+    }
     // getUserChannels({commit}, id) {
     //   return new Promise((resolve, reject) => {
     //     instance.get("/channels", id)
