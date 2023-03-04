@@ -26,10 +26,6 @@ export default defineComponent({
         }
     },
     mounted() {
-        if (store.state.user.id == -1) {
-            this.$router.push('/login')
-            return
-        }
         this.$store.dispatch('getProfileInfos', this.$route.params.id)
     }
 })

@@ -15,6 +15,8 @@ const vuetify = createVuetify({
   directives,
 })
 
-createApp(App).use(vuetify).use(VueCropper).use(store).use(router).mount('#app')
+const app = createApp(App).use(vuetify).use(VueCropper).use(store).use(router)
 
-App.config.globalProperties.$store=store
+app.config.globalProperties.$store=store
+
+app.mount('#app')

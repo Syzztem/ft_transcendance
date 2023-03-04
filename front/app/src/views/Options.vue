@@ -58,13 +58,7 @@ export default defineComponent({
             this.$store.commit('logout')
             this.$router.push('/login')
         }
-    },
-    mounted() {
-    if (store.state.user.id == -1) {
-        this.$router.push('/login')
-        return
     }
-  }
 })
 </script>
 

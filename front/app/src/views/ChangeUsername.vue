@@ -37,12 +37,6 @@ export default defineComponent({
             newUsername,
             updateUsername
         }
-    },
-    mounted() {
-        if (store.state.user.id == -1) {
-            this.$router.push('/login')
-            return
-        }
     }
 })
 </script>

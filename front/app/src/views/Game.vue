@@ -78,10 +78,6 @@ export default defineComponent({
     ///
   },
   mounted() {
-    if (store.state.user.id == -1) {
-        this.$router.push('/login')
-        return
-  }
     // 
     // temporaire, est censé recevoir les données depuis le backend
     //

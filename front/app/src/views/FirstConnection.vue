@@ -6,12 +6,6 @@
                     <v-card color="rgb(2, 105, 255, 0.5)">
                         <v-col>
                             <p>
-                                token: {{ cookies.get('token') }}
-                            </p>
-                            <p>
-                                id: {{ cookies.get('id') }}
-                            </p>
-                            <p>
                                 CHOOSE USERNAME :
                             </p>
                         </v-col>
@@ -54,19 +48,21 @@ export default defineComponent({
             username: ''
         }
     },
-    setup() {
-        const { cookies } = useCookies()
-        return { cookies }
-    },
     mounted() {
     // if (store.state.user.id == -1) {
         // this.$router.push('/login')
         // return
     // }
+        if (this.$route.query.token) {
+            localStorage.setItem('token', this.$route.query.token as any)
+        } else {
+            this.$router.push('login')
+            return 
+        }
     },
     methods: {
         ok() {
-            this.$store.dispatch('changeUsername', { username: this.username, id: this.cookies.get('id'), token: this.cookies.get('token') })
+            this.$store.dispatch('changeUsername', {token: localStorage.getItem('token'), username: this.username})
             .then((res) => {
                 console.log(res)
             }

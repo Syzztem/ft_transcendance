@@ -6,28 +6,23 @@ const instance = axios.create({
   baseURL: 'http://' +  process.env.VUE_APP_URL + ':3000'
 })
 
-let user: any = localStorage.getItem('user')
-if (!user) {
-  user = {
-    id: -1,
-    token: ''
-  }
+let token: any = localStorage.getItem('token')
+let id: any = localStorage.getItem('id')
+
+if (!token) {
+  token: ''
 }
 else {
   try {
-    instance.defaults.headers.common.Authorization = `Bearer ${user.token}`;
+    instance.defaults.headers.common.Authorization = `Bearer ${token}`;
   } catch (ex) {
-    user = {
-      id: -1,
-      token: ''
-    }
+    token: ''
   }
 }
 
 const store = createStore({
   state: {
     status: '',
-    user: user,
     userInfos: {
       profilePic: '',
       username: ''
@@ -41,10 +36,6 @@ const store = createStore({
     setStatus(state, status) {
       state.status = status
     },
-    logUser(state, user) {
-      localStorage.setItem('user', JSON.stringify(user))
-      state.user = user
-    },
     profileInfos(state, profileInfos) {
       state.profileInfos.username = profileInfos.username
       state.profileInfos.profilePic = 'http://' +  process.env.VUE_APP_URL + ':3000/user/profilepic/' + profileInfos.username
@@ -54,34 +45,15 @@ const store = createStore({
       state.userInfos.profilePic = 'http://' +  process.env.VUE_APP_URL + ':3000/user/profilepic/' + userInfos.username
     },
     logout(state) {
-      state.user = {
-        id: -1,
-        token: ''
-      }
+      id = -1
+      token = ''
       localStorage.removeItem('user')
     }
   },
   actions: {
-    login({commit}) {
-      commit('setStatus', 'loading_login')
-      return new Promise((resolve, reject) => {
-        instance.get("/auth/42/callback")
-        .then((response: any) => {
-          console.log(response)
-          commit('setStatus', '')
-          commit('logUser', response.data)
-          resolve(response)
-        })
-        .catch((error: any) => {
-          console.log(error)
-          commit('setStatus', 'error_login')
-          reject(error)
-        })
-      })
-    },
     getUserInfos({commit}) {
       return new Promise((resolve, reject) => {
-        instance.get("/user/id/" + this.state.user.id)
+        instance.get("/user/id/" + id)
         .then((response: any) => {
           console.log(response.data)
           commit('userInfos', response.data)

@@ -25,12 +25,6 @@ export default defineComponent({
             url: "http://" + process.env.VUE_APP_URL + ":3000/auth/42/callback"
         }
     },
-    mounted() {
-        if (this.$store.state.user.id != -1) {
-            this.$router.push('/')
-            return
-        }
-    },
     computed: {
         ...mapState(['status'])
     }

@@ -48,7 +48,7 @@ export default defineComponent({
       <img v-for="n in 2" :key="n" src="@/assets/salameche.png" class="master" style=""/>
       <img v-for="n in 2" :key="n" src="@/assets/carapuce.png" class="master" style=""/>
     </div>
-      <Header v-if="$store.state.user.id != -1 && $route.path != '/game'"/>
+      <!-- <Header v-if="$store.state.user.id != -1 && $route.path != '/game'"/> -->
     <v-main>
       <transition name="bounce" mode="out-in">
         <router-view>
