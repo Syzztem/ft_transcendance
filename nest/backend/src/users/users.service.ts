@@ -163,4 +163,7 @@ export class UserService {
         return HttpStatus.OK;
     }
 
+    async updateToken(id: number, jwtToken: string){
+        this.userRepository.update({id: id}, {token: jwtToken})
+    }
 }
