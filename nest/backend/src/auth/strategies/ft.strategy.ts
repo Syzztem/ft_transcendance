@@ -19,7 +19,7 @@ export class ftStrategy extends PassportStrategy(Strategy, 'ft') {
     let user = await this.userService.getUserByName({ username: profile.username })
     if (!user) {
       const newUser : CreateUserDTO = {
-        username: profile.username, // WARNING Boolean needed
+        username: '', // WARNING Boolean needed
         login42: profile.username,
         email: "", // besoin reel ?
         token: accessToken

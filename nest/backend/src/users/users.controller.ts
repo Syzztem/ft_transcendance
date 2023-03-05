@@ -1,7 +1,7 @@
 import CreateUserDTO from './dto/create-user.dto';
 import FindUserDTO from './dto/find-user.dto';
 import ChangeUserDTO from './dto/change-user.dto';
-import {Req, Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, Res, Response, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import {Req, Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, Res, Response, UploadedFile, UseGuards, UseInterceptors, ImATeapotException, ConflictException, NotFoundException } from '@nestjs/common';
 import SendDMDTO from 'src/dto/send-dm.dto';
 import { User } from '../database/entities/User';
 import FindUserByNameDTO from 'src/dto/find-user-by-name.dto';
@@ -83,14 +83,23 @@ export class UsersController {
     @HttpCode(HttpStatus.OK)
     async changeUsername( @Req() req,  @Body() changeUserDTO: ChangeUserDTO, @Response() res: any) {
         console.log("ID ?: ", req)
-        const user = await this.userService.getUserById(req.user.id)
-        if (!user) return res.status(HttpStatus.NOT_FOUND).send()
+        const user = await this.userService.getUserById(req.user.userId)
+        if (!user)
+            throw new NotFoundException();
+ 
+        // if (!user) return res.status(HttpStatus.NOT_FOUND).send()
         const oldPath = '/usr/app/profilepics/' + user.username + '.jpg'
         const newPath = '/usr/app/profilepics/' + changeUserDTO.username + '.jpg'
         fs.rename(oldPath, newPath, (err) => {
-            if (err) return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send()
+            throw new ImATeapotException();
         })
-        res.status(await this.userService.changeUsername(changeUserDTO)).json({username: changeUserDTO.username})
+        try {
+            await this.userService.changeUsername(req.user.userId, changeUserDTO.username);
+        }
+        catch {
+            throw new ConflictException('Username already exist');
+        }
+        // res.status(await this.userService.changeUsername(changeUserDTO)).json({username: changeUserDTO.username})
     }
 
     @Patch("friend/:id1/:id2")
