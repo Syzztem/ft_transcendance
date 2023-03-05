@@ -73,12 +73,11 @@ export class UserService {
         return this.userRepository.save(user);
     }
 
-    async changeUsername(dto: ChangeUserDTO): Promise<number> {
-        const user = await this.userRepository.findOneBy({ token: dto.token })
-        if (await this.userRepository.findOneBy({ username: dto.username })) return HttpStatus.CONFLICT
-        user.username = dto.username
+    async changeUsername(id: number, new_name: string){
+        const user = await this.userRepository.findOneBy({ id: id })
+        // if (await this.userRepository.findOneBy({ username: dto.username })) return HttpStatus.CONFLICT
+        user.username = new_name
         await this.userRepository.save(user)
-        return HttpStatus.OK
     }
 
 
