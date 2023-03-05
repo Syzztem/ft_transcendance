@@ -9,8 +9,9 @@ import { UserService } from './users.service';
 import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ftAuthGuard } from 'src/auth/guards/ft.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
-@UseGuards(ftAuthGuard)
+@UseGuards(JwtAuthGuard)
 @Controller('user')
 export class UsersController {
     constructor(private userService: UserService) {}
@@ -79,19 +80,37 @@ export class UsersController {
         return res.status(HttpStatus.OK).json({user})
     }
 
+
     @Patch("username")
     @HttpCode(HttpStatus.OK)
-    async changeUsername( @Req() req,  @Body() changeUserDTO: ChangeUserDTO, @Response() res: any) {
-        console.log("ID ?: ", req)
-        const user = await this.userService.getUserById(req.user.id)
+    async changeUsername(@Req() req, @Body() changeUserDTO: ChangeUserDTO,
+                            @Response() res: any) {
+        console.log('test')
+        const token = await req.headers['Authorization'].substring("Bearen ".length)
+        console.log("token: ", token)
+        const user = await this.userService.getUserByToken(JSON.stringify(token))
         if (!user) return res.status(HttpStatus.NOT_FOUND).send()
         const oldPath = '/usr/app/profilepics/' + user.username + '.jpg'
         const newPath = '/usr/app/profilepics/' + changeUserDTO.username + '.jpg'
         fs.rename(oldPath, newPath, (err) => {
             if (err) return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send()
         })
-        res.status(await this.userService.changeUsername(changeUserDTO)).json({username: changeUserDTO.username})
+        res.status(await this.userService.changeUsername(changeUserDTO)).send()
     }
+
+    // @Patch("username")
+    // @HttpCode(HttpStatus.OK)
+    // async changeUsername( @Req() req,  @Body() changeUserDTO: ChangeUserDTO, @Response() res: any) {
+    //     console.log("ID ?: ", req)
+    //     const user = await this.userService.getUserById(req.user.id)
+    //     if (!user) return res.status(HttpStatus.NOT_FOUND).send()
+    //     const oldPath = '/usr/app/profilepics/' + user.username + '.jpg'
+    //     const newPath = '/usr/app/profilepics/' + changeUserDTO.username + '.jpg'
+    //     fs.rename(oldPath, newPath, (err) => {
+    //         if (err) return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send()
+    //     })
+    //     res.status(await this.userService.changeUsername(changeUserDTO)).json({username: changeUserDTO.username})
+    // }
 
     @Patch("friend/:id1/:id2")
     @HttpCode(HttpStatus.CREATED)

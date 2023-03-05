@@ -53,12 +53,6 @@ export default defineComponent({
         // this.$router.push('/login')
         // return
     // }
-        if (this.$route.query.token) {
-            localStorage.setItem('token', this.$route.query.token as any)
-        } else {
-            this.$router.push('login')
-            return 
-        }
     },
     methods: {
         ok() {

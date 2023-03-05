@@ -16,6 +16,7 @@
 </template>
 
 <script lang="ts">
+import router from '@/router'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
 
@@ -27,6 +28,14 @@ export default defineComponent({
     },
     computed: {
         ...mapState(['status'])
+    },
+    mounted() {
+        console.log('token: ', this.$route.query.token)
+        if (this.$route.query.token) {
+            localStorage.setItem('token', this.$route.query.token as any)
+            this.$router.push('userInfos')
+            return
+        }
     }
 })
 </script>

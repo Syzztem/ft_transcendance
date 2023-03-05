@@ -16,12 +16,12 @@ export class AuthController {
   async redirect(@Request() req, @Res() res) {
     const access_token = await this.authService.login(req.user)
     await this.userService.updateToken(req.user.id, access_token);
-    res.json({token: access_token})
-    // const url = new URL('http://' + process.env.URL)
-    // url.port = '8080'
-    // url.pathname = 'userInfos'
-    // url.searchParams.set('token', access_token)
-    // res.redirect(url.href)
+    //res.json({token: access_token}) avec ca la requete est envoyee au back
+    const url = new URL('http://' + process.env.URL)
+    url.port = '8080'
+    url.pathname = 'login'
+    url.searchParams.set('token', access_token)
+    res.redirect(url.href)
   }
 
   @UseGuards(JwtAuthGuard)

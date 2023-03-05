@@ -49,14 +49,14 @@ export class UserService {
         });
     }
 
-    // async getUserByToken(token: string): Promise<User> {
-    //     return this.userRepository.findOne({
-    //         select: {
-    //             username:   true
-    //         },
-    //         where: {token: token}
-    //     })
-    // }
+    async getUserByToken(token: string): Promise<User> {
+        return this.userRepository.findOne({
+            select: {
+                username:   true
+            },
+            where: {token: token}
+        })
+    }
 
     async verifyToken(id: number, token: string) : Promise<number> {
         const user = await this.userRepository.findOneBy({id});
