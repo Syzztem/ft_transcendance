@@ -64,7 +64,8 @@ const store = createStore({
     },
 
     addChannel(state, newchan) {
-      state.chat.joined_channels.push(newchan);
+      const copy = Object.assign({}, newchan);
+      state.chat.joined_channels.push(copy);
     },
     setCurrentChannel(state, channel) {
       state.chat.current_channel = channel;
@@ -138,7 +139,7 @@ const store = createStore({
     rmChannel({ commit }, id) {
       commit("removeChannel", id);
     },
-    createChannel({commit}, channel)
+    createChannel({ commit }, channel)
     {
       commit("addChannel", channel);
     }

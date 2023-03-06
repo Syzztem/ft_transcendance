@@ -15,14 +15,15 @@ const socket = io('http://localhost:3000');
 /*
 	TODO :
 
-	- create a dialog for add channel and search channels
-	- add channel function
 	- merge la branche de louis
-	- implementer create_channel via l api.
+	- add front protection so channels with same name can t be created?
+
+	- create a dialog to search for existing channels
 	- clickable profile on user -> opens 	OPTIONS PANEL	:	dm, profile page, add to friends, remove from friend block user, unblock user
 											ADVANCED PANEL	:	promote/demote/ban/kick/unban
 	- v-if (blocked) -> display red block icon
 	- v-if display only available options (don t block if already blocked etc)
+	ajouter superman 64 en fond d ecran 42
 */
 
 export default defineComponent({
@@ -39,22 +40,22 @@ export default defineComponent({
 			],
 			dialog: false,
 			newChannel: {
-			name: '',
-			description: ''
+				name: 'test',
+				id: 0,
+				users: null,
+				messages: null,
+				password: '',
 			}
 		}
 	},
 	methods: {
 		...mapActions(["selectChannel", "rmChannel"]),
-		createChannel() {
-      // call Vuex action to create the channel with this.newChannel data
-      // reset the form fields
-      this.newChannel.name = '';
-      this.newChannel.description = '';
-      // close the dialog
-      this.dialog = false;
-    }
-
+		createChannel(newchan : any)
+		{
+			newchan.id += 1;
+			this.$store.dispatch('createChannel', newchan );
+			this.dialog = false;
+		}
 	},
     computed: {
 		username()
@@ -78,9 +79,7 @@ export default defineComponent({
 		},
 	},
 	mounted() {
-		store.commit('addChannel', {name: 'channel1', id : 0, users: [{name :'user1'}], messages:[{sender:'user1',content:'salut'}]} );
-		store.commit('addChannel', {name: 'channel2', id: 1, users: [{name :'user42'}], messages:[{sender:'user42',content:'pouet'}]} );
-		store.commit('addChannel', {name: 'channel3', id: 2, users: [{name :'user99'}], messages:[{sender:'user99',content:'yo'}]} );
+		// store.commit('addChannel', {name: 'channel3', id: 2, users: [{name :'user99'}], messages:[{sender:'user99',content:'yo'}]} );
 		// store.commit('setChannels', channels);
 		// socket.emit('findAllMessages', {}, (response : any) => {
 		// 	console.log(response);
@@ -212,22 +211,19 @@ export default defineComponent({
 								<v-btn id="Btnchannel" class="mt-2 mr-4 mb-2" @click="dialog = true">
 									+
 								</v-btn>
-								<v-dialog v-model="dialog" persistent max-width="500px">
+								<v-dialog v-model="dialog" max-width="500px">
 								<v-card>
 									<v-card-title>
-									Create a New Channel
+										Create a New Channel
 									</v-card-title>
-
 									<v-card-text>
-									<v-text-field label="Channel Name" v-model="newChannel.name"></v-text-field>
-									<v-text-field label="Description" v-model="newChannel.description"></v-text-field>
-									<!-- add any other form fields here -->
+										<v-text-field label="Channel Name" v-model="newChannel.name"></v-text-field>
+										<v-text-field label="Password" v-model="newChannel.password"></v-text-field>
 									</v-card-text>
-
 									<v-card-actions>
-									<v-spacer></v-spacer>
-									<v-btn color="error" text @click="dialog = false">Cancel</v-btn>
-									<v-btn color="primary" @click="createChannel()">Create</v-btn>
+									<v-spacer/>
+										<v-btn color="error" text @click="dialog = false">Cancel</v-btn>
+										<v-btn color="primary" @click="createChannel(newChannel)">Create</v-btn>
 									</v-card-actions>
 								</v-card>
 								</v-dialog>
@@ -283,9 +279,7 @@ export default defineComponent({
 #Userscontent
 {
 	background-color:	rgb(0, 0, 128);
-	overflow-y:			scroll;
-	scrollbar-color:	gold;
-	scrollbar-width :	auto;
+	overflow:			auto;
 }
 
 #Usercard
@@ -389,9 +383,7 @@ export default defineComponent({
 	font-family:		"Pokemon";
 	color:				rgb(255, 200, 0);
 	text-shadow:		2px 2px 4px rgb(0, 4, 255), 0 0 1em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
-	overflow-y:			scroll;
-	scrollbar-color:	gold;
-	scrollbar-width :	auto;
+	overflow:			auto;
 }
 
 #Channelcreate
