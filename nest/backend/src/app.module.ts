@@ -13,7 +13,6 @@ import { Game } from './entities/Game';
 import { ChannelMessage } from './entities/ChannelMessage';
 import { FriendMessage } from './entities/FriendMessage';
 import { BanAndMute } from './entities/BanAndMute';
-import { MiddlewareBuilder } from '@nestjs/core';
 
 @Module({
   imports: [
