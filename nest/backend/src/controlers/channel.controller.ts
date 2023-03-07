@@ -35,11 +35,19 @@ export class ChannelController {
         res.status(await this.channelService.postMessage(postMessageDTO)).send();
     }
 
-    @Patch("join/:chanId:/uid")
+    @Post("join/:chanId:/uid")
     async joinChannel(@Param('chanId') chanId: number,
                       @Param('uid') uid:number,
                       @Response() res: any) {
         res.status(await this.channelService.joinChannel(chanId, uid)).send();
+    }
+
+    @Post("joinwithpassword/:chanId:/uid")
+    async joinWithPassword( @Param('chanId') chanId: number,
+                            @Param('uid') uid: number,
+                            @Body() password: string,
+                            @Response() res:any) {
+        res.status(await this.channelService.joinChannelWithPassword(chanId, uid, password)).send();
     }
 
     @Patch("leave/:chanId:/uid")

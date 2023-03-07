@@ -1,6 +1,7 @@
-import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { BeforeInsert, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, Unique } from 'typeorm';
 import { Channel } from './Channel';
 import { Game } from './Game';
+import * as bcrypt from 'bcrypt'
 
 @Entity()
 @Unique(["username", "email", "token"])
@@ -49,4 +50,13 @@ export class User {
 
   @OneToMany(() => Game, (game) =>game.player2)
   games2: Game[]
+
+  @BeforeInsert()
+  async hashToken() {
+    this.token = await bcrypt.hash(this.token, 15);
+  }
+
+  async verifyToken(token: string) {
+      return bcrypt.compare(token, this.token);
+  }
 }

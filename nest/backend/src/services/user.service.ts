@@ -9,6 +9,7 @@ import SendDMDTO from 'src/dto/send-dm.dto';
 import { FriendMessage } from 'src/entities/FriendMessage';
 import { User } from 'src/entities/User';
 import { Repository } from 'typeorm';
+import * as fs from 'fs'
 
 @Injectable()
 export class UserService {
@@ -34,12 +35,6 @@ export class UserService {
                 losses:     dto.winsLosses,
                 level:      dto.level,
             },
-            relations: {
-                friends:    dto.friends,
-                blocked:    true,
-                channels:   dto.channels,
-                games:      dto.games
-            },
             where: {id: dto.id}
         });
     }
@@ -47,15 +42,21 @@ export class UserService {
     async getUserByToken(dto: FindUserByTokenDTO): Promise<User> {
         return this.userRepository.findOne({
             select: {
-                id:         dto.id,
-                profilePic: dto.profilePic,
-                username: dto.username
+                username:   true
             },
             where: {token: dto.token}
         })
     }
 
+    async verifyToken(id: number, token: string) : Promise<number> {
+        const user = await this.userRepository.findOneBy({id});
+        if (!user) return HttpStatus.NOT_FOUND;
+        if (user.verifyToken(token)) return HttpStatus.OK;
+        else return HttpStatus.UNAUTHORIZED;
+    }
+
     async add(createUserDTO: CreateUserDTO) : Promise<User> {
+        if (createUserDTO.username == 'default') return null;
         if (await this.userRepository.count({ where: { username: createUserDTO.username } }) != 0)
             return null;
         const user = this.userRepository.create(createUserDTO);

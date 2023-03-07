@@ -2,8 +2,7 @@
     <v-container>
         <v-card>
             <v-row justify="center">
-                <img v-if="user.profilePic != null" :src="user.profilePic"/>
-                <img v-else src="@/assets/egg_picture.png"/>
+                <img :src="user.profilePic"/>
             </v-row>
             <v-row justify="center">
                 <p>
@@ -34,7 +33,7 @@ export default defineComponent({
             this.$router.push('/login')
             return
         }
-        this.$store.dispatch('getUserInfos', { token: store.state.user.token })
+        this.$store.dispatch('getUserInfos')
     }
 })
 </script>

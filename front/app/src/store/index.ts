@@ -33,7 +33,7 @@ const store = createStore({
     status: '',
     user: user,
     userInfos: {
-      picture: '',
+      profilePic: '',
       username: ''
       
     },
@@ -54,6 +54,7 @@ const store = createStore({
     },
     userInfos(state, userInfos) {
       state.userInfos = userInfos
+      state.userInfos.profilePic = 'http://rcorenti.fr:3000/user/profilepic/' + userInfos.username
     },
     logout(state) {
       state.user = {
@@ -62,7 +63,6 @@ const store = createStore({
       }
       localStorage.removeItem('user')
     },
-
     addChannel(state, newchan) {
       const copy = Object.assign({}, newchan);
       state.chat.joined_channels.push(copy);
@@ -74,9 +74,6 @@ const store = createStore({
       state.chat.joined_channels = state.chat.joined_channels.filter(c => c.id !== id);
       state.chat.current_channel = null;
     },
-    // setChannels(state , channels: IChannel[]) {
-    //   state.chat.joined_channels = channels;
-    // },
   },
   actions: {
     createAccount({commit}, userInfos) {
@@ -142,6 +139,18 @@ const store = createStore({
     createChannel({ commit }, channel)
     {
       commit("addChannel", channel);
+    },
+    changeProfilePic({commit}, userInfos) {
+      return new Promise((resolve, reject) => {
+        instance.post("/user/setpp/", userInfos)
+        .then((response: any) => {
+          resolve(response)
+        })
+        .catch((error: any) => {
+          console.log(error)
+          reject(error)
+        })
+      })
     }
     // getUserChannels({commit}, id) {
     //   return new Promise((resolve, reject) => {

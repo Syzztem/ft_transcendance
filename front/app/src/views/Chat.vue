@@ -79,6 +79,10 @@ export default defineComponent({
 		},
 	},
 	mounted() {
+		if (store.state.user.id == -1) {
+        this.$router.push('/login')
+        return
+    }
 		// store.commit('addChannel', {name: 'channel3', id: 2, users: [{name :'user99'}], messages:[{sender:'user99',content:'yo'}]} );
 		// store.commit('setChannels', channels);
 		// socket.emit('findAllMessages', {}, (response : any) => {

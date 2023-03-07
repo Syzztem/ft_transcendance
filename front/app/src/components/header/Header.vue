@@ -4,12 +4,9 @@
             POKEPONG
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <img v-if="user.profilePic" id="profilePic" :src="user.profilePic"/>
-        <img v-else id="profilePic" src="@/assets/egg_picture.png" />
-        <v-btn router :to="'/profil'">
-            <p>
+        <img id="profilePic" :src="$store.state.userInfos.profilePic"/>
+        <v-btn class="btn" router :to="'/profil'">
                 {{ user.username }}
-            </p>
         </v-btn>
         <v-btn v-if="$router.currentRoute.value.path == '/options'" @click="$router.go(-1)">
             <img id="optionsImg" src="@/assets/optionsButton.png"/>
@@ -26,17 +23,13 @@ import { mapState } from 'vuex';
 import store from '@/store';
 
 export default defineComponent({
-    data() {
-        return {
-        }
-    },
     computed: {
         ...mapState({
             user: 'userInfos'
         })
     },
     mounted() {
-        this.$store.dispatch('getUserInfos', { token: store.state.user.token })
+        this.$store.dispatch('getUserInfos')
     }
 })
 </script>
@@ -51,7 +44,7 @@ export default defineComponent({
 #logo:hover {
   color: rgb(255, 233, 0);
 }
-p {
+.btn {
   font-family: "pokemon";
   font-size: 20px;
   color: rgb(255, 200, 0);

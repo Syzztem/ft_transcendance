@@ -19,16 +19,6 @@ import store from '@/store'
 // shield        : zamazenta (legendary so less spawn | add 1 shield (max 1 shield / 2 players), shield protect of 1 loss ball and disappears)
 
 
-
-// power ups     : pokemons
-
-// fake ball     : amphinobi
-// hide screen   : smogogo
-// little paddle : ptiravi
-// big paddle    : ronflex
-// shield        : zamazenta (legendary so less spawn | add 1 shield (max 1 shield / 2 players), shield protect of 1 loss ball and disappears)
-
-
 export default defineComponent({
   data() {
     return {

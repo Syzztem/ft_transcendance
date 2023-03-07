@@ -9,6 +9,7 @@ import { Channel } from 'src/entities/Channel';
 import { ChannelMessage } from 'src/entities/ChannelMessage';
 import { User } from 'src/entities/User';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt'
 
 @Injectable()
 export class ChannelService {
@@ -113,9 +114,22 @@ export class ChannelService {
     async joinChannel(chanId: number, uid: number) : Promise<number> {
         const chan = await this.channelRepository.findOneBy({id: chanId});
         if (!chan) return HttpStatus.NOT_FOUND;
-        if(chan.isBanned(uid)) return HttpStatus.FORBIDDEN;
         const user = await this.userRepository.findOneBy({id: uid});
         if (!user) return HttpStatus.NOT_FOUND;
+        if(chan.isBanned(uid)) return HttpStatus.FORBIDDEN;
+        if (chan.password != null) return HttpStatus.UNAUTHORIZED;
+        chan.users.push(user);
+        return HttpStatus.OK;
+    }
+
+    async joinChannelWithPassword(chanId: number, uid: number, password: string) {
+        const chan = await this.channelRepository.findOneBy({id: chanId});
+        if (!chan) return HttpStatus.NOT_FOUND;
+        const user = await this.userRepository.findOneBy({id: uid});
+        if (!user) return HttpStatus.NOT_FOUND;
+        if (chan.password == null) return HttpStatus.BAD_REQUEST;
+        if(chan.isBanned(uid)) return HttpStatus.FORBIDDEN;
+        if (!await chan.verifyPassword(password)) return HttpStatus.UNAUTHORIZED;
         chan.users.push(user);
         return HttpStatus.OK;
     }

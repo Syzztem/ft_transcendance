@@ -5,7 +5,7 @@
       <v-card id="card" black color="transparent" height="50vh" rounded flat class="mr-10">
         <v-row justify="center" class="mt-16">
           <a href="https://profile.intra.42.fr/users/lnoirot">
-            <img src="@/assets/lnoirot.jpg"/>
+            <img src="@/assets/lnoirot.png"/>
           </a>
         </v-row>
         <v-row justify="center">
