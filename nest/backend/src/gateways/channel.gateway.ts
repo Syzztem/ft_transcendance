@@ -5,13 +5,13 @@ import {Server, Socket} from 'socket.io'
 import PostMessageDTO from 'src/dto/post-message.dto';
 import { Repository } from 'typeorm';
 import GetMessageDTO from 'src/dto/get-message.dto';
-import CreateChannelDTO from './dto/create-channel.dto';
-import { Channel } from './entities/Channel';
-import { BanAndMute } from './entities/BanAndMute';
-import { User } from './entities/User';
-import { ChannelMessage } from './entities/ChannelMessage';
-import { JoinChannelDTO } from './dto/join-channel.dto';
-import { BanUserDTO } from './dto/ban-user.dto';
+import CreateChannelDTO from '../dto/create-channel.dto';
+import { Channel } from '../entities/Channel';
+import { BanAndMute } from '../entities/BanAndMute';
+import { User } from '../entities/User';
+import { ChannelMessage } from '../entities/ChannelMessage';
+import { JoinChannelDTO } from '../dto/join-channel.dto';
+import { BanUserDTO } from '../dto/ban-user.dto';
 
 @WebSocketGateway()
 export class ChannelGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {

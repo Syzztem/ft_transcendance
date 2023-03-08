@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, Response } from '@nestjs/common';
+import { response } from 'express';
 import CreateChannelDTO from 'src/dto/create-channel.dto';
 import GetChannelDTO from 'src/dto/get-channel.dto';
 import GetMessageDTO from 'src/dto/get-message.dto';
@@ -92,7 +93,9 @@ export class ChannelController {
 
     @Post("new")
     @HttpCode(HttpStatus.OK)
-    createChannel(@Body() createChannelDTO: CreateChannelDTO) {
-        this.channelService.createChannel(createChannelDTO);
+    async createChannel(  @Body() createChannelDTO: CreateChannelDTO,
+                    @Response() res: any) {
+        const channel = await this.channelService.createChannel(createChannelDTO);
+        if (!channel) return res.status(HttpStatus.NOT_FOUND).send();
     }
 }
