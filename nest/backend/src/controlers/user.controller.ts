@@ -1,10 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, Res, Response, UploadedFile, UseInterceptors } from '@nestjs/common';
 import CreateUserDTO from 'src/dto/create-user.dto';
 import FindUserDTO from 'src/dto/find-user.dto';
-import FindUserByTokenDTO from 'src/dto/Find-user-by-token.dto'
 import SendDMDTO from 'src/dto/send-dm.dto';
-import { User } from 'src/entities/User';
-import FindUserByNameDTO from 'src/dto/find-user-by-name.dto';
 import { UserService } from 'src/services/user.service';
 import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -38,36 +35,22 @@ export class UserController {
     @Get("/profilepic/:username")
     async getProfilePic(@Param('username') username : string,
                         @Response() res : any) {
-        const path = '/usr/app/profilepics/' + username + '.jpg';
+        const path = UserService.PP_PATH + username + '.jpg';
         if (!fs.existsSync(path)) return res.status(HttpStatus.OK).sendFile('/usr/app/profilepics/defaultpp.jpg');
         res.status(HttpStatus.OK).sendFile(path);
     }
 
-    @Post("setpp")
+    @Post("/setpp/:username")
     @UseInterceptors(FileInterceptor('file'))
-    async setProfilePic(@Body() findUserByTokenDTO: FindUserByTokenDTO,
+    async setProflePic(@Param('username') username: string,
                         @UploadedFile() file: Express.Multer.File,
-                        @Response() res: any) {
-        const user = await this.userService.getUserByToken(findUserByTokenDTO)
-        if (!user) return res.status(HttpStatus.NOT_FOUND).send()
-        const path = '/usr/app/profilepics/' + user.username + '.jpg'
+                        @Response() res : any) {
+        const path = UserService.PP_PATH + username + '.jpg';
         fs.writeFile(path, file.buffer, (err) => {
-            if (err) res.status(HttpStatus.INTERNAL_SERVER_ERROR).send()
-            else res.status(HttpStatus.OK).send()
+            if (err) res.status(HttpStatus.INTERNAL_SERVER_ERROR).send();
+            else res.status(HttpStatus.OK).send();
         })
     }
-
-    // @Post("/setpp/:username")
-    // @UseInterceptors(FileInterceptor('file'))
-    // async setProflePic(@Param('username') username: string,
-    //                     @UploadedFile() file: Express.Multer.File,
-    //                     @Response() res : any) {
-    //     const path = '/usr/app/profilepics/' + username + '.jpg';
-    //     fs.writeFile(path, file.buffer, (err) => {
-    //         if (err) res.status(HttpStatus.INTERNAL_SERVER_ERROR).send();
-    //         else res.status(HttpStatus.OK).send();
-    //     })
-    // }
 
     @Post("verify/:id")
     async verifyToken(@Body() token: string,
@@ -85,28 +68,19 @@ export class UserController {
     }
 
     @Post("login")
-    async login(@Body() findUserByNameDTO: FindUserByNameDTO,
+    async login(@Body() username: string,
                     @Response() res: any) {
-        const user = await this.userService.getUserByName(findUserByNameDTO)
+        const user = await this.userService.getUserByName(username)
         if (!user) return res.status(HttpStatus.NOT_FOUND).send();
-        return res.status(HttpStatus.OK).json({
-            id:     {user}.user.id,
-            token:  {user}.user.token
-        })
+        return res.status(HttpStatus.OK).json(user);
     }
 
-    @Patch("username")
+    @Patch("username/:id")
     @HttpCode(HttpStatus.OK)
-    async changeUsername(@Body() changeUserDTO: ChangeUserDTO,
+    async changeUsername(   @Body() username: string,
+                            @Param('id') id: number,
                             @Response() res: any) {
-        const user = await this.userService.getUserByToken({token: changeUserDTO.token})
-        if (!user) return res.status(HttpStatus.NOT_FOUND).send()
-        const oldPath = '/usr/app/profilepics/' + user.username + '.jpg'
-        const newPath = '/usr/app/profilepics/' + changeUserDTO.username + '.jpg'
-        fs.rename(oldPath, newPath, (err) => {
-            if (err) return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send()
-        })
-        res.status(await this.userService.changeUsername(changeUserDTO)).send()
+        res.status(await this.userService.changeUsername({id, username})).send()
     }
 
     @Patch("friend/:id1/:id2")

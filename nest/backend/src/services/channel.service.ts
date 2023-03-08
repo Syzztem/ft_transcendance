@@ -9,7 +9,6 @@ import { Channel } from 'src/entities/Channel';
 import { ChannelMessage } from 'src/entities/ChannelMessage';
 import { User } from 'src/entities/User';
 import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt'
 
 @Injectable()
 export class ChannelService {
