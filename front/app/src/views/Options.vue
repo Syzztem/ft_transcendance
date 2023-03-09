@@ -55,16 +55,10 @@ export default defineComponent({
     },
     methods: {
         logout() {
-            this.$store.commit('logout')
+            this.$store.dispatch('logout')
             this.$router.push('/login')
         }
-    },
-    mounted() {
-    if (store.state.user.id == -1) {
-        this.$router.push('/login')
-        return
     }
-  }
 })
 </script>
 

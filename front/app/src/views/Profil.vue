@@ -2,11 +2,11 @@
     <v-container>
         <v-card>
             <v-row justify="center">
-                <img :src="user.profilePic"/>
+                <img :src="$store.state.profileInfos.profilePic"/>
             </v-row>
             <v-row justify="center">
                 <p>
-                    {{ user.username }}
+                    {{ $store.state.profileInfos.username }}
                 </p>
             </v-row>
         </v-card>
@@ -17,23 +17,16 @@
 import { defineComponent } from 'vue';
 import store from '@/store';
 import { mapState } from 'vuex';
+import { routeLocationKey } from 'vue-router';
 
 export default defineComponent({
     data() {
         return {
+            username: ''
         }
-    },
-    computed: {
-        ...mapState({
-            user: 'userInfos'
-        })
     },
     mounted() {
-        if (store.state.user.id == -1) {
-            this.$router.push('/login')
-            return
-        }
-        this.$store.dispatch('getUserInfos')
+        this.$store.dispatch('getProfileInfos', this.$route.params.id)
     }
 })
 </script>

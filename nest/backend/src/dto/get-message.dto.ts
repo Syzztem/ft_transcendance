@@ -1,4 +1,4 @@
-import { Channel } from "src/entities/Channel";
+import { Channel } from "src/database/entities/Channel";
 
 export default class GetMessageDTO {
     channel: Channel;

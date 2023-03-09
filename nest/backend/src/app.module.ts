@@ -1,30 +1,35 @@
-import { GameModule } from './game.module';
-import { ChannelModule } from './channel.module';
-import { UserModule } from './user.module';
+import { UsersModule } from './users/users.module';
+import { GameModule } from './game/game.module';
+import { ChannelModule } from './channel/channel.module';
 import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { CorsMiddleware } from './cors.middlewar';
+import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
+import { ftStrategy } from './auth/strategies/ft.strategy';
+import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { User } from './entities/User';
-import { Channel } from './entities/Channel';
-import { Game } from './entities/Game';
-import { ChannelMessage } from './entities/ChannelMessage';
-import { FriendMessage } from './entities/FriendMessage';
-import { BanAndMute } from './entities/BanAndMute';
-import { MiddlewareBuilder } from '@nestjs/core';
-import { MessagesModule } from './messages/messages.module';
+import { UsersController } from './users/users.controller';
+// import { CorsMiddleware } from './cors.middlewar';
+import { User } from './database/entities/User';
+import { Channel } from './database/entities/Channel';
+import { Game } from './database/entities/Game';
+import { ChannelMessage } from './database/entities/ChannelMessage';
+import { FriendMessage } from './database/entities/FriendMessage';
+import { BanAndMute } from './database/entities/BanAndMute';
 
 @Module({
-  imports: [
+  imports: [PassportModule, AuthModule, UsersModule, ConfigModule.forRoot({
+    isGlobal: true,
+  }),
+    UsersModule,
     GameModule,
     ChannelModule,
-    UserModule,
-    MessagesModule,
+    UsersModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'db',
+      host: process.env.POSTGRES_HOST,
       port: 5432,
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PW,
@@ -34,14 +39,14 @@ import { MessagesModule } from './messages/messages.module';
     })
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AuthModule],
 })
 export class AppModule {
   constructor(private dataSource: DataSource) {}
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(CorsMiddleware).forRoutes({
-      path: '*',
-      method: RequestMethod.ALL
-    })
+  // configure(consumer: MiddlewareConsumer) {
+  //   consumer.apply(CorsMiddleware).forRoutes({
+  //     path: '*',
+  //     method: RequestMethod.ALL
+  //   })
   }
-}
+// }

@@ -1,116 +1,93 @@
-import IChannel from '@/models/IChannel'
-import IMessage from '@/models/IMessage'
-import IUser from '@/models/IUser'
-import { resolveComponent } from 'vue'
 import { createStore } from 'vuex'
 
 const axios = require('axios')
 
 const instance = axios.create({
-  baseURL: "http://localhost:3000"
+  baseURL: 'http://' +  process.env.VUE_APP_URL + ':3000'
 })
 
-let user: any = localStorage.getItem('user')
-if (!user) {
-  user = {
-    id: -1,
-    token: ''
-  }
+let token: any = localStorage.getItem('token')
+let id: any = localStorage.getItem('id')
+
+// if (!token) {
+//   token: ''
+// }
+// else {
+//   try {
+//     instance.defaults.headers.common.Authorization = `Bearer ${token}`;
+//   } catch (ex) {
+//     token: ''
+//   }
+// }
+
+if (!token) {
+  token: ''
 }
 else {
   try {
-    user = JSON.parse(user)
+    instance.defaults.headers.common = {'Authorization': `Bearer ${token}`};
   } catch (ex) {
-    user = {
-      id: -1,
-      token: ''
-    }
+    token: ''
   }
 }
+
+// const config = {
+//   headers: {
+//     Authorization: 'Bearer ${token}'
+//   }
+// }
 
 const store = createStore({
   state: {
     status: '',
-    user: user,
     userInfos: {
       profilePic: '',
       username: ''
-      
     },
-    chat: {
-      joined_channels:  [] as IChannel[],
-      current_channel:  null as IChannel | null,
-      blocked_users:    [],
-      current_message:  "",
+    profileInfos: {
+      profilePic: '',
+      username: ''
     }
   },
   mutations: {
     setStatus(state, status) {
       state.status = status
     },
-    logUser(state, user) {
-      localStorage.setItem('user', JSON.stringify(user))
-      state.user = user
+    profileInfos(state, profileInfos) {
+      state.profileInfos.username = profileInfos.username
+      state.profileInfos.profilePic = 'http://' +  process.env.VUE_APP_URL + ':3000/user/profilepic/' + profileInfos.username
     },
     userInfos(state, userInfos) {
-      state.userInfos = userInfos
-      state.userInfos.profilePic = 'http://rcorenti.fr:3000/user/profilepic/' + userInfos.username
+      state.userInfos.username = userInfos.username
+      state.userInfos.profilePic = 'http://' +  process.env.VUE_APP_URL + ':3000/user/profilepic/' + userInfos.username
     },
     logout(state) {
-      state.user = {
-        id: -1,
-        token: ''
-      }
-      localStorage.removeItem('user')
-    },
-    addChannel(state, newchan) {
-      const copy = Object.assign({}, newchan);
-      state.chat.joined_channels.push(copy);
-    },
-    setCurrentChannel(state, channel) {
-      state.chat.current_channel = channel;
-    },
-    removeChannel(state, id) {
-      state.chat.joined_channels = state.chat.joined_channels.filter(c => c.id !== id);
-      state.chat.current_channel = null;
-    },
+      id = -1
+      token = ''
+      localStorage.removeItem('id')
+      localStorage.removeItem('token')
+    }
   },
   actions: {
-    createAccount({commit}, userInfos) {
-      commit('setStatus', 'loading_create')
+    getUserInfos({commit}) {
       return new Promise((resolve, reject) => {
-        commit
-        instance.post("/user/new", userInfos)
+        instance.get("/user/id/" + id)
         .then((response: any) => {
-          commit('setStatus', 'created')
-          resolve(response)
-        })
-        .catch((error: any) => {
-          commit('setStatus', 'error_create')
-          reject(error)
-        })
-      })
-    },
-    login({commit}, userInfos) {
-      commit('setStatus', 'loading_login')
-      return new Promise((resolve, reject) => {
-        instance.post("/user/login", userInfos)
-        .then((response: any) => {
-          commit('setStatus', '')
-          commit('logUser', response.data)
-          resolve(response)
-        })
-        .catch((error: any) => {
-          commit('setStatus', 'error_login')
-          reject(error)
-        })
-      })
-    },
-    getUserInfos({commit}, userInfos) {
-      return new Promise((resolve, reject) => {
-        instance.post("/user/infos", userInfos)
-        .then((response: any) => {
+          console.log(response.data)
           commit('userInfos', response.data)
+          resolve(response)
+        })
+        .catch((error: any) => {
+          reject(error)
+        })
+      })
+    },
+    getProfileInfos({commit}, id) {
+      return new Promise((resolve, reject) => {
+        instance.get("/user/id/" + id)
+        .then((response: any) => {
+          console.log(response.data)
+          commit('profileInfos', response.data)
           resolve(response)
         })
         .catch((error: any) => {
@@ -130,19 +107,21 @@ const store = createStore({
         })
       })
     },
-    selectChannel({ commit }, channel) {
-      commit("setCurrentChannel", channel);
-    },
-    rmChannel({ commit }, id) {
-      commit("removeChannel", id);
-    },
-    createChannel({ commit }, channel)
-    {
-      commit("addChannel", channel);
-    },
-    changeProfilePic({commit}, userInfos) {
+    changeProfilePic({commit}, data) {
       return new Promise((resolve, reject) => {
-        instance.post("/user/setpp/", userInfos)
+        instance.post("/user/setpp/" + this.state.userInfos.username, data.formData)
+        .then((response: any) => {
+          resolve(response)
+        })
+        .catch((error: any) => {
+          console.log(error)
+          reject(error)
+        })
+      })
+    },
+    logout({commit}) {
+      return new Promise((resolve, reject) => {
+        instance.post("/auth/logout")
         .then((response: any) => {
           resolve(response)
         })
@@ -152,36 +131,11 @@ const store = createStore({
         })
       })
     }
-    // getUserChannels({commit}, id) {
-    //   return new Promise((resolve, reject) => {
-    //     instance.get("/channels", id)
-    //     .then((res: any) => {
-    //       commit('setChannels', res.data)
-    //       resolve(res)
-    //     })
-    //     .catch((error: any) => {
-    //       reject(error)
-    //     })
-    //   })
-    // },
-    // createChannel({commit}, channel_name)
-    // {
-    //   return new Promise((resolve,reject) => {
-    //     instance.get("/new", channel_name)
-    //     .then((res : any) => 
-    //     {
-    //       commit('createChannel', res.data)
-    //       resolve(res)
-    //     })
-    //     .catch((error : any) => {
-    //       reject(error)
-    //     })
-    //   })
-    // },
-    //   setCurrentChannel({ commit }, channel) {
-    //     commit('setCurrentChannel', channel);
-    // },
-
+  },
+  getters: {
+    getUsername(state) {
+      return state.userInfos.username
+    }
   }
 })
 
