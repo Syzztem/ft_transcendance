@@ -1,3 +1,4 @@
+import IChannel from '@/models/IChannel'
 import { createStore } from 'vuex'
 
 const axios = require('axios')
@@ -47,6 +48,12 @@ const store = createStore({
     profileInfos: {
       profilePic: '',
       username: ''
+    },
+    chat: {
+      joined_channels:  [] as IChannel[],
+      current_channel:  null as IChannel | null,
+      blocked_users:    [],
+      current_message:  "",
     }
   },
   mutations: {
@@ -66,7 +73,18 @@ const store = createStore({
       token = ''
       localStorage.removeItem('id')
       localStorage.removeItem('token')
-    }
+    },
+    addChannel(state, newchan) {
+      const copy = Object.assign({}, newchan);
+      state.chat.joined_channels.push(copy);
+    },
+    setCurrentChannel(state, channel) {
+      state.chat.current_channel = channel;
+    },
+    removeChannel(state, id) {
+      state.chat.joined_channels = state.chat.joined_channels.filter(c => c.id !== id);
+      state.chat.current_channel = null;
+    },
   },
   actions: {
     getUserInfos({commit}) {
@@ -130,7 +148,17 @@ const store = createStore({
           reject(error)
         })
       })
-    }
+    },
+    selectChannel({ commit }, channel) {
+      commit("setCurrentChannel", channel);
+    },
+    rmChannel({ commit }, id) {
+      commit("removeChannel", id);
+    },
+    createChannel({ commit }, channel)
+    {
+      commit("addChannel", channel);
+    },
   },
   getters: {
     getUsername(state) {
