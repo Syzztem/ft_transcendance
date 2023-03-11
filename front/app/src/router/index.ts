@@ -11,6 +11,9 @@ import Hall from '@/views/Hall.vue'
 import Login from '@/views/Login.vue'
 import Profil from '@/views/Profil.vue'
 
+import TestWebsocket from '@/views/TestWebsocket.vue'
+
+
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/login',
@@ -55,6 +58,10 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     component: Home
+  },
+  {
+    path: '/test',
+    component: TestWebsocket
   }
 ]
 
