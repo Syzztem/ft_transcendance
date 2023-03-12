@@ -12,10 +12,10 @@ export class Game {
     @ManyToOne(() => User, (user) => user.games2)
     player2: User;
 
-    @Column("int")
+    @Column("int", {default: 0})
     player1Score: number;
 
-    @Column("int")
+    @Column("int", {default: 0})
     player2Score: number;
 
     @Column({type:"timestamp", default: () => "CURRENT_TIMESTAMP"})

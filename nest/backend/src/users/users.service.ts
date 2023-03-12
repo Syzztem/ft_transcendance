@@ -35,6 +35,14 @@ export class UserService {
         });
       }
 
+      async findOneById(userId: number): Promise<User | undefined> {
+        return this.userRepository.findOne({
+            where: {
+                id: userId,
+            }
+        });
+      }
+
     async findByLogin(login: string): Promise<User> {
         return this.userRepository.findOne({
           where: { login42: login }

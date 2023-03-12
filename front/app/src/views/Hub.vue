@@ -2,6 +2,8 @@
 import IGameConfig from '../models/IGameConfig'
 import { defineComponent } from 'vue'
 import store from '@/store'
+import socket from '../websocket'
+import router from '@/router'
 
 export default defineComponent({
   data() {
@@ -9,27 +11,32 @@ export default defineComponent({
       gameConfig: Object() as IGameConfig,
       route: "",
       showOriginal: false,
-      showPowerUps: false
+      showPowerUps: false,
+      gameSocket: socket
     }
   },
+  mounted() {
+    this.gameSocket.on('redirectGame', (response: number) => {
+      console.log("redirect YAAAY", response)
+      router.push({name: 'game', params: {id: response}})
+    })  
+  },
   methods: {
+    JoinMatchmaking() {
+      this.gameSocket.emit('joinMatchmaking')
+    },
     originalModeToggle() {
       this.gameConfig.mode = 'original'
-      this.route = "game"
+      this.route = ""
       this.showOriginal = true
       this.showPowerUps = false
+      this.JoinMatchmaking()
     },
     powerUpsModeToggle() {
       this.gameConfig.mode = 'powerUps'
       this.route = ""
       this.showPowerUps = true
       this.showOriginal = false
-    }
-  },
-  mounted() {
-    if (store.state.user.id == -1) {
-        this.$router.push('/login')
-        return
     }
   }
 })

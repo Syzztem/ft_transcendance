@@ -24,6 +24,7 @@ const routes: Array<RouteRecordRaw> = [
     component: Profil
   },
   {
+    name: 'game',
     path: '/game/:id',
     component: Game
   },
