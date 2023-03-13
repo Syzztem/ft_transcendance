@@ -1,3 +1,4 @@
+import { UserGateway } from './gateways/user.gateway';
 import { GameModule } from './game.module';
 import { ChannelModule } from './channel.module';
 import { UserModule } from './user.module';
@@ -34,7 +35,7 @@ import { BanAndMute } from './entities/BanAndMute';
   providers: [AppService],
 })
 export class AppModule {
-  constructor(private dataSource: DataSource) {}
+  constructor(private dataSource: DataSource) { }
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(CorsMiddleware).forRoutes({
       path: '*',

@@ -6,11 +6,11 @@ import { Channel } from 'diagnostics_channel';
 import { ChannelMessage } from './entities/ChannelMessage';
 import { BanAndMute } from './entities/BanAndMute';
 import { User } from './entities/User';
-import { ChannelGateway } from './gateways/channel.gateway';
+import { MessageGateway } from './gateways/message.gateway';
 
 @Module({
     imports: [TypeOrmModule.forFeature([Channel, ChannelMessage, BanAndMute, User])],
     controllers: [ChannelController,],
-    providers: [ChannelService, ChannelGateway],
+    providers: [ChannelService, MessageGateway],
 })
 export class ChannelModule { }

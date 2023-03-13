@@ -12,18 +12,22 @@ import { User } from '../entities/User';
 import { ChannelMessage } from '../entities/ChannelMessage';
 import { JoinChannelDTO } from '../dto/join-channel.dto';
 import { BanUserDTO } from '../dto/ban-user.dto';
+import SendDMDTO from 'src/dto/send-dm.dto';
+import { FriendMessage } from 'src/entities/FriendMessage';
 
 @WebSocketGateway()
-export class ChannelGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
+export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
 
     constructor(@InjectRepository(Channel) private channelRepository: Repository<Channel>,                 @InjectRepository(ChannelMessage) private messageRepository: Repository<ChannelMessage>,
                 @InjectRepository(BanAndMute) private bansAndMutesRepository: Repository<BanAndMute>,
-                @InjectRepository(User) private userRepository: Repository<User>) {}
+                @InjectRepository(User) private userRepository: Repository<User>,
+                @InjectRepository(FriendMessage) private usrmessageRepository: Repository<FriendMessage>) {}
                 
     @WebSocketServer()
     server: Server;
 
     private clients = new Map<number, Socket>();
+    private sockets = new Map<Socket, number>();
 
     @SubscribeMessage('newmsg')
     async handleMessage(@MessageBody() dto: PostMessageDTO,
@@ -34,14 +38,12 @@ export class ChannelGateway implements OnGatewayConnection, OnGatewayDisconnect,
         if (!user || chan.isMuted(dto.senderId))
             throw new BadRequestException("User doesn't exist, is not on this channel or is muted");
         this.server.to(chan.id.toString()).emit(user.username + "@" + chan.id + ":" + dto.message);
-        this.messageRepository.createQueryBuilder()
-        .insert()
-        .into(ChannelMessage)
-        .values({
+        const message = this.messageRepository.create({
             content: dto.message,
             sender: user,
             channel: chan
-        }).execute();
+        })
+        this.messageRepository.save(message);
     }
 
     @SubscribeMessage('join')
@@ -93,7 +95,6 @@ export class ChannelGateway implements OnGatewayConnection, OnGatewayDisconnect,
             isBanned: dto.isBan
         });
         this.bansAndMutesRepository.save(banAndMute);
-        return HttpStatus.OK;
     }
 
     @SubscribeMessage('getmsg')
@@ -160,26 +161,74 @@ export class ChannelGateway implements OnGatewayConnection, OnGatewayDisconnect,
                         @ConnectedSocket() client: Socket) {
         const message = await this.messageRepository.findOneBy({id});
         if (!message) throw new BadRequestException("Message doesn't exist");
+        if (message.sender.id )
         this.server.to(message.channel.id.toString()).emit("!" + id);
         this.messageRepository.delete(id)
         return HttpStatus.NO_CONTENT;
     }
+
+    @SubscribeMessage('sendDM')
+    async sendDM(   @MessageBody() dto : SendDMDTO,
+                    @ConnectedSocket() client: Socket) {
+        const user1 = await this.userRepository.findOneBy({id: dto.id1});
+        const user2 = await this.userRepository.findOneBy({id: dto.id2});
+
+        if (!user1 || !user2) return HttpStatus.NOT_FOUND;
+        if (user1.blocked.includes(user2) || user2.blocked.includes(user1))
+            throw new BadRequestException("Users blocked each other");
+        const socket = this.clients.get(user2.id);
+        if (socket) socket.emit(user1.username + ":" + dto.message)
+        const message = this.usrmessageRepository.create({
+            content: dto.message,
+            sender: user1,
+            receiver: user2
+        })
+        this.messageRepository.save(message)
+        return HttpStatus.OK;
+    }
+
+    @SubscribeMessage('deleteDM')
+    async deleteDM( @MessageBody() id: number,
+                    @ConnectedSocket() client: Socket) {
+        const message = await this.usrmessageRepository.findOneBy({id});
+        const recvsocket = this.clients.get(message.receiver.id);
+        if (!message || message.sender.id != this.sockets.get(client))
+            throw new BadRequestException("message dosn't exist or does not belong to the person who deleted it");
+        if (recvsocket) recvsocket.emit("!" + id);
+        this.messageRepository.delete(id);
+
+    }
+
+    @SubscribeMessage('addFriend')
+    async addFriend(@MessageBody() ids: number[],
+                    @ConnectedSocket() client: Socket) {
+        const user1 = await this.userRepository.findOneBy({id: ids[0]});
+        const user2 = await this.userRepository.findOneBy({id: ids[1]});
+
+        if (!user1 || !user2) throw new BadRequestException("One or more of the users doesn't exist");
+        if (user1.friends.includes(user2))
+            return ;
+        if(user1.blocked.includes(user2) || user2.blocked.includes(user1))
+            throw new BadRequestException("Users blocked each other");
+        this.clients.get(ids[1]).emit("+" + ids[0]);
+        user1.friends.push(user2);
+        this.userRepository.save(user2);
+    }
+
 
     async handleConnection(client: Socket, uid: number) {
         const user = await this.userRepository.findOneBy({id: uid});
         if(!user) client.disconnect();
         client.emit(user.channels.toString());
         this.clients.set(user.id, client);
+        this.sockets.set(client, user.id);
         client.join(user.channels.map(chan => chan.id.toString()));
         console.log('User connected');
     }
 
     async handleDisconnect(client: Socket) {
-        this.clients.forEach((value: Socket, key: number) => {
-            if (value === client) {
-                return this.clients.delete(key);
-            }
-        });
+        this.clients.delete(this.sockets.get(client));
+        this.sockets.delete(client);
         client.disconnect();
         console.log('User disconnected');
     }
