@@ -1,10 +1,7 @@
 import CreateUserDTO from './dto/create-user.dto';
-import FindUserDTO from './dto/find-user.dto';
-import ChangeUserDTO from './dto/change-user.dto';
-import {Request, Req, Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, Res, Response, UploadedFile, UseGuards, UseInterceptors, ImATeapotException, ConflictException, NotFoundException } from '@nestjs/common';
+import {Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Response, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import SendDMDTO from 'src/dto/send-dm.dto';
 import { User } from '../database/entities/User';
-import FindUserByNameDTO from 'src/dto/find-user-by-name.dto';
 import { UserService } from './users.service';
 import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -37,17 +34,17 @@ export class UsersController {
     @Get("profilepic/:username")
     async getProfilePic(@Param('username') username : string,
                         @Response() res : any) {
-        const path = '/usr/app/profilepics/' + username + '.jpg';
+        const path = UserService.PP_PATH + username + '.jpg';
         if (!fs.existsSync(path)) return res.status(HttpStatus.OK).sendFile('/usr/app/profilepics/defaultpp.jpg');
         res.status(HttpStatus.OK).sendFile(path);
     }
     @UseGuards(JwtAuthGuard)
-    @Post("setpp/:username")
+    @Post("/setpp/:username")
     @UseInterceptors(FileInterceptor('file'))
-    async setProfilePic(@Param('username') username: string,
+    async setProflePic(@Param('username') username: string,
                         @UploadedFile() file: Express.Multer.File,
                         @Response() res : any) {
-        const path = '/usr/app/profilepics/' + username + '.jpg';
+        const path = UserService.PP_PATH + username + '.jpg';
         fs.writeFile(path, file.buffer, (err) => {
             if (err) res.status(HttpStatus.INTERNAL_SERVER_ERROR).send();
             else res.status(HttpStatus.OK).send();
@@ -72,37 +69,20 @@ export class UsersController {
     }
 
     @Post("login")
-    async login(@Body() findUserByNameDTO: FindUserByNameDTO,
+    async login(@Body() username: string,
                     @Response() res: any) {
-        const user = await this.userService.getUserByName(findUserByNameDTO)
+        const user = await this.userService.getUserByName(username)
         if (!user) return res.status(HttpStatus.NOT_FOUND).send();
         return res.status(HttpStatus.OK).json({user})
     }
 
-
-    @Patch("username")
+    @Patch("username/:id")
     @HttpCode(HttpStatus.OK)
-    async changeUsername(@Req() req: any, @Body() changeUserDTO: ChangeUserDTO, @Response() res: any) {
-        const user = await this.userService.getUserById(changeUserDTO.id)
-        if (!user)
-            throw new NotFoundException();
- 
-        // if (!user) return res.status(HttpStatus.NOT_FOUND).send()
-        const oldPath = '/usr/app/profilepics/' + user.username + '.jpg'
-        const newPath = '/usr/app/profilepics/' + changeUserDTO.username + '.jpg'
-        fs.rename(oldPath, newPath, (err) => {
-            if (!user) throw new ImATeapotException();
-        })
-        try {
-            await this.userService.changeUsername(changeUserDTO.id, changeUserDTO.username);
-        }
-        catch {
-            throw new ConflictException('Username already exist');
-        }
-        res.status(HttpStatus.OK).send()
-        //res.status(await this.userService.changeUsername(changeUserDTO)).json({username: changeUserDTO.username})
+    async changeUsername(   @Body() username: string,
+                            @Param('id') id: number,
+                            @Response() res: any) {
+        res.status(await this.userService.changeUsername({id, username})).send()
     }
-
 
     // @Patch("username")
     // @HttpCode(HttpStatus.OK)

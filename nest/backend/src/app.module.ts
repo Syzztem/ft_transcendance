@@ -1,17 +1,14 @@
 import { UsersModule } from './users/users.module';
 import { GameModule } from './game/game.module';
 import { ChannelModule } from './channel/channel.module';
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
-import { ftStrategy } from './auth/strategies/ft.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { UsersController } from './users/users.controller';
-// import { CorsMiddleware } from './cors.middlewar';
 import { User } from './database/entities/User';
 import { Channel } from './database/entities/Channel';
 import { Game } from './database/entities/Game';
@@ -48,5 +45,5 @@ export class AppModule {
   //     path: '*',
   //     method: RequestMethod.ALL
   //   })
-  }
-// }
+// 
+}
