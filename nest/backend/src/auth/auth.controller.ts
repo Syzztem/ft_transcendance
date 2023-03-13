@@ -22,7 +22,7 @@ export class AuthController {
     url.pathname = 'login'
     url.searchParams.set('token', access_token)
     url.searchParams.set('id', req.user.id)
-    console.log(url.href)
+    console.log("url= ", url.href)
     res.redirect(url.href)
   }
 

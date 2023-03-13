@@ -1,9 +1,16 @@
 import { createStore } from 'vuex'
+import { AxiosInstance } from 'axios'
 
 const axios = require('axios')
 
-const instance = axios.create({
+const instance : AxiosInstance = axios.create({
   baseURL: 'http://' +  process.env.VUE_APP_URL + ':3000'
+})
+
+instance.interceptors.request.use(function (request) {
+  const token = localStorage.getItem('token')
+  request.headers.Authorization = token ? `Bearer ${token}` : '';
+  return request
 })
 
 let token: any = localStorage.getItem('token')
@@ -20,16 +27,16 @@ let id: any = localStorage.getItem('id')
 //   }
 // }
 
-if (!token) {
-  token: ''
-}
-else {
-  try {
-    instance.defaults.headers.common = {'Authorization': `Bearer ${token}`};
-  } catch (ex) {
-    token: ''
-  }
-}
+// if (!token) {
+//   token: ''
+// }
+// else {
+//   try {
+    // instance.defaults.headers.common = {'Authorization': `Bearer ${token}`};
+//   } catch (ex) {
+//     token: ''
+//   }
+// }
 
 // const config = {
 //   headers: {
@@ -70,8 +77,10 @@ const store = createStore({
   },
   actions: {
     getUserInfos({commit}) {
+      if (!localStorage.getItem('id')) // better solution ?
+        return ;
       return new Promise((resolve, reject) => {
-        instance.get("/user/id/" + id)
+        instance.get("/user/id/" + localStorage.getItem('id'))
         .then((response: any) => {
           console.log("Response from the front: ",response.data)
           commit('userInfos', response.data)
