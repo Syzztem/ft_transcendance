@@ -1,4 +1,4 @@
 export default class ChangeUserDTO {
-    username: string;
-    token: string;
+    id: number;
+    username: string;;
 }

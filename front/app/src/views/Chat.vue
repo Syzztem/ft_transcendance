@@ -13,6 +13,7 @@ import { mapActions ,mapState} from "vuex";
 	TODO :
 
   -use louis API to create channels
+  - integrer swagger
 	- add front protection so channels with same name can t be created?
 	- create a dialog to search for existing channels
 	- clickable profile on user -> opens 	OPTIONS PANEL	:	dm, profile page, add to friends, remove from friend block user, unblock user
@@ -42,7 +43,7 @@ export default defineComponent({
 				messages: null,
 				password: '',
 			},
-			id: localStorage.getItem('id'),
+			id: Number(localStorage.getItem('id')),
 		}
 	},
 	methods: {
@@ -222,7 +223,7 @@ export default defineComponent({
 									<v-card-actions>
 									<v-spacer/>
 										<v-btn color="error" text @click="dialog = false">Cancel</v-btn>
-										<v-btn color="primary" @click="createChannel(id)">Create</v-btn>
+										<v-btn color="primary" @click="createChannel(newChannel)">Create</v-btn>
 									</v-card-actions>
 								</v-card>
 								</v-dialog>

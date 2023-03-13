@@ -2,28 +2,30 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import CreateUserDTO from 'src/users/dto/create-user.dto';
 import ChangeUserDTO from 'src/last_dto/change-user.dto';
-import FindUserByNameDTO from 'src/dto/find-user-by-name.dto';
-import FindUserDTO from 'src/users/dto/find-user.dto';
 import SendDMDTO from 'src/dto/send-dm.dto';
 import { FriendMessage } from 'src/database/entities/FriendMessage';
 import { User } from 'src/database/entities/User';
 import { Repository } from 'typeorm';
+import * as fs from 'fs';
 
 @Injectable()
 export class UserService {
+    public static readonly PP_PATH = '/usr/app/profilepics/';
+
 	findOne(token: string) {
 		throw new Error('Method not implemented.');
 	}
+
     constructor(@InjectRepository(User) private userRepository: Repository<User>,
                 @InjectRepository(FriendMessage) private messageRepository: Repository<FriendMessage>) {}
 
-    async getUserByName(dto: FindUserByNameDTO): Promise<User> {
+    async getUserByName(username: string): Promise<User> {
         return this.userRepository.findOne({
             select: {
                 id:         true,
                 token:      true
             },
-            where: {username: dto.username}
+            where: {username: username}
         })
     }
 
@@ -46,15 +48,6 @@ export class UserService {
         });
     }
 
-    async getUserByToken(token: string): Promise<User> {
-        return this.userRepository.findOne({
-            select: {
-                username:   true
-            },
-            where: {token: token}
-        })
-    }
-
     async verifyToken(id: number, token: string) : Promise<number> {
         const user = await this.userRepository.findOneBy({id});
         if (!user) return HttpStatus.NOT_FOUND;
@@ -70,10 +63,18 @@ export class UserService {
         return this.userRepository.save(user);
     }
 
-    async changeUsername(id: number, new_name: string){
-        const user = await this.userRepository.findOneBy({ id: id })
-        // if (await this.userRepository.findOneBy({ username: dto.username })) return HttpStatus.CONFLICT
-        user.username = new_name
+    async changeUsername(dto: ChangeUserDTO): Promise<number> {
+        const user = await this.userRepository.findOneBy({ id: dto.id })
+
+        if (!user) return HttpStatus.NOT_FOUND;
+        if (await this.userRepository.count({ where: { username: dto.username } }) != 0)
+            return HttpStatus.CONFLICT;
+        user.username = dto.username;
+        const oldPath = UserService.PP_PATH + user.username + '.jpg';
+        const newPath = UserService.PP_PATH + dto.username + '.jpg';
+        fs.rename(oldPath, newPath, (err) => {
+            if (err) return HttpStatus.INTERNAL_SERVER_ERROR;
+        })
         await this.userRepository.save(user)
     }
 
@@ -158,7 +159,6 @@ export class UserService {
         this.userRepository.save(user2);
         return HttpStatus.OK;
     }
-
     async updateToken(id: number, jwtToken: string){
         this.userRepository.update({id: id}, {token: jwtToken})
     }

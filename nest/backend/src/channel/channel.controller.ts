@@ -92,7 +92,9 @@ export class ChannelController {
 
     @Post("new")
     @HttpCode(HttpStatus.OK)
-    createChannel(@Body() createChannelDTO: CreateChannelDTO) {
-        this.channelService.createChannel(createChannelDTO);
+    async createChannel(  @Body() createChannelDTO: CreateChannelDTO,
+                    @Response() res: any) {
+        const channel = await this.channelService.createChannel(createChannelDTO);
+        if (!channel) return res.status(HttpStatus.NOT_FOUND).send();
     }
 }
