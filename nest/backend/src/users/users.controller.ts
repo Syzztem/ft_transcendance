@@ -81,12 +81,12 @@ export class UsersController {
     @UseGuards(JwtAuthGuard)
     @Patch("username")
     @HttpCode(HttpStatus.OK)
-    async changeUsername(   @Body() username: string,
+    async changeUsername(   @Body() data: {username: string}, // {user: wour}
                             @Req() req,
                             @Response() res: any) {
-        console.log("USER", req)   
-        console.log("This is a username: ", username, req.user.sub);
-        res.status(await this.userService.changeUsername({id: req.user.sub, username})).send()
+        // console.log("USER", req)   
+        console.log("This is a username: ", data.username);
+        res.status(await this.userService.changeUsername({id: req.user.sub, username: data.username})).send()
     }
 
     // @Patch("username")
