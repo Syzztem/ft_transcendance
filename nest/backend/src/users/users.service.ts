@@ -57,7 +57,7 @@ export class UserService {
 
     async add(createUserDTO: CreateUserDTO) : Promise<User> {
         if (createUserDTO.username == 'default') return null;
-        if (await this.userRepository.count({ where: { username: createUserDTO.username } }) != 0)
+        if (await this.userRepository.count({ where: { login42: createUserDTO.login42 } }) != 0)
             return null;
         const user = this.userRepository.create(createUserDTO);
         return this.userRepository.save(user);

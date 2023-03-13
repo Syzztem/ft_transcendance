@@ -73,7 +73,7 @@ const store = createStore({
       return new Promise((resolve, reject) => {
         instance.get("/user/id/" + id)
         .then((response: any) => {
-          console.log(response.data)
+          console.log("Response from the front: ",response.data)
           commit('userInfos', response.data)
           resolve(response)
         })

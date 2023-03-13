@@ -34,7 +34,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   async logout(@Request() req, @Res() res) {
-    res.clearCookie('jwt', {sameSite: "Lax"})
+    res.clearCookie('jwt', {sameSite: "Lax"}) //not in cookies anymore
     res.send("logged out")
   }
 }

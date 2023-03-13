@@ -12,11 +12,13 @@ export class AuthService {
 	) {}
   
 	async validateUser(token: string): Promise<any> {
+		console.log('validateUser')
 		return this.jwtService.verify(token, {secret: jwtConstants.secret})
 	}
   
 	async login(user: any) {
-		const payload = { username: user.username, sub: user.userId };
+		console.log('login user', user)
+		const payload = { username: user.username, sub: user.id };
 		return this.jwtService.sign(payload);
 	}
 }
