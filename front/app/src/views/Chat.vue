@@ -41,7 +41,8 @@ export default defineComponent({
 				users: null,
 				messages: null,
 				password: '',
-			}
+			},
+			id: localStorage.getItem('id'),
 		}
 	},
 	methods: {
@@ -49,8 +50,12 @@ export default defineComponent({
 		createChannel(newchan : any)
 		{
 			newchan.id += 1;
-			this.$store.dispatch('createChannel', newchan );
+			this.$store.dispatch('createChannel', this.id);
 			this.dialog = false;
+		},
+		displayUser()
+		{
+			console.log(this.id);
 		}
 	},
     computed: {
@@ -70,11 +75,9 @@ export default defineComponent({
 		blocked_users() {
 			return this.$store.state.chat.blocked_users
 		},
-		user_id() {
-			return this.$store.state.user.id
-		},
 	},
 	mounted() {
+
 		// store.commit('addChannel', {name: 'channel3', id: 2, users: [{name :'user99'}], messages:[{sender:'user99',content:'yo'}]} );
 		// store.commit('setChannels', channels);
 		// socket.emit('findAllMessages', {}, (response : any) => {
@@ -219,11 +222,14 @@ export default defineComponent({
 									<v-card-actions>
 									<v-spacer/>
 										<v-btn color="error" text @click="dialog = false">Cancel</v-btn>
-										<v-btn color="primary" @click="createChannel(newChannel)">Create</v-btn>
+										<v-btn color="primary" @click="createChannel(id)">Create</v-btn>
 									</v-card-actions>
 								</v-card>
 								</v-dialog>
-								<v-btn id="Btnchannel" class="mt-2 mb-2">
+								<v-btn id="Btnchannel" class="mt-2 mb-2"
+								@click="displayUser()"
+
+								>
 									🔎
 								</v-btn>
 							</v-card>

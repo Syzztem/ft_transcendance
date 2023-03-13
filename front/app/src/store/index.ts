@@ -155,10 +155,24 @@ const store = createStore({
     rmChannel({ commit }, id) {
       commit("removeChannel", id);
     },
-    createChannel({ commit }, channel)
-    {
-      commit("addChannel", channel);
-    },
+    // createChannel({ commit }, channel)
+    // {
+    //   commit("addChannel", channel);
+    // },
+    createChannel({ commit }, user_id) {
+    return new Promise((resolve, reject) => {
+      instance
+        .post("/new", user_id)
+        .then((response : any) => {
+          const newChannel = response.data;
+          commit("addChannel", newChannel);
+          resolve(response);
+        })
+        .catch((error : any) => {
+          reject(error);
+        });
+    });
+  },
   },
   getters: {
     getUsername(state) {
