@@ -5,20 +5,21 @@ import {Server, Socket} from 'socket.io'
 import PostMessageDTO from 'src/dto/post-message.dto';
 import { Repository } from 'typeorm';
 import GetMessageDTO from 'src/dto/get-message.dto';
-import CreateChannelDTO from '../dto/create-channel.dto';
-import { Channel } from '../entities/Channel';
-import { BanAndMute } from '../entities/BanAndMute';
-import { User } from '../entities/User';
-import { ChannelMessage } from '../entities/ChannelMessage';
 import { JoinChannelDTO } from '../dto/join-channel.dto';
 import { BanUserDTO } from '../dto/ban-user.dto';
 import SendDMDTO from 'src/dto/send-dm.dto';
-import { FriendMessage } from 'src/entities/FriendMessage';
+import { Channel } from 'src/database/entities/Channel';
+import { BanAndMute } from 'src/database/entities/BanAndMute';
+import { User } from 'src/database/entities/User';
+import { FriendMessage } from 'src/database/entities/FriendMessage';
+import CreateChannelDTO from 'src/channel/dto/create-channel.dto';
+import { ChannelMessage } from 'src/database/entities/ChannelMessage';
 
 @WebSocketGateway()
 export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
 
-    constructor(@InjectRepository(Channel) private channelRepository: Repository<Channel>,                 @InjectRepository(ChannelMessage) private messageRepository: Repository<ChannelMessage>,
+    constructor(@InjectRepository(Channel) private channelRepository: Repository<Channel>,                
+                @InjectRepository(ChannelMessage) private messageRepository: Repository<ChannelMessage>,
                 @InjectRepository(BanAndMute) private bansAndMutesRepository: Repository<BanAndMute>,
                 @InjectRepository(User) private userRepository: Repository<User>,
                 @InjectRepository(FriendMessage) private usrmessageRepository: Repository<FriendMessage>) {}
