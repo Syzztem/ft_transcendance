@@ -1,9 +1,10 @@
-/* eslint-disable */
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from '@/store'
 import 'vuetify/styles'
+import VueCropper from 'vue-cropper'; 
+import 'vue-cropper/dist/index.css'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
@@ -14,6 +15,8 @@ const vuetify = createVuetify({
   directives,
 })
 
-createApp(App).use(vuetify).use(store).use(router).mount('#app')
+const app = createApp(App).use(vuetify).use(VueCropper).use(store).use(router)
 
-App.config.globalProperties.$store=store
+app.config.globalProperties.$store=store
+
+app.mount('#app')

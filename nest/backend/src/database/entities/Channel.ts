@@ -28,7 +28,7 @@ export class Channel {
     isPrivate: boolean;
 
     @Column({type: "varchar", nullable: true, default: null})
-    password: string;
+    password?: string;
 
     @OneToMany(() => BanAndMute, ban => ban.channel)
     @JoinColumn()

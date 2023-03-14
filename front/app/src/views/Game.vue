@@ -78,10 +78,6 @@ export default defineComponent({
     ///
   },
   mounted() {
-    if (store.state.user.id == -1) {
-        this.$router.push('/login')
-        return
-  }
     // 
     // temporaire, est censé recevoir les données depuis le backend
     //
@@ -120,7 +116,7 @@ export default defineComponent({
     this.ball.speedY = this.gameConfig.gameSpeed
     this.ball.ray = 7
     this.ball.hits = 0
-    //
+    // 
     //
     //
     /// temoraire /// bot / QA

@@ -15,16 +15,15 @@ export class AuthService {
   
 	async validateUser(token: string): Promise<any> {
 	return this.jwtService.verify(token, {secret: jwtConstants.secret})
-
 	}
   
-	async login(user: any) {
-		console.log('Sign JWT')
-	  const payload = { username: user.username, sub: user.userId };
-	  return { 
-		access_token: this.jwtService.sign(payload),
-	  };
-	}
+	// async login(user: any) {
+	// 	console.log('Sign JWT')
+	//   const payload = { username: user.username, sub: user.userId };
+	//   return { 
+	// 	access_token: this.jwtService.sign(payload),
+	//   };
+	// }
 
 	async generateTwoFactorAuthenticationSecret(user: User) {
 		const secret = authenticator.generateSecret();
@@ -62,4 +61,10 @@ export class AuthService {
 		  access_token: this.jwtService.sign(payload),
 		};
 	  }
+  
+	async login(user: any) {
+		console.log('login user', user)
+		const payload = { username: user.login42, sub: user.id };
+		return this.jwtService.sign(payload);
+	}
 }

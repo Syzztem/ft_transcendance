@@ -4,28 +4,10 @@
       <v-card id="card" class="mt-6" color="transparent" height="700" width="300" flat>
         <div class="screen">
           <v-card height="270" color="rgb(0, 0, 0, 0.5)">
-          <v-row justify="center" class="mt-2">
+            <v-row justify="center" class="mt-2">
               <div class="avatar">
-                <NiceAvatar v-if="ifRd"
-                  ref="niceAvatar"
-                  :size="size"
-                  :face-color="faceColor"
-                  :eye="eye"
-                  :eye-brow="eyeBrow"
-                  :ear="ear"
-                  :earring="earring"
-                  :mouth="mouth"
-                  :hair="hair"
-                  :hair-color="hairColor"
-                  :nose="nose"
-                  :glasses="glasses"
-                  :beard="beard"
-                  :beard-color="beardColor"
-                  :shirt="shirt"
-                  :shirt-color="shirtColor"
-                  :bg-color="bgColor"
-                />
-                <cropper v-else class="cropper" :stencil-props="{ aspectRatio: 1 }" :src="url" />
+                <NiceAvatar v-if="ifRd" ref="niceAvatar" :size="size" :face-color="faceColor" :eye="eye" :eye-brow="eyeBrow" :ear="ear" :earring="earring" :mouth="mouth" :hair="hair" :hair-color="hairColor" :nose="nose" :glasses="glasses" :beard="beard" :beard-color="beardColor" :shirt="shirt" :shirt-color="shirtColor" :bg-color="bgColor" />
+                <cropper ref="cropper" v-else class="cropper" :stencil-props="{ aspectRatio: 1 }" :src="url" />
               </div>
             </v-row>
           </v-card>
@@ -33,20 +15,22 @@
             <div class="options">
               <div class="buttons">
                 <v-row justify="center">
-                  <v-btn type="button" id="btn" class="mt-6" @click="random" height="120" width="250" color="rgb(0, 75, 255)">
+                  <v-btn type="button" id="btn" class="mt-6" @click="random" height="120" width="300" color="rgb(0, 75, 255)">
                     Random
                   </v-btn>
                 </v-row>
                 <v-row justify="center">
-                  <v-btn type="button" id="btn" class="mt-6" @click="upload" height="120"  width="250" color="rgb(0, 75, 255)">
+                  <v-btn type="button" id="btn" class="mt-6" onclick="document.getElementById('inpt').click()" height="120" width="300" color="rgb(0, 75, 255)">
                     Upload
-                    <input type="file" id="btn" class="mt-6" @click="upload" @change="onFileChange" />
                   </v-btn>
                 </v-row>
                 <v-row justify="center">
-                  <v-btn type="button" id="btn" class="mt-6" @click="sendPic" height="120"  width="250" color="rgb(0, 75, 255)">
+                  <v-btn type="button" id="btn" class="mt-6" @click="sendPic" height="120" width="300" color="rgb(0, 75, 255)">
                     Ok
                   </v-btn>
+                </v-row>
+                <v-row>
+                  <input type="file" id="inpt" class="mt-6" @click="upload" @change="onFileChange" style="visibility:hidden;" />
                 </v-row>
               </div>
             </div>
@@ -54,7 +38,7 @@
         </div>
       </v-card>
     </v-row>
-  </v-container>
+</v-container>
 </template>
   
 <script lang="ts">
@@ -76,11 +60,11 @@ import {
   BEARD_COLORS,
 } from "@/components/NiceAvatar/types"
 import NiceAvatar from "@/components/NiceAvatar/NiceAvatar.vue"
-import { defineComponent, Events } from 'vue'
+import { defineComponent } from 'vue'
 import { Cropper } from 'vue-advanced-cropper'
+import 'vue-cropper/dist/index.css'
 import 'vue-advanced-cropper/dist/style.css'
-import store from '@/store'
-  
+
 export default defineComponent({
   components: {
     NiceAvatar,
@@ -91,6 +75,12 @@ export default defineComponent({
       url: "",
       ifRd: true,
       size: 250,
+      coordinates: {
+        width: 0,
+        height: 0,
+        left: 0,
+        top: 0
+      },
       faceColor: FACE_COLORS[0],
       eye: EYES.OVAL,
       eyeBrow: EYEBROWS.EYEBROWS_UP,
@@ -141,6 +131,7 @@ export default defineComponent({
       return Object.values(SHIRT)
     }
   },
+
   mounted() {
     this.random()
   },
@@ -174,12 +165,45 @@ export default defineComponent({
       this.ifRd = false
     },
     sendPic() {
-      this.$store.dispatch('changeProfilePic', { token: this.$store.state.user.token })
-      .then(() => {
-        
-      }, (error) => {
-          console.log(error)
-      })
+      if (this.ifRd) {
+        const $el = (this.$refs.niceAvatar as any).$el
+        if ($el) {
+          const canvas = document.createElement("canvas")
+          canvas.height = 250
+          canvas.width = 250
+          const ctx: any = canvas.getContext("2d")
+          const img = document.createElement("img")
+          img.setAttribute("src", "data:image/svg+xml;base64," + btoa(new XMLSerializer().serializeToString($el)))
+          img.onload = () => {
+            ctx.drawImage(img, 0, 0, canvas.height, canvas.width)
+            const formData = new FormData()
+            canvas.toBlob((blob: any) => {
+              formData.append('file', blob)
+              this.$store.dispatch('changeProfilePic', {
+                formData: formData
+              })
+                .then(() => { },
+                  () => {
+                  })
+            }, "image/jpg")
+          }
+        }
+      }
+      else {
+        const { canvas } = (this.$refs.cropper as any).getResult()
+        if (canvas) {
+          const formData = new FormData()
+          canvas.toBlob((blob: any) => {
+            formData.append('file', blob)
+            this.$store.dispatch('changeProfilePic', {
+              formData: formData
+            })
+              .then(() => { },
+                () => {
+                })
+          }, "image/jpg")
+        }
+      }
     }
   }
 })
@@ -198,8 +222,8 @@ export default defineComponent({
 }
 
 .cropper {
-	height: 250px;
-	width: 250px;
-	background: #DDD;
+  height: 250px;
+  width: 250px;
+  background: #DDD;
 }
 </style>
