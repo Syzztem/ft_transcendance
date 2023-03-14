@@ -9,16 +9,16 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(private authService: AuthService) {}
   
-  @UseGuards(ftAuthGuard)
+  // @UseGuards(ftAuthGuard)
   @Post('/auth/login')
   async login(@Request() req) {
     return req.user;
   }
   
-  @UseGuards(JwtAuthGuard)
-  @Get('profile')
-  getProfile(@Request() req) {
-    return req.user;
-  }
+  // @UseGuards(JwtAuthGuard)
+  // @Get('profile')
+  // getProfile(@Request() req): any {
+  //   return req.user;
+  // }
   
 }

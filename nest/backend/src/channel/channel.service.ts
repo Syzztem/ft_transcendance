@@ -9,7 +9,6 @@ import { Channel } from 'src/database/entities/Channel';
 import { ChannelMessage } from 'src/database/entities/ChannelMessage';
 import { User } from 'src/database/entities/User';
 import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt'
 
 @Injectable()
 export class ChannelService {
@@ -156,7 +155,15 @@ export class ChannelService {
     }
 
     async createChannel(dto: CreateChannelDTO) : Promise<Channel>{
-        const channel = this.channelRepository.create(dto);
+        // const user = await this.userRepository.findByLogin({id: dto.admin});
+        const user = 'placeholder';
+        if (!user) return null;
+        const channel = this.channelRepository.create();
+        channel.name = dto.name;
+        // channel.admin = user;
+        // channel.users.push(user);
+        // channel.password = dto.password;
+        // channel.isPrivate = dto.password == null ? false : true;
         return this.channelRepository.save(channel);
     }
 }

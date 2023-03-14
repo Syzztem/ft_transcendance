@@ -27,6 +27,15 @@ Envoie un message prive de la part de SendDmDTO.id1 a SendDMDTO.id2
 `FORBIDDEN`: Un des deux utilisateurs a bloque l'autre
 ___
 
+`PATCH` `username/<ID>`  
+Change le nom de l'utilistaeur pointe par ID en le nom d'utilisateur passe en parametre  
+### http codes:
+
+`OK` Succes  
+`INTERNAL_SERVER_ERROR` Erreur dans la modification du nom du fichier contenant la photo de profil  
+`CONFLICT` Le nom d'utilisateur est deja utilise
+___
+
 `PATCH` `friend/<ID1>/<ID2>`  
 Cree un lien d'amitie de l'utilisateur ID1 a l'utilisateur ID2
 #### http codes:
@@ -156,3 +165,13 @@ Supprime le channel pointe par ID
 `NO_CONTENT` : Succes  
 `NOT_FOUND` : Le channel n'existe pas  
 ___
+
+## Controller les channels via une passerelle de prises de toile
+
+### Messages recus:
+
+`username@chanId:message` Message envoye par `username` dans le channel pointe par`chanId`   
+
+`!messageId` Le message pointe par `messageId` a ete supprime  
+
+`/chanId:message` L'utilisateur a quitte ou a ete banni du channel pointe par chanId, ou ce dernier a ete supprime  

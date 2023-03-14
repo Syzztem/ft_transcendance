@@ -1,34 +1,57 @@
 import { createStore } from 'vuex'
+import { AxiosInstance } from 'axios'
 
 const axios = require('axios')
 
-const instance = axios.create({
-  baseURL: "http://rcorenti.fr:3000"
+const instance : AxiosInstance = axios.create({
+  baseURL: 'http://' +  process.env.VUE_APP_URL + ':3000'
 })
 
-let user: any = localStorage.getItem('user')
-if (!user) {
-  user = {
-    id: -1,
-    token: ''
-  }
-}
-else {
-  try {
-    user = JSON.parse(user)
-  } catch (ex) {
-    user = {
-      id: -1,
-      token: ''
-    }
-  }
-}
+instance.interceptors.request.use(function (request) {
+  const token = localStorage.getItem('token')
+  request.headers.Authorization = token ? `Bearer ${token}` : '';
+  return request
+})
+
+let token: any = localStorage.getItem('token')
+let id: any = localStorage.getItem('id')
+
+// if (!token) {
+//   token: ''
+// }
+// else {
+//   try {
+//     instance.defaults.headers.common.Authorization = `Bearer ${token}`;
+//   } catch (ex) {
+//     token: ''
+//   }
+// }
+
+// if (!token) {
+//   token: ''
+// }
+// else {
+//   try {
+    // instance.defaults.headers.common = {'Authorization': `Bearer ${token}`};
+//   } catch (ex) {
+//     token: ''
+//   }
+// }
+
+// const config = {
+//   headers: {
+//     Authorization: 'Bearer ${token}'
+//   }
+// }
 
 const store = createStore({
   state: {
     status: '',
-    user: user,
     userInfos: {
+      profilePic: '',
+      username: ''
+    },
+    profileInfos: {
       profilePic: '',
       username: ''
     }
@@ -37,59 +60,43 @@ const store = createStore({
     setStatus(state, status) {
       state.status = status
     },
-    logUser(state, user) {
-      localStorage.setItem('user', JSON.stringify(user))
-      state.user = user
+    profileInfos(state, profileInfos) {
+      state.profileInfos.username = profileInfos.username
+      state.profileInfos.profilePic = 'http://' +  process.env.VUE_APP_URL + ':3000/user/profilepic/' + profileInfos.username
     },
     userInfos(state, userInfos) {
-      state.userInfos = userInfos
-      state.userInfos.profilePic = 'http://rcorenti.fr:3000/user/profilepic/' + userInfos.username
+      state.userInfos.username = userInfos.username
+      state.userInfos.profilePic = 'http://' +  process.env.VUE_APP_URL + ':3000/user/profilepic/' + userInfos.username
     },
     logout(state) {
-      state.user = {
-        id: -1,
-        token: ''
-      }
-      localStorage.removeItem('user')
+      id = -1
+      token = ''
+      localStorage.removeItem('id')
+      localStorage.removeItem('token')
     }
   },
   actions: {
-    createAccount({commit}, userInfos) {
-      commit('setStatus', 'loading_create')
-      return new Promise((resolve, reject) => {
-        commit
-        instance.post("/user/new", userInfos)
-        .then((response: any) => {
-          commit('setStatus', 'created')
-          resolve(response)
-        })
-        .catch((error: any) => {
-          commit('setStatus', 'error_create')
-          reject(error)
-        })
-      })
-    },
-    login({commit}, userInfos) {
-      commit('setStatus', 'loading_login')
-      return new Promise((resolve, reject) => {
-        instance.post("/user/login", userInfos)
-        .then((response: any) => {
-          commit('setStatus', '')
-          commit('logUser', response.data)
-          resolve(response)
-        })
-        .catch((error: any) => {
-          commit('setStatus', 'error_login')
-          reject(error)
-        })
-      })
-    },
     getUserInfos({commit}) {
+      if (!localStorage.getItem('id')) // better solution ?
+        return ;
       return new Promise((resolve, reject) => {
-        instance.get("/user/id/" + this.state.user.id)
+        instance.get("/user/id/" + localStorage.getItem('id'))
         .then((response: any) => {
-          console.log(response.data)
+          // console.log("Response from the front: ",response.data)
           commit('userInfos', response.data)
+          resolve(response)
+        })
+        .catch((error: any) => {
+          reject(error)
+        })
+      })
+    },
+    getProfileInfos({commit}, id) {
+      return new Promise((resolve, reject) => {
+        instance.get("/user/id/" + id)
+        .then((response: any) => {
+          // console.log(response.data)
+          commit('profileInfos', response.data)
           resolve(response)
         })
         .catch((error: any) => {
@@ -104,14 +111,14 @@ const store = createStore({
           commit('userInfos', response.data)
           resolve(response)
         })
-        .catch((error: any) => {  
+        .catch((error: any) => {
           reject(error)
         })
       })
     },
-    changeProfilePic({commit}, userInfos) {
+    changeProfilePic({commit}, data) {
       return new Promise((resolve, reject) => {
-        instance.post("/user/setpp/", userInfos)
+        instance.post("/user/setpp/" + this.state.userInfos.username, data.formData)
         .then((response: any) => {
           resolve(response)
         })
@@ -120,6 +127,23 @@ const store = createStore({
           reject(error)
         })
       })
+    },
+    logout({commit}) {
+      return new Promise((resolve, reject) => {
+        instance.post("/auth/logout")
+        .then((response: any) => {
+          resolve(response)
+        })
+        .catch((error: any) => {
+          console.log(error)
+          reject(error)
+        })
+      })
+    }
+  },
+  getters: {
+    getUsername(state) {
+      return state.userInfos.username
     }
   }
 })

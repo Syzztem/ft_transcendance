@@ -62,10 +62,10 @@ export class GameGateway implements OnGatewayDisconnect, OnGatewayConnection{
 		return data;
 	}
 
-    @SubscribeMessage('hello')
-    hello(): void {
-		console.log("Hello from Nest")
-	}
+    // @SubscribeMessage('hello')
+    // hello(): void {
+	// 	console.log("Hello from Nest")
+	// }
 
 	@SubscribeMessage('joinMatchmaking')
 	async joinMatchmaking(@ConnectedSocket() clientSocket: Socket) {

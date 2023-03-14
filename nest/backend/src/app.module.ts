@@ -1,6 +1,7 @@
 import { UsersModule } from './users/users.module';
 import { GameModule } from './game/game.module';
 import { ChannelModule } from './channel/channel.module';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -14,8 +15,6 @@ import { Game } from './database/entities/Game';
 import { ChannelMessage } from './database/entities/ChannelMessage';
 import { FriendMessage } from './database/entities/FriendMessage';
 import { BanAndMute } from './database/entities/BanAndMute';
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
-import { CorsMiddleware } from './cors.middlewar';
 
 @Module({
   imports: [PassportModule, AuthModule, UsersModule, ConfigModule.forRoot({
@@ -41,10 +40,10 @@ import { CorsMiddleware } from './cors.middlewar';
 })
 export class AppModule {
   constructor(private dataSource: DataSource) {}
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(CorsMiddleware).forRoutes({
-      path: '*',
-      method: RequestMethod.ALL
-    })
-  }
+  // configure(consumer: MiddlewareConsumer) {
+  //   consumer.apply(CorsMiddleware).forRoutes({
+  //     path: '*',
+  //     method: RequestMethod.ALL
+  //   })
+// 
 }

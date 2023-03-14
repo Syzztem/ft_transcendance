@@ -1,29 +1,30 @@
-import { Controller, UseGuards, Post, Request , Get, Query, Body, Redirect, Res, Req, HttpCode, UnauthorizedException } from "@nestjs/common";
+import { Controller, UseGuards, Post, Request , Get, Body, Redirect, Res, Req } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { AuthGuard } from "@nestjs/passport";
 import { ftAuthGuard } from "./guards/ft.guard";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import { UserService } from "src/users/users.service";
+import { UnauthorizedException, HttpCode } from "@nestjs/common";
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService, private userService: UserService) {}
 
-  
-  @UseGuards(ftAuthGuard)
-  @Get()
-  async ftlogin(){
-  }
-  
   @Get('42/callback')
   @UseGuards(ftAuthGuard)
   async redirect(@Request() req, @Res() res) {
-    const access_token = this.authService.login(req.user)
-    res.cookie('jwt', access_token, {sameSite: "Lax"})
-    res.redirect('http://localhost:8080')
+    const access_token = await this.authService.login(req.user)
+    await this.userService.updateToken(req.user.id, access_token);
+    //res.json({token: access_token}) avec ca la requete est envoyee au back
+    const url = new URL('http://' + process.env.URL)
+    url.port = '8080'
+    url.pathname = 'login'
+    url.searchParams.set('token', access_token)
+    url.searchParams.set('id', req.user.id)
+    // console.log("url= ", url.href)
+    res.redirect(url.href)
   }
 
-  @UseGuards(ftAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@Request() req) {
     return req.user;
@@ -59,11 +60,10 @@ export class AuthController {
     return this.authService.loginWith2fa(request.user);
   }
 
-
-  @UseGuards(ftAuthGuard)
-  @Post('auth/logout')
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
   async logout(@Request() req, @Res() res) {
-    res.clearCookie('jwt', {sameSite: "Lax"})
+    res.clearCookie('jwt', {sameSite: "Lax"}) //not in cookies anymore
     res.send("logged out")
   }
 }
