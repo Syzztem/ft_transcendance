@@ -14,6 +14,7 @@ export class AuthService {
 	) {}
   
 	async validateUser(token: string): Promise<any> {
+		// console.log("verify: ", this.jwtService.verify(token, {secret: jwtConstants.secret}))
 	return this.jwtService.verify(token, {secret: jwtConstants.secret})
 	}
   

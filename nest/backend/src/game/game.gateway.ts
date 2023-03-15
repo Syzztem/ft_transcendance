@@ -10,7 +10,7 @@ import { from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Server, Socket } from 'socket.io';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { UseGuards } from '@nestjs/common';
+import { ConsoleLogger, UseGuards } from '@nestjs/common';
 import Board from './interfaces/Board.interface';
 import Score from './interfaces/Score.interface';
 import WsUser from './interfaces/WsUser.interface';
@@ -18,7 +18,9 @@ import { GameService } from './game.service';
 import { UserService } from '../users/users.service';
 import { User } from 'src/database/entities/User';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit } from '@nestjs/websockets';
-import { Logger } from '@nestjs/common';
+import { Logger, Request } from '@nestjs/common';
+import { AuthService } from 'src/auth/auth.service';
+import { JwtService } from '@nestjs/jwt';
 
 @WebSocketGateway(/*{
 cors: {
@@ -26,6 +28,7 @@ cors: {
 },
 }*/)
 
+// @UseGuards(JwtAuthGuard)
 export class GameGateway implements OnGatewayDisconnect, OnGatewayConnection{
 	@WebSocketServer()
 	server: Server;
@@ -35,15 +38,23 @@ export class GameGateway implements OnGatewayDisconnect, OnGatewayConnection{
 	constructor(
 		private gameService: GameService,
 		private userService: UserService,
+		private jwtService: JwtService
 		// pendingPlayer: Array<WsUser>
 	) {}
 
-	handleConnection(@ConnectedSocket() clientSocket: Socket) {
-		this.logger.log('New client connected');	
+	async handleConnection(@ConnectedSocket() clientSocket: Socket, @Request() req) {
+
+		const payload = clientSocket.handshake.auth
+		console.log("payload: ", payload);
+		  const user = await this.userService.findOneById(this.jwtService.decode(clientSocket.handshake.auth.token).sub);  
+		  if (!user)
+		  	clientSocket.disconnect();
+		else
+			this.logger.log('New client connected in game gateway');	
 	}
 
 	handleDisconnect(@ConnectedSocket() clientSocket: Socket) {
-		this.logger.log('Client disconnected');
+		this.logger.log('Client disconnected from game gateway');
 		this.leaveMatchmaking(clientSocket);
 	}
 
@@ -62,35 +73,32 @@ export class GameGateway implements OnGatewayDisconnect, OnGatewayConnection{
 		return data;
 	}
 
-    // @SubscribeMessage('hello')
-    // hello(): void {
-	// 	console.log("Hello from Nest")
-	// }
-
 	@SubscribeMessage('joinMatchmaking')
-	async joinMatchmaking(@ConnectedSocket() clientSocket: Socket) {
-		console.log("join mactchmaking :", clientSocket.id)
-		const user = await this.userService.findOneById(1) // placeholder ==> Id from JWT
+	async joinMatchmaking(@ConnectedSocket() clientSocket: Socket, @Request() req) {
+		const clientId = this.jwtService.decode(clientSocket.handshake.auth.token).sub
+		const user = await this.userService.findOneById(clientId)
 		const challenger = { socketId: clientSocket.id, user: user}
-
+		this.logger.log('Player ' + challenger.user.username +  ' joined the queue');
+		
 		if (this.pendingPlayer.length == 0){
 			this.pendingPlayer.push(challenger)
-			console.log("push user :", this.pendingPlayer)
+			// console.log("push user :", this.pendingPlayer)
 			return ;
 		}
 		const owner = this.pendingPlayer.pop()
-		console.log("remove user :", this.pendingPlayer)
+		// console.log("remove user :", this.pendingPlayer)
 		this.initGame(owner, challenger)
 	}
 
 	async initGame(owner: WsUser, adverse: WsUser) {
-		console.log("initGame :", owner.socketId, adverse.socketId)
+		// console.log("initGame :", owner.socketId, adverse.socketId)
 		const game = await this.gameService.newGame({
 			player1: owner.user,
 			player2: adverse.user,
 			player1score: 0, // default value in entity ?
 			player2score: 0  
 		})
+		this.logger.log('Initialization of room ' + game.id + " with " + owner.user.username + " against " + adverse.user.username); 
 		const ownerSocket = this.server.sockets.sockets.get(owner.socketId);
 		const adverdeSocket = this.server.sockets.sockets.get(adverse.socketId);
 		ownerSocket.join(`game:${game.id}`)

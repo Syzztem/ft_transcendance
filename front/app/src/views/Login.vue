@@ -19,6 +19,7 @@
 import router from '@/router'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
+import socket from '@/websocket'
 
 export default defineComponent({
     data() {
@@ -31,9 +32,10 @@ export default defineComponent({
     },
     mounted() {
         // console.log('token: ', this.$route.query.token)
-        if (this.$route.query.token) {
+        if (this.$route.query.token) { 
             localStorage.setItem('token', this.$route.query.token as any)
             localStorage.setItem('id', this.$route.query.id?.toString() as any)
+            socket.connect()
             this.$router.push('userInfos')
             return
         }
