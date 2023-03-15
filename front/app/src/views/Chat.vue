@@ -38,9 +38,7 @@ export default defineComponent({
 			dialog: false,
 			newChannel: {
 				name: 'test',
-				id: 0,
-				users: null,
-				messages: null,
+				adminId: 0,
 				password: '',
 			},
 			id: Number(localStorage.getItem('id')),

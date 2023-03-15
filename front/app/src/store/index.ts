@@ -159,10 +159,10 @@ const store = createStore({
     // {
     //   commit("addChannel", channel);
     // },
-    createChannel({ commit }, user_id) {
+    createChannel({ commit }, channelInfos) {
     return new Promise((resolve, reject) => {
       instance
-        .post("new", user_id)
+        .post("new", channelInfos)
         .then((response : any) => {
           const newChannel = response.data;
           commit("addChannel", newChannel);
