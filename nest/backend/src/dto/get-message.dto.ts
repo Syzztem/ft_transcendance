@@ -1,6 +1,6 @@
 import { Channel } from "src/database/entities/Channel";
 
 export default class GetMessageDTO {
-    channel: Channel;
+    channelId: number;
     page: number;
 }
