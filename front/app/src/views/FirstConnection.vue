@@ -55,7 +55,7 @@ export default defineComponent({
     },
     methods: {
         ok() {
-            this.$store.dispatch('changeUsername', {token: localStorage.getItem('token'), username: this.username})
+            this.$store.dispatch('changeUsername', {username: this.username})
             .then((res) => {
                 this.$router.push('/')
             }
