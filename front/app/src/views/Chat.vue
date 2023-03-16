@@ -12,8 +12,6 @@ import { mapActions ,mapState} from "vuex";
 /*
 	TODO :
 
-	-	use louis API to create channels
-	- add front protection so channels with same name can t be created?
 	- create a dialog to search for existing channels
 	- clickable profile on user -> opens 	OPTIONS PANEL	:	dm, profile page, add to friends, remove from friend block user, unblock user
 											ADVANCED PANEL	:	promote/demote/ban/kick/unban
@@ -37,7 +35,8 @@ export default defineComponent({
 			newChannel: {
 				name: 'test',
 				password: '',
-				adminId: 0,
+				id: 0,
+				adminId: -1,
 			},
 			id: Number(localStorage.getItem('id')),
 		}
@@ -47,6 +46,7 @@ export default defineComponent({
 		createChannel(newchan : any)
 		{
 			newchan.id += 1;
+			newchan.adminId = this.id;
 			this.$store.dispatch('createChannel', newchan);
 			this.dialog = false;
 		},
@@ -70,7 +70,6 @@ export default defineComponent({
 		},
 	},
 	mounted() {
-		// store.commit('addChannel', {name: 'channeltest', id: 42, users: [{name :'user99'}], messages:[{sender:'user99',content:'yo'}]} );
 	},
 })
 

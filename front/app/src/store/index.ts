@@ -177,12 +177,13 @@ const store = createStore({
           adminId: channelInfos.adminId,
           password: channelInfos.password,
         };
+        console.log(data);
         instance
           .post("/channel/new", data)
           .then((response : any) => {
             const newChannel = response.data;
             console.log(newChannel);
-            // commit("addChannel", newChannel);
+            commit("addChannel", newChannel);
             resolve(response);
           })
           .catch((error : any) => {
