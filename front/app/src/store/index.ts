@@ -16,34 +16,6 @@ instance.interceptors.request.use(function (request) {
 let token: any = localStorage.getItem('token')
 let id: any = localStorage.getItem('id')
 
-// if (!token) {
-//   token: ''
-// }
-// else {
-//   try {
-//     instance.defaults.headers.common.Authorization = `Bearer ${token}`;
-//   } catch (ex) {
-//     token: ''
-//   }
-// }
-
-// if (!token) {
-//   token: ''
-// }
-// else {
-//   try {
-    // instance.defaults.headers.common = {'Authorization': `Bearer ${token}`};
-//   } catch (ex) {
-//     token: ''
-//   }
-// }
-
-// const config = {
-//   headers: {
-//     Authorization: 'Bearer ${token}'
-//   }
-// }
-
 const store = createStore({
   state: {
     status: '',

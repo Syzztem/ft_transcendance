@@ -12,20 +12,23 @@ export default defineComponent({
       route: "",
       showOriginal: false,
       showPowerUps: false,
-      gameSocket: socket
+      gameSocket: socket,
+      isMatchmaking: false
     }
   },
   mounted() {
     this.gameSocket.on('redirectGame', (response: number) => {
-      console.log("redirect YAAAY", response)
       router.push({name: 'game', params: {id: response}})
     })  
   },
   methods: {
     JoinMatchmaking() {
+      this.isMatchmaking = true
       this.gameSocket.emit('joinMatchmaking')
     },
     originalModeToggle() {
+      if (this.isMatchmaking)
+        return ;
       this.gameConfig.mode = 'original'
       this.route = ""
       this.showOriginal = true
@@ -33,6 +36,8 @@ export default defineComponent({
       this.JoinMatchmaking()
     },
     powerUpsModeToggle() {
+      if (this.isMatchmaking)
+        return ;
       this.gameConfig.mode = 'powerUps'
       this.route = ""
       this.showPowerUps = true

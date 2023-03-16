@@ -4,6 +4,7 @@ import IScore from '../models/IScore'
 import ITable from '../models/ITable'
 import IPlayer from '../models/IPlayer'
 import IGameConfig from '../models/IGameConfig'
+import Board from '@/models/Board.interface'
 
 export class Game {
     gameConfig: IGameConfig
@@ -127,8 +128,11 @@ export class Game {
     }
 
     private updatePaddle() {
-        if (this.gameConfig.keyUp || this.gameConfig.keyDown)
+        console.log("update Paddle")
+        if (this.gameConfig.keyUp || this.gameConfig.keyDown) {
+            console.log("Owner move")
             this.ownerPaddle.lastPos = this.ownerPaddle.pos
+        }
         if (this.gameConfig.keyDown && this.ownerPaddle.pos < this.table.height - this.ownerPaddle.height - this.ball.ray * 4)
             this.ownerPaddle.pos += this.ownerPaddle.speed * 1000 / 60
         else if (this.gameConfig.keyDown)
@@ -139,8 +143,10 @@ export class Game {
             this.ownerPaddle.pos = this.ball.ray * 4
         /// temporaire /// bot / QA
         if (this.gameConfig.modeButtonText === 'Q/A') {
-            if (this.gameConfig.QKey || this.gameConfig.AKey)
+            if (this.gameConfig.QKey || this.gameConfig.AKey){
                 this.adversePaddle.lastPos = this.adversePaddle.pos
+                console.log("Adverse move")
+            }
             if (this.gameConfig.AKey && this.adversePaddle.pos < this.table.height - this.adversePaddle.height - this.ball.ray * 4)
                 this.adversePaddle.pos += this.adversePaddle.speed * 1000 / 60
             else if (this.gameConfig.AKey)
@@ -192,7 +198,7 @@ export class Game {
         }
         if (this.ownerScore.score === this.ownerScore.maximum || this.adverseScore.score === this.adverseScore.maximum) {
             this.winner = this.ownerScore.score === this.ownerScore.maximum ? "RIGHT" : "LEFT"
-            this.endScreen()
+            // this.endScreen()
             cancelAnimationFrame(this.gameConfig.frameId)
             return
         }
@@ -200,7 +206,8 @@ export class Game {
         this.gameConfig.frameId = requestAnimationFrame(this.loop.bind(this))
     }
 
-    private endScreen() {
+    public endScreen(winner: string) {
+        this.winner = winner
         this.context!.clearRect(0, 0, this.table.width, this.table.height)
         this.context!.fillText('PLAYER', this.table.width / 3, this.table.height / 4, this.table.width)
         this.context!.fillText(this.winner, this.table.width / 2.5, this.table.height / 2, this.table.width)
@@ -260,6 +267,15 @@ export class Game {
         this.updatePaddle()
     }
 
+    public updateBoard(board: Board) {
+        this.ownerPaddle = board.ownerPaddle
+        this.ball = board.ball
+        this.adversePaddle = board.adversePaddle
+        this.ownerScore.score = board.scores.owner
+        this.adverseScore.score = board.scores.adverse
+        this.draw(1)
+    }
+
     public draw(multi: number) {
         this.context!.fillStyle = 'white'
         this.context!.clearRect(0, 0, this.table.width, this.table.height)
@@ -271,13 +287,13 @@ export class Game {
     }
 
     public startLoop() {
-        this.gameConfig.frameId = requestAnimationFrame((timestamp) => {
+        // this.gameConfig.frameId = requestAnimationFrame((timestamp) => {
             this.draw(1)
-            this.gameConfig.lastFrameTimeMs = timestamp
-            this.gameConfig.lastFpsUpdate = timestamp
-            this.gameConfig.framesThisSecond = 0
+            // this.gameConfig.lastFrameTimeMs = timestamp
+            // this.gameConfig.lastFpsUpdate = timestamp
+            // this.gameConfig.framesThisSecond = 0
             this.beginLoop()
-            this.gameConfig.frameId = requestAnimationFrame(this.loop.bind(this))
-        })
+        //     this.gameConfig.frameId = requestAnimationFrame(this.loop.bind(this))
+        // })
     }
 }

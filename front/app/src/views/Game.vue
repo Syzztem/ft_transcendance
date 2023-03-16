@@ -9,6 +9,7 @@ import IPlayer from '@/models/IPlayer'
 import { defineComponent } from "vue" 
 import store from '@/store'
 import socket from '@/websocket'
+import Board from '@/models/Board.interface'
 
 
 // power ups     : pokemons
@@ -53,7 +54,7 @@ export default defineComponent({
       if (e.key === 'ArrowDown')
         this.gameConfig.keyDown = false
       /// temporaire /// bot / QA
-      if (e.key === 'q')
+      if (e.key === 'q') 
         this.gameConfig.QKey = false
       if (e.key === 'a')
         this.gameConfig.AKey = false
@@ -84,6 +85,13 @@ export default defineComponent({
     ///
   },
   mounted() {
+    socket
+      .on('updateBoard', (response: Board) => {
+        this.game?.updateBoard(response)
+      })
+      .on('endGame', (winner: string) => {
+        this.game?.endScreen(winner)
+      })
   //   if (store.state.user.id == -1) {
   //       this.$router.push('/login')
   //       return

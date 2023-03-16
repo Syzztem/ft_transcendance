@@ -88,6 +88,10 @@ export class UserService {
         if (await this.userRepository.count({ where: { username: dto.username } }) != 0)
             return HttpStatus.CONFLICT;
         user.username = dto.username;
+        /*******************************
+            Crash when username > 8
+        ********************************/
+
         // const oldPath = UserService.PP_PATH + user.login42 + '.jpg';
         // const newPath = UserService.PP_PATH + dto.username + '.jpg';
         // fs.rename(oldPath, newPath, (err) => {

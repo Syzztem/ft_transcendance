@@ -18,16 +18,20 @@ import Key from './interfaces/Key.interface';
 import { GameService } from './game.service';
 import { UserService } from '../users/users.service';
 import { User } from 'src/database/entities/User';
-import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit } from '@nestjs/websockets';
+import { OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
 import { Logger, Request } from '@nestjs/common';
-import { AuthService } from 'src/auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { Game } from 'src/database/entities/Game';
+import Match from './Match';
 
-
-enum Side {
+export enum Side {
 	OWNER,
 	ADVERSE
+}
+
+export enum KeyEvent {
+	UP = 0,
+	DOWN = 1
 }
 @WebSocketGateway(/*{
 cors: {
@@ -40,6 +44,10 @@ export class GameGateway implements OnGatewayDisconnect, OnGatewayConnection{
 	@WebSocketServer()
 	server: Server;
 	pendingPlayer: Array<WsUser> = [];
+	matchsList = new Map<number, {
+		game: Game
+		match: Match
+	}>();
 	private logger = new Logger('GameGateway')
 	
 	constructor(
@@ -49,7 +57,7 @@ export class GameGateway implements OnGatewayDisconnect, OnGatewayConnection{
 		// pendingPlayer: Array<WsUser>
 	) {}
 
-	async handleConnection(@ConnectedSocket() clientSocket: Socket, @Request() req) {
+	async handleConnection(@ConnectedSocket() clientSocket: Socket) {
 
 		const payload = clientSocket.handshake.auth
 		console.log("payload: ", payload);
@@ -98,17 +106,31 @@ export class GameGateway implements OnGatewayDisconnect, OnGatewayConnection{
 	}
 
 	@SubscribeMessage('keyUp')
-	keyUp(@MessageBody() data: Key){
-		console.log(data)
+	keyUp(@ConnectedSocket() clientSocket: Socket, @MessageBody() data: Key){
+		const clientId: number = this.jwtService.decode(clientSocket.handshake.auth.token).sub
+		let match: Match = this.matchsList[data.gameId].match
+		let game: Game = this.matchsList[data.gameId].game
+		let user: User = new User()
+
+		user.id = clientId
+		const side = this.getPlayerSide(user, game)
+		match.updateKey(side, KeyEvent.UP, data.key)
 	}
 
 	@SubscribeMessage('keyDown')
-	keyDown(@MessageBody() data: Key){
-		console.log(data)
+	keyDown (@ConnectedSocket() clientSocket: Socket, @MessageBody() data: Key){
+		const clientId: number = this.jwtService.decode(clientSocket.handshake.auth.token).sub
+		let match: Match = this.matchsList[data.gameId].match
+		let game: Game = this.matchsList[data.gameId].game
+		let user: User = new User()
+
+		user.id = clientId
+		const side = this.getPlayerSide(user, game)
+		match.updateKey(side, KeyEvent.DOWN, data.key)
 	}
 
-	getPlayerSide(player: User, game: Game) {
-		return (player == game.player1 ? Side.OWNER : Side.ADVERSE)
+	getPlayerSide(player: User, game: Game) { 
+		return (player.id === game.player1.id ? Side.OWNER : Side.ADVERSE)
 	}
 
 	isPlayerAuthorize(player: User, game: Game) : boolean {
@@ -123,12 +145,13 @@ export class GameGateway implements OnGatewayDisconnect, OnGatewayConnection{
 			player1score: 0, // default value in entity ?
 			player2score: 0  
 		})
-		this.logger.log('Initialization of room ' + game.id + " with " + owner.user.username + " against " + adverse.user.username); 
+		this.logger.log(`Initialization of room ${game.id} with ${owner.user.username}(${owner.user.id}) against ${adverse.user.username}(${adverse.user.id})`); 
 		const ownerSocket = this.server.sockets.sockets.get(owner.socketId);
 		const adverdeSocket = this.server.sockets.sockets.get(adverse.socketId);
 		ownerSocket.join(`game:${game.id}`)
 		adverdeSocket.join(`game:${game.id}`)
 		this.server.to(`game:${game.id}`).emit('redirectGame', game.id)
+		this.startGame(game)
 	}
 
 	@SubscribeMessage('leaveMatchmaking')
@@ -137,10 +160,8 @@ export class GameGateway implements OnGatewayDisconnect, OnGatewayConnection{
 			if (player.socketId == clientSocket.id) {
 				this.pendingPlayer.splice(this.pendingPlayer.indexOf(player))
 			}
-		})
+		}) 
 	}
-
-	
 
 	updateBoard(gameId: number, board: Board) {
 		this.server.to(`game:${gameId}`).emit('updateBoard', board)
@@ -150,5 +171,60 @@ export class GameGateway implements OnGatewayDisconnect, OnGatewayConnection{
 		this.server.to(`game:${gameId}`).emit('updateScore', score)
 	}
 
+	startGame(game: Game) {
+		let match: Match = new Match()
+		const gameId = game.id
+
+		this.matchsList[gameId] = {
+			game: game,
+			match: match
+		}
+		match.interval = setInterval((timestamp) => {
+			this.updateBoard(
+				gameId, {
+					ownerPaddle: match.ownerPaddle,
+					adversePaddle: match.adversePaddle,
+					ball: match.ball,
+					scores: {
+						owner: match.ownerScore.score,
+						adverse: match.adverseScore.score
+					}
+				}
+			)
+            // this.draw(1)
+            match.gameConfig.lastFrameTimeMs = timestamp
+            match.gameConfig.lastFpsUpdate = timestamp
+            match.gameConfig.framesThisSecond = 0
+			if (match.winner) {
+				clearInterval(match.interval)
+				this.gameService.updateGame(gameId, {
+					owner: match.ownerScore.score,
+					adverse: match.adverseScore.score
+				})
+				this.endGame(game, match)
+			}
+			match.loop(timestamp)
+		}, 17)
+		// match.gameConfig.frameId = requestAnimationFrame((timestamp) => {
+		// 	this.updateBoard(
+		// 		gameId, {
+		// 			ownerPaddle: match.ownerPaddle,
+		// 			adversePaddle: match.adversePaddle,
+		// 			ball: match.ball
+		// 		}
+		// 	)
+        //     // this.draw(1)
+        //     match.gameConfig.lastFrameTimeMs = timestamp
+        //     match.gameConfig.lastFpsUpdate = timestamp
+        //     match.gameConfig.framesThisSecond = 0
+        //     // this.beginLoop()
+        //     match.gameConfig.frameId = requestAnimationFrame(match.loop.bind(match))
+        // })
+
+	}
 	
+	endGame(game: Game, match: Match) {
+		this.server.to(`game:${game.id}`).emit('endGame', match.winner)
+		this.server.to(`game:${game.id}`).socketsLeave(`game:${game.id}`)
+	}
 }
