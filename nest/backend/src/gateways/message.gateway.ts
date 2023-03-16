@@ -242,7 +242,13 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect,
 
     async handleConnection(client: Socket) {
         const uid: number = this.jwtService.decode(client.handshake.auth.token).sub;
-        const user = await this.userRepository.findOneBy({id: uid});
+        const user = await this.userRepository.findOne({
+            select: {
+                id: true,
+                channels: true
+            },
+            where: {id: uid}
+        });
         if(!user) client.disconnect();
         client.emit(user.channels.toString());
         this.clients.set(user.id, client);
