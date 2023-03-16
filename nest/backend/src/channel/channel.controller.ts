@@ -3,41 +3,43 @@ import GetChannelDTO from './dto/get-channel.dto';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, Response } from '@nestjs/common';
 import GetMessageDTO from 'src/dto/get-message.dto';
 import PostMessageDTO from 'src/dto/post-message.dto';
-import { Channel } from 'src/database/entities/Channel';
 import { ChannelMessage } from 'src/database/entities/ChannelMessage';
 import { ChannelService } from 'src/channel/channel.service';
 
-@Controller()
+@Controller('channel')
 export class ChannelController {
     constructor(private channelService: ChannelService) {}
 
     @Get("id")
     async getChannel(@Query() getChannelDTO: GetChannelDTO,
-                     @Response() res : any) : Promise<Channel> {
+                     @Response() res : any) {
         const channel = await this.channelService.getChannelById(getChannelDTO);
-        if (!channel) return res.status(HttpStatus.NOT_FOUND).send();
-        return channel;
+        if (!channel) return res.status(HttpStatus.NOT_FOUND).send(channel);
     }
 
     @Get("page")
     async getPage(@Query() getMessageDTO: GetMessageDTO,
                   @Response() res : any) : Promise<ChannelMessage[]> {
         const messages = await this.channelService.getMessagePage(getMessageDTO);
-        if (!messages) return res.status(HttpStatus.NOT_FOUND).send();
-        return messages;
+        if (!messages) return res.status(HttpStatus.NOT_FOUND).send(messages);
     }
 
     @Post("newmsg")
     async newMessage(@Body() postMessageDTO: PostMessageDTO,
                     @Response() res : any) {
-        res.status(await this.channelService.postMessage(postMessageDTO)).send();
+        res.status(await this.channelService.postMessage(postMessageDTO)).send(postMessageDTO);
     }
 
     @Post("join/:chanId:/uid")
     async joinChannel(@Param('chanId') chanId: number,
                       @Param('uid') uid:number,
                       @Response() res: any) {
-        res.status(await this.channelService.joinChannel(chanId, uid)).send();
+        const dto: GetMessageDTO = {
+            channelId: chanId,
+            page: 0
+        }
+        res.status(await this.channelService.joinChannel(chanId, uid))
+           .send(this.channelService.getMessagePage({channelId: chanId, page: 0}));
     }
 
     @Post("joinwithpassword/:chanId:/uid")
@@ -45,14 +47,15 @@ export class ChannelController {
                             @Param('uid') uid: number,
                             @Body() password: string,
                             @Response() res:any) {
-        res.status(await this.channelService.joinChannelWithPassword(chanId, uid, password)).send();
+        res.status(await this.channelService.joinChannelWithPassword(chanId, uid, password))
+           .send(this.channelService.getMessagePage({channelId: chanId, page: 0}));
     }
 
     @Patch("leave/:chanId:/uid")
     async leaveChannel(@Param('chanId') chanId: number,
                       @Param('uid') uid:number,
                       @Response() res: any) {
-        res.status(await this.channelService.leaveChannel(chanId, uid)).send();
+        res.status(await this.channelService.leaveChannel(chanId, uid)).send(chanId);
     }
 
     @Patch("ban/:chanId/:uid/:date")
@@ -60,7 +63,7 @@ export class ChannelController {
                   @Param('uid') uid:number,
                   @Param('date') date: Date,
                   @Response() res: any) {
-        res.status(await this.channelService.banUser(chanId, uid, date)).send();
+        res.status(await this.channelService.banUser(chanId, uid, date)).send(uid);
     }
 
     @Patch("mute/:chanId/:uid/:date")
@@ -68,26 +71,26 @@ export class ChannelController {
                    @Param('uid') uid:number,
                    @Param('date') date: Date,
                    @Response() res: any) {
-        res.status(await this.channelService.muteUser(chanId, uid, date)).send();
+        res.status(await this.channelService.muteUser(chanId, uid, date)).send(uid);
     }
 
     @Patch("unban/:chanId/:uid")
     async unBanUser(@Param('chanId') chanId:number, 
                     @Param('uid') uid:number,
                     @Response() res : any) {
-        res.status(await this.channelService.unBanUser(chanId, uid)).send();
+        res.status(await this.channelService.unBanUser(chanId, uid)).send(uid);
     }
 
     @Delete("msg/:id")
     async deleteMessage(@Param('id') id: number,
                         @Response() res : any) {
-        res.status(await this.channelService.deleteMessage(id)).send();
+        res.status(await this.channelService.deleteMessage(id)).send(id);
     }
 
     @Delete(":id")
     async deleteChannel(@Param ('id') id: number,
                         @Response() res : any) {
-        res.status(await this.channelService.deleteChannel(id)).send();
+        res.status(await this.channelService.deleteChannel(id)).send(id);
     }
 
     @Post("new")
@@ -96,5 +99,6 @@ export class ChannelController {
                     @Response() res: any) {
         const channel = await this.channelService.createChannel(createChannelDTO);
         if (!channel) return res.status(HttpStatus.NOT_FOUND).send();
+        res.status(HttpStatus.OK).send(channel);
     }
 }

@@ -41,7 +41,7 @@ export class ChannelService {
             relations: {
                 sender:     true,
             },
-            where: {channel: {id: dto.channel.id}},
+            where: {channel: {id: dto.channelId}},
             order: {id: "DESC"},
             take: 50,
             skip: 50 * dto.page
@@ -160,9 +160,10 @@ export class ChannelService {
         const channel = this.channelRepository.create();
         channel.name = dto.name;
         channel.admin = user;
-        channel.users.push(user);
+        channel.users = [user];
         channel.password = dto.password;
         channel.isPrivate = dto.password == null ? false : true;
-        return this.channelRepository.save(channel);
+        this.channelRepository.save(channel);
+        return channel;
     }
 }
