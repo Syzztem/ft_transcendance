@@ -14,6 +14,7 @@ import { ConsoleLogger, UseGuards } from '@nestjs/common';
 import Board from './interfaces/Board.interface';
 import Score from './interfaces/Score.interface';
 import WsUser from './interfaces/WsUser.interface';
+import Key from './interfaces/Key.interface';
 import { GameService } from './game.service';
 import { UserService } from '../users/users.service';
 import { User } from 'src/database/entities/User';
@@ -21,7 +22,13 @@ import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit } from '@nestjs
 import { Logger, Request } from '@nestjs/common';
 import { AuthService } from 'src/auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
+import { Game } from 'src/database/entities/Game';
 
+
+enum Side {
+	OWNER,
+	ADVERSE
+}
 @WebSocketGateway(/*{
 cors: {
 	origin: '*',
@@ -90,6 +97,24 @@ export class GameGateway implements OnGatewayDisconnect, OnGatewayConnection{
 		this.initGame(owner, challenger)
 	}
 
+	@SubscribeMessage('keyUp')
+	keyUp(@MessageBody() data: Key){
+		console.log(data)
+	}
+
+	@SubscribeMessage('keyDown')
+	keyDown(@MessageBody() data: Key){
+		console.log(data)
+	}
+
+	getPlayerSide(player: User, game: Game) {
+		return (player == game.player1 ? Side.OWNER : Side.ADVERSE)
+	}
+
+	isPlayerAuthorize(player: User, game: Game) : boolean {
+		return (player === game.player1 || player === game.player2)
+	}
+
 	async initGame(owner: WsUser, adverse: WsUser) {
 		// console.log("initGame :", owner.socketId, adverse.socketId)
 		const game = await this.gameService.newGame({
@@ -114,6 +139,8 @@ export class GameGateway implements OnGatewayDisconnect, OnGatewayConnection{
 			}
 		})
 	}
+
+	
 
 	updateBoard(gameId: number, board: Board) {
 		this.server.to(`game:${gameId}`).emit('updateBoard', board)

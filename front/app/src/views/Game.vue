@@ -8,6 +8,7 @@ import { Game } from '../controllers/Game'
 import IPlayer from '@/models/IPlayer'
 import { defineComponent } from "vue" 
 import store from '@/store'
+import socket from '@/websocket'
 
 
 // power ups     : pokemons
@@ -35,8 +36,9 @@ export default defineComponent({
       table: Object() as ITable,
       player: Object() as IPlayer,
       /// temporaire /// bot / QA
-      modeButtonText: 'BOT'
+      modeButtonText: 'BOT',
       ///
+      gameSocket: socket,
     }
   },
   methods: {
@@ -44,6 +46,8 @@ export default defineComponent({
       this.$router.push('/hub')
     },
     handleKeyUp(e: KeyboardEvent) {
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown')
+        this.gameSocket.emit('keyUp', {gameId: this.$route.params.id, key: e.key})
       if (e.key === 'ArrowUp')
         this.gameConfig.keyUp = false
       if (e.key === 'ArrowDown')
@@ -56,6 +60,8 @@ export default defineComponent({
       ///
     },
     handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown')
+        this.gameSocket.emit('keyDown', {gameId: this.$route.params.id, key: e.key})
       if (e.key === 'ArrowUp')
         this.gameConfig.keyUp = true
       if (e.key === 'ArrowDown')
