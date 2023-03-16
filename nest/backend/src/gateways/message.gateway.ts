@@ -14,6 +14,7 @@ import { User } from 'src/database/entities/User';
 import { FriendMessage } from 'src/database/entities/FriendMessage';
 import CreateChannelDTO from 'src/channel/dto/create-channel.dto';
 import { ChannelMessage } from 'src/database/entities/ChannelMessage';
+import { JwtService } from '@nestjs/jwt';
 
 @WebSocketGateway()
 export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
@@ -22,7 +23,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect,
                 @InjectRepository(ChannelMessage) private messageRepository: Repository<ChannelMessage>,
                 @InjectRepository(BanAndMute) private bansAndMutesRepository: Repository<BanAndMute>,
                 @InjectRepository(User) private userRepository: Repository<User>,
-                @InjectRepository(FriendMessage) private usrmessageRepository: Repository<FriendMessage>) {}
+                @InjectRepository(FriendMessage) private usrmessageRepository: Repository<FriendMessage>,
+                private jwtService: JwtService) {}
                 
     @WebSocketServer()
     server: Server;
@@ -93,7 +95,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect,
         if (!user) throw new BadRequestException("User doesn't exist or is not on this channel");
         if (dto.isBan) {
             client = this.clients.get(dto.uid);
-            client.emit("/" + chan.id + ":You were banned from tjis channel");
+            client.emit("/" + chan.id + ":You were banned from this channel");
             client.leave(chan.id.toString());
             chan.removeUser(dto.uid);
             this.channelRepository.save(chan);
@@ -238,7 +240,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect,
     }
 
 
-    async handleConnection(client: Socket, uid: number) {
+    async handleConnection(client: Socket) {
+        const uid: number = this.jwtService.decode(client.handshake.auth.token).sub;
         const user = await this.userRepository.findOneBy({id: uid});
         if(!user) client.disconnect();
         client.emit(user.channels.toString());
