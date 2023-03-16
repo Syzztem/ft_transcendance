@@ -8,11 +8,12 @@ import { MessageGateway } from 'src/gateways/message.gateway';
 import { Channel } from 'src/database/entities/Channel';
 import { ChannelMessage } from 'src/database/entities/ChannelMessage';
 import { BanAndMute } from 'src/database/entities/BanAndMute';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
     imports: [TypeOrmModule.forFeature([User, FriendMessage, Channel, ChannelMessage, BanAndMute])],
     controllers: [UsersController],
-    providers: [UserService, MessageGateway],
+    providers: [UserService, MessageGateway, JwtService],
     exports: [UserService],
 })
 export class UsersModule {}
