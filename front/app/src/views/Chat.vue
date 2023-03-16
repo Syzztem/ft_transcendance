@@ -12,8 +12,7 @@ import { mapActions ,mapState} from "vuex";
 /*
 	TODO :
 
-  -use louis API to create channels
-  - integrer swagger
+	-	use louis API to create channels
 	- add front protection so channels with same name can t be created?
 	- create a dialog to search for existing channels
 	- clickable profile on user -> opens 	OPTIONS PANEL	:	dm, profile page, add to friends, remove from friend block user, unblock user
@@ -40,6 +39,7 @@ export default defineComponent({
 				name: 'test',
 				adminId: 0,
 				password: '',
+				id: 0,
 			},
 			id: Number(localStorage.getItem('id')),
 		}
@@ -49,13 +49,9 @@ export default defineComponent({
 		createChannel(newchan : any)
 		{
 			newchan.id += 1;
-			this.$store.dispatch('createChannel', this.id);
+			this.$store.dispatch('createChannel', newchan);
 			this.dialog = false;
 		},
-		displayUser()
-		{
-			console.log(this.id);
-		}
 	},
     computed: {
 		username()
@@ -77,13 +73,7 @@ export default defineComponent({
 	},
 	mounted() {
 
-		// store.commit('addChannel', {name: 'channel3', id: 2, users: [{name :'user99'}], messages:[{sender:'user99',content:'yo'}]} );
-		// store.commit('setChannels', channels);
-		// socket.emit('findAllMessages', {}, (response : any) => {
-		// 	console.log(response);
-		// })
-		// console.log('Mounted:', this.channels, this.joined_channels, this.current_channel, this.blocked_users)
-		// console.log('username:', this.username)
+		// store.commit('addChannel', {name: 'channeltest', id: 42, users: [{name :'user99'}], messages:[{sender:'user99',content:'yo'}]} );
 	},
 })
 
@@ -115,8 +105,6 @@ export default defineComponent({
 //   if (e.key === 'Enter')
 // 	  UpdateMessagesButton();
 // }
-
-
 </script>
 
 <template>
@@ -131,36 +119,40 @@ export default defineComponent({
 								Users
 							</v-card-title>
 							<v-card height="75vh" id="Userscontent">
-							<v-list-item v-for="user in current_channel.users">
-								<v-card id="Usercard" class="d-flex align-center justify-center mt-4">
-									<v-badge class="mt-2" dot location="top right" color="green"> 
-									<v-badge location="bottom end" class="mb-2">
-										<template v-slot:badge>
-											<img src="@/assets/sens_interdit.webp"/>
-										</template>
-										<v-avatar size="60">
-											<img
-											src="https://cdn.vuetifyjs.com/images/john.jpg"
-											alt="John"
-											height="60"
-											>
-										</v-avatar>
-									</v-badge>
-									</v-badge>
-									<v-card-text>
-										{{user.name}}
-										<v-menu activator="parent">
-											<v-list>
-												<v-list-item v-for="(item, index) in options" :key="index" :value="index">
-													<v-list-item-title>
-														{{ item.title }}
-													</v-list-item-title>
-												</v-list-item>
-											</v-list>
-										</v-menu>
-									</v-card-text>
-								</v-card>
-							</v-list-item>
+							<ul v-if="current_channel">
+								<li>
+									<v-list-item v-for="user in current_channel.users">
+										<v-card id="Usercard" class="d-flex align-center justify-center mt-4">
+											<v-badge class="mt-2" dot location="top right" color="green"> 
+											<v-badge location="bottom end" class="mb-2">
+												<template v-slot:badge>
+													<img src="@/assets/sens_interdit.webp"/>
+												</template>
+												<v-avatar size="60">
+													<img
+													src="https://cdn.vuetifyjs.com/images/john.jpg"
+													alt="John"
+													height="60"
+													>
+												</v-avatar>
+											</v-badge>
+											</v-badge>
+											<v-card-text>
+												{{user.name}}
+												<v-menu activator="parent">
+													<v-list>
+														<v-list-item v-for="(item, index) in options" :key="index" :value="index">
+															<v-list-item-title>
+																{{ item.title }}
+															</v-list-item-title>
+														</v-list-item>
+													</v-list>
+												</v-menu>
+											</v-card-text>
+										</v-card>
+									</v-list-item>
+								</li>
+							</ul>
 							</v-card>
 						</v-card>
 					</v-col>
@@ -171,18 +163,19 @@ export default defineComponent({
 						<v-card :overflow-hidden="false" height="89vh" width="58vw" class="d-flex" align="center" color="transparent" bordered="0" flat>
 							<v-row id = "RowMessagebox">
 								<v-card id="Messagebox" class="rounded-xl mb-4" color="rgb(0, 0, 51, 0.87)" height="75vh" width="58vw">
-									<v-card-title id="Messageboxtitle" class="align-item-center ">
+									<v-card-title id="Messageboxtitle" class="align-item-center " v-if="current_channel">
 										{{current_channel.name}}
 									</v-card-title>
-										<v-card-text class="Messagesscroller" align="left">
+									<v-card-text class="Messagesscroller" align="left">
+										<ul v-if="current_channel">
 											<div v-for="message in current_channel.messages">
 												<li v-if="message.content != ''">
 													{{message.sender}}: {{message.content}}
 												</li>
 											</div>
-										</v-card-text>
+										</ul>
+									</v-card-text>
 								</v-card>
-								<!--Message Input -->
 								<v-row justify="center">
 									<v-card id="Inputbox" class="d-flex justify-center align-center rounded-xl" height="10vh" width="50vw" elevation="8">
 										<v-text-field hide-details variant="plain" id="Inputfield" class = "ml-5" autofocus>
@@ -225,14 +218,11 @@ export default defineComponent({
 									</v-card-actions>
 								</v-card>
 								</v-dialog>
-								<v-btn id="Btnchannel" class="mt-2 mb-2"
-								@click="displayUser()"
-
-								>
+								<v-btn id="Btnchannel" class="mt-2 mb-2">
 									🔎
 								</v-btn>
 							</v-card>
-							<v-card id="Channelscontent" height="65vh" >
+							<v-card id="Channelscontent" height="65vh" v-if="joined_channels">
 								<v-list-item v-for="channel in joined_channels" :key="channel.id">
 									<v-card 
 										id="Channelcard" 

@@ -1,1 +1,1 @@
-docker system prune -a && docker rmi -f $(docker images -aq)
+docker system prune && docker rmi -f $(docker images -aq)
