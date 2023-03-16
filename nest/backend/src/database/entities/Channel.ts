@@ -1,4 +1,4 @@
-import { BeforeInsert, Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { BanAndMute } from "./BanAndMute";
 import { ChannelMessage } from "./ChannelMessage";
 import { User } from "./User";
@@ -12,7 +12,7 @@ export class Channel {
     @Column("varchar")
     name: string;
 
-    @OneToOne(() => User)
+    @ManyToOne(() =>User)
     @JoinColumn()
     admin: User;
 
