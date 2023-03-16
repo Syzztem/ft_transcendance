@@ -116,7 +116,7 @@ export default defineComponent({
     this.ball.speedY = this.gameConfig.gameSpeed
     this.ball.ray = 7
     this.ball.hits = 0
-    //
+    // 
     //
     //
     /// temoraire /// bot / QA

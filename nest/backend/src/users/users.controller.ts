@@ -1,11 +1,12 @@
 import CreateUserDTO from './dto/create-user.dto';
-import {Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Response, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import {Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Response, UploadedFile, UseGuards, UseInterceptors, Req } from '@nestjs/common';
 import SendDMDTO from 'src/dto/send-dm.dto';
 import { User } from '../database/entities/User';
 import { UserService } from './users.service';
 import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { ftAuthGuard } from 'src/auth/guards/ft.guard';
 
 // @UseGuards(JwtAuthGuard)
 @Controller('user')
@@ -50,6 +51,7 @@ export class UsersController {
             else res.status(HttpStatus.OK).send();
         })
     }
+
     @UseGuards(JwtAuthGuard)
     @Post("verify/:id")
     async verifyToken(@Body() token: string,
@@ -75,13 +77,16 @@ export class UsersController {
         if (!user) return res.status(HttpStatus.NOT_FOUND).send();
         return res.status(HttpStatus.OK).json({user})
     }
-
-    @Patch("username/:id")
+    
+    @UseGuards(JwtAuthGuard)
+    @Patch("username")
     @HttpCode(HttpStatus.OK)
-    async changeUsername(   @Body() username: string,
-                            @Param('id') id: number,
+    async changeUsername(   @Body() data: {username: string}, // {user: wour}
+                            @Req() req,
                             @Response() res: any) {
-        res.status(await this.userService.changeUsername({id, username})).send()
+        // console.log("USER", req)   
+        console.log("This is a username: ", data.username);
+        res.status(await this.userService.changeUsername({id: req.user.sub, username: data.username})).send()
     }
 
     // @Patch("username")

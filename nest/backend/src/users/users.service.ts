@@ -57,7 +57,7 @@ export class UserService {
 
     async add(createUserDTO: CreateUserDTO) : Promise<User> {
         if (createUserDTO.username == 'default') return null;
-        if (await this.userRepository.count({ where: { username: createUserDTO.username } }) != 0)
+        if (await this.userRepository.count({ where: { login42: createUserDTO.login42 } }) != 0)
             return null;
         const user = this.userRepository.create(createUserDTO);
         return this.userRepository.save(user);
@@ -70,12 +70,14 @@ export class UserService {
         if (await this.userRepository.count({ where: { username: dto.username } }) != 0)
             return HttpStatus.CONFLICT;
         user.username = dto.username;
-        const oldPath = UserService.PP_PATH + user.username + '.jpg';
-        const newPath = UserService.PP_PATH + dto.username + '.jpg';
-        fs.rename(oldPath, newPath, (err) => {
-            if (err) return HttpStatus.INTERNAL_SERVER_ERROR;
-        })
+        // const oldPath = UserService.PP_PATH + user.login42 + '.jpg';
+        // const newPath = UserService.PP_PATH + dto.username + '.jpg';
+        // fs.rename(oldPath, newPath, (err) => {
+        //     console.log('I am bad developper :', err)
+        //     if (err) return HttpStatus.INTERNAL_SERVER_ERROR;
+        // })
         await this.userRepository.save(user)
+        return HttpStatus.OK;
     }
 
 
