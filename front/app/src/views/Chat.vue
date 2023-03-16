@@ -19,7 +19,6 @@ import { mapActions ,mapState} from "vuex";
 											ADVANCED PANEL	:	promote/demote/ban/kick/unban
 	- v-if (blocked) -> display red block icon
 	- v-if display only available options (don t block if already blocked etc)
-	ajouter superman 64 en fond d ecran 42
 */
 
 export default defineComponent({
@@ -37,9 +36,8 @@ export default defineComponent({
 			dialog: false,
 			newChannel: {
 				name: 'test',
-				adminId: 0,
 				password: '',
-				id: 0,
+				adminId: 0,
 			},
 			id: Number(localStorage.getItem('id')),
 		}
@@ -72,7 +70,6 @@ export default defineComponent({
 		},
 	},
 	mounted() {
-
 		// store.commit('addChannel', {name: 'channeltest', id: 42, users: [{name :'user99'}], messages:[{sender:'user99',content:'yo'}]} );
 	},
 })

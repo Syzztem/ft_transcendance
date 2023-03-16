@@ -82,8 +82,10 @@ const store = createStore({
       localStorage.removeItem('token')
     },
     addChannel(state, newchan) {
-      const copy = Object.assign({}, newchan);
-      state.chat.joined_channels.push(copy);
+      //const copy = Object.assign({}, newchan);
+      console.log("newchan !");
+      console.log(newchan);
+      state.chat.joined_channels.push(newchan);
     },
     setCurrentChannel(state, channel) {
       state.chat.current_channel = channel;
@@ -164,24 +166,32 @@ const store = createStore({
     rmChannel({ commit }, id) {
       commit("removeChannel", id);
     },
-    createChannel({ commit }, channel)
-    {
-      commit("addChannel", channel);
+    // createChannel({ commit }, channel)
+    // {
+    //   commit("addChannel", channel);
+    // },
+    createChannel({ commit }, channelInfos) {
+      return new Promise((resolve, reject) => {
+        const data = {
+          name: channelInfos.name,
+          adminId: channelInfos.adminId,
+          password: channelInfos.password,
+        };
+        instance
+          .post("/channel/new", data)
+          .then((response : any) => {
+            const newChannel = response.data;
+            console.log(newChannel);
+            // commit("addChannel", newChannel);
+            resolve(response);
+          })
+          .catch((error : any) => {
+            reject(error);
+          });
+      });
     },
-  //   createChannel({ commit }, channelInfos) {
-  //   return new Promise((resolve, reject) => {
-  //     instance
-  //       .post("new", channelInfos)
-  //       .then((response : any) => {
-  //         const newChannel = response.data;
-  //         commit("addChannel", newChannel);
-  //         resolve(response);
-  //       })
-  //       .catch((error : any) => {
-  //         reject(error);
-  //       });
-  //   });
-  // },
+
+
   },
   getters: {
     getUsername(state) {
