@@ -23,7 +23,7 @@ export class UsersController {
     //     this.userService.add(def);
     //     return this.userService.getUserByName("toto");
     // }
-    //@UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard)
     @Get("id/:id")
     async getUser(@Param('id') id: number,
                   @Response() res: any) : Promise<User> {
@@ -61,7 +61,7 @@ export class UsersController {
         res.status(await this.userService.verifyToken(id, token)).send(id);
     }
 
-    //@UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard)
     @Post("new")
     async newUser(@Body() createUserDTO: CreateUserDTO,
                   @Response() res: any) {
