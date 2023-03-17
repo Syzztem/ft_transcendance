@@ -134,7 +134,7 @@ export default defineComponent({
 											</v-badge>
 											</v-badge>
 											<v-card-text>
-												{{user.name}}
+												{{user.username}}
 												<v-menu activator="parent">
 													<v-list>
 														<v-list-item v-for="(item, index) in options" :key="index" :value="index">
