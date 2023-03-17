@@ -163,6 +163,6 @@ export class ChannelService {
         channel.users = [user];
         channel.password = dto.password;
         channel.isPrivate = dto.password == null ? false : true;
-        return this.channelRepository.save(channel);
+        return await this.channelRepository.save(channel);
     }
 }
