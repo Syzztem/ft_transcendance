@@ -36,7 +36,7 @@ export default defineComponent({
       .on('endGame', (winner: string) => {
         this.game?.endScreen(winner)
       })
-      .emit('joinGame', this.$route.params.id)
+      .emit('joinGame', Number(this.$route.params.id))
  
     this.canvas = <HTMLCanvasElement> document.getElementById('gameCanvas')
     this.game = new Game(this.canvas)
@@ -48,7 +48,7 @@ export default defineComponent({
   unmounted() {
     document.removeEventListener('keyup', this.handleKeyUp)
     document.removeEventListener('keydown', this.handleKeyDown)
-    this.gameSocket.emit('leaveGame', this.gameId)
+    this.gameSocket.emit('leaveGame', Number(this.gameId))
   }
 })
 </script>

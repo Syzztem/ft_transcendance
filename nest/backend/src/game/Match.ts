@@ -22,14 +22,14 @@ export default class Match {
         this.ownerPaddle = {
             height: 80,
             width: 10,
-            pos: 30 ,
+            pos: 222 ,
             lastPos: 0,
             speed: 1
         }
         this.adversePaddle = {
             height: 80,
             width: 10,
-            pos: 30 ,
+            pos: 222 ,
             lastPos: 0,
             speed: 1
         }
