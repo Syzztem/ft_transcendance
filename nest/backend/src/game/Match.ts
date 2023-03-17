@@ -149,21 +149,16 @@ export default class Match {
             this.ownerPaddle.pos -= this.ownerPaddle.speed * 1000 / 60
         else if (this.gameConfig.keyUp)
             this.ownerPaddle.pos = this.ball.ray * 4
-        // if (this.gameConfig.modeButtonText === 'Q/A') {
-            if (this.gameConfig.QKey || this.gameConfig.AKey)
-                this.adversePaddle.lastPos = this.adversePaddle.pos
-            if (this.gameConfig.AKey && this.adversePaddle.pos < this.table.height - this.adversePaddle.height - this.ball.ray * 4)
-                this.adversePaddle.pos += this.adversePaddle.speed * 1000 / 60
-            else if (this.gameConfig.AKey)
-                this.adversePaddle.pos = this.table.height - this.adversePaddle.height - this.ball.ray * 4
-            if (this.gameConfig.QKey && this.adversePaddle.pos > this.ball.ray * 4)
-                this.adversePaddle.pos -= this.adversePaddle.speed * 1000 / 60
-            else if (this.gameConfig.QKey)
-                this.adversePaddle.pos = this.ball.ray * 4
-        // } else if (this.adversePaddle.pos != this.ball.posY - this.adversePaddle.height / 2
-        //         && this.ball.posY < this.table.height - this.adversePaddle.height / 2 - this.ball.ray * 4
-        //         && this.ball.posY > this.ball.ray * 4 + this.adversePaddle.height / 2)
-        //     this.adversePaddle.pos = this.ball.posY - this.adversePaddle.height / 2
+        if (this.gameConfig.QKey || this.gameConfig.AKey)
+            this.adversePaddle.lastPos = this.adversePaddle.pos
+        if (this.gameConfig.AKey && this.adversePaddle.pos < this.table.height - this.adversePaddle.height - this.ball.ray * 4)
+            this.adversePaddle.pos += this.adversePaddle.speed * 1000 / 60
+        else if (this.gameConfig.AKey)
+            this.adversePaddle.pos = this.table.height - this.adversePaddle.height - this.ball.ray * 4
+        if (this.gameConfig.QKey && this.adversePaddle.pos > this.ball.ray * 4)
+            this.adversePaddle.pos -= this.adversePaddle.speed * 1000 / 60
+        else if (this.gameConfig.QKey)
+            this.adversePaddle.pos = this.ball.ray * 4
     }
 
     public loop(timestamp: number) {

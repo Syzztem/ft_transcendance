@@ -199,4 +199,12 @@ export class UserService {
     async updateToken(id: number, jwtToken: string){
         this.userRepository.update({id: id}, {token: jwtToken})
     }
+
+    async incrementWins(userId: number) {
+        this.userRepository.increment({id: userId}, 'wins', 1)
+    }
+
+    async incrementLosses(userId: number) {
+        this.userRepository.increment({id: userId}, 'losses', 1)
+    }
 }
