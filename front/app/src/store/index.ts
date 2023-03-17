@@ -55,7 +55,7 @@ const store = createStore({
     },
     addChannel(state, newchan) {
       const { name, password, isPrivate, users, messages } = newchan;
-      const newfront = {name : name, password : password, isPrivate : isPrivate, users: users, messages : [], id: 1}
+      const newfront = {name : name, password : password, isPrivate : isPrivate, users: users, messages : [], id: newchan.id}
       state.chat.joined_channels.push(newfront);
     },
     setCurrentChannel(state, channel) {
