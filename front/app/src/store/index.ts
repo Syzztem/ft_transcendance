@@ -17,34 +17,6 @@ instance.interceptors.request.use(function (request) {
 let token: any = localStorage.getItem('token')
 let id: any = localStorage.getItem('id')
 
-// if (!token) {
-//   token: ''
-// }
-// else {
-//   try {
-//     instance.defaults.headers.common.Authorization = `Bearer ${token}`;
-//   } catch (ex) {
-//     token: ''
-//   }
-// }
-
-// if (!token) {
-//   token: ''
-// }
-// else {
-//   try {
-    // instance.defaults.headers.common = {'Authorization': `Bearer ${token}`};
-//   } catch (ex) {
-//     token: ''
-//   }
-// }
-
-// const config = {
-//   headers: {
-//     Authorization: 'Bearer ${token}'
-//   }
-// }
-
 const store = createStore({
   state: {
     status: '',
@@ -100,7 +72,7 @@ const store = createStore({
       return new Promise((resolve, reject) => {
         instance.get("/user/id/" + localStorage.getItem('id'))
         .then((response: any) => {
-          console.log("Response from the front: ",response.data)
+          // console.log("Response from the front: ",response.data)
           commit('userInfos', response.data)
           resolve(response)
         })
@@ -113,7 +85,7 @@ const store = createStore({
       return new Promise((resolve, reject) => {
         instance.get("/user/id/" + id)
         .then((response: any) => {
-          console.log(response.data)
+          // console.log(response.data)
           commit('profileInfos', response.data)
           resolve(response)
         })

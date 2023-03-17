@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "@nestjs/config": "^2.2.0",
+    "@nestjs/passport": "^9.0.0",
+    "bcrypt": "^5.1.0",
+    "cookie-session": "^2.0.0",
+    "dotenv": "^16.0.3",
+    "passport": "^0.6.0",
+    "passport-google-oauth20": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.0",
+    "@types/passport-google-oauth20": "^2.0.11"
+  }
+}

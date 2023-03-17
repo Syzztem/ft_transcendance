@@ -3,4 +3,3 @@ export class FtApiDto {
     clientSecret: string;
 	redirectUri: string;
   }
-  

@@ -17,6 +17,8 @@
     "npm": "^9.3.1",
     "save-svg-as-png": "^1.4.17",
     "serve": "^14.1.2",
+    "socket.io": "^4.6.1",
+    "socket.io-client": "^4.6.1",
     "vue": "^3.2.13",
     "vue-advanced-cropper": "^2.8.8",
     "vue-cropper": "^1.0.5",

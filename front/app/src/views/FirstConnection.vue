@@ -60,7 +60,7 @@ export default defineComponent({
                 this.$router.push('/')
             }
             , (error) => {
-                console.log(error)
+                // console.log(error)
             })
         }
     }

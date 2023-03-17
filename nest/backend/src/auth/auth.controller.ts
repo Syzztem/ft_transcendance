@@ -1,11 +1,9 @@
-import { Controller, UseGuards, Post, Request , Get, Query, Body, Redirect, Res } from "@nestjs/common";
+import { Controller, UseGuards, Post, Request , Get, Body, Redirect, Res, Req } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { AuthGuard } from "@nestjs/passport";
 import { ftAuthGuard } from "./guards/ft.guard";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
-import cookieParser from 'cookie-parser';
 import { UserService } from "src/users/users.service";
-
+import { UnauthorizedException, HttpCode } from "@nestjs/common";
 
 @Controller('auth')
 export class AuthController {
@@ -22,7 +20,7 @@ export class AuthController {
     url.pathname = 'login'
     url.searchParams.set('token', access_token)
     url.searchParams.set('id', req.user.id)
-    console.log("url= ", url.href)
+    // console.log("url= ", url.href)
     res.redirect(url.href)
   }
 
@@ -30,6 +28,36 @@ export class AuthController {
   @Get('profile')
   getProfile(@Request() req) {
     return req.user;
+  }
+
+  @Post('2fa/turn-on')
+  @UseGuards(JwtAuthGuard)
+  async turnOnTwoFactorAuthentication(@Req() request, @Body() body) {
+    const isCodeValid =
+      this.authService.isTwoFactorAuthenticationCodeValid(
+        body.twoFactorAuthenticationCode,
+        request.user,
+      );
+    if (!isCodeValid) {
+      throw new UnauthorizedException('Wrong authentication code');
+    }
+    await this.userService.turnOnTwoFactorAuthentication(request.user.id);
+  }
+
+  @Post('2fa/authenticate')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
+  async authenticate(@Request() request, @Body() body) {
+    const isCodeValid = this.authService.isTwoFactorAuthenticationCodeValid(
+      body.twoFactorAuthenticationCode,
+      request.user,
+    );
+
+    if (!isCodeValid) {
+      throw new UnauthorizedException('Wrong authentication code');
+    }
+
+    return this.authService.loginWith2fa(request.user);
   }
 
   @UseGuards(JwtAuthGuard)
