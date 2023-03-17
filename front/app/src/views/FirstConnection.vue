@@ -48,10 +48,6 @@ export default defineComponent({
         }
     },
     mounted() {
-    // if (store.state.user.id == -1) {
-        // this.$router.push('/login')
-        // return
-    // }
     },
     methods: {
         ok() {
@@ -60,7 +56,6 @@ export default defineComponent({
                 this.$router.push('/')
             }
             , (error) => {
-                // console.log(error)
             })
         }
     }

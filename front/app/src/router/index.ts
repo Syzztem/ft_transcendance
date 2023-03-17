@@ -66,10 +66,6 @@ const routes: Array<RouteRecordRaw> = [
     path: '/',
     component: Home
   },
-  {
-    path: '/test',
-    component: TestWebsocket
-  }
 ]
 
 const router = createRouter({

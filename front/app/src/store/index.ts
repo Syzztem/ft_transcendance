@@ -49,12 +49,11 @@ const store = createStore({
   },
   actions: {
     getUserInfos({commit}) {
-      if (!localStorage.getItem('id')) // better solution ?
+      if (!localStorage.getItem('id'))
         return ;
       return new Promise((resolve, reject) => {
         instance.get("/user/id/" + localStorage.getItem('id'))
         .then((response: any) => {
-          // console.log("Response from the front: ",response.data)
           commit('userInfos', response.data)
           resolve(response)
         })
@@ -67,7 +66,6 @@ const store = createStore({
       return new Promise((resolve, reject) => {
         instance.get("/user/id/" + id)
         .then((response: any) => {
-          // console.log(response.data)
           commit('profileInfos', response.data)
           resolve(response)
         })

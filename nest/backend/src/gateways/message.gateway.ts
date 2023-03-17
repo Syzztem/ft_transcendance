@@ -224,17 +224,12 @@ export class MessageGateway /*implements OnGatewayConnection, OnGatewayDisconnec
 //         this.clients.set(user.id, client);
 //         this.sockets.set(client, user.id);
 //         client.join(user.channels.map(chan => chan.id.toString()));
-//         console.log('User connected');
 //     }
 
 //     async handleDisconnect(client: Socket) {
 //         this.clients.delete(this.sockets.get(client));
 //         this.sockets.delete(client);
 //         client.disconnect();
-//         console.log('User disconnected');
 //     }
 
-//     afterInit(server: any) {
-//         // console.log('Socket is live')
-//     }
 }

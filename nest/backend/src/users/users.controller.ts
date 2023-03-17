@@ -72,7 +72,7 @@ export class UsersController {
     async changeUsername(   @Body() data: {username: string}, // {user: wour}
                             @Req() req,
                             @Response() res: any) {
-        res.status(await this.userService.changeUsername({id: req.user.sub, username: data.username})).send()
+        res.status(await this.userService.changeUsername({id: req.user.sub, username: data.username, token: req.user.token})).send()
     }
 
     @UseGuards(JwtAuthGuard)

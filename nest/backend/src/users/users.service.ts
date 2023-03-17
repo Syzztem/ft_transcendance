@@ -2,7 +2,7 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import CreateUserDTO from 'src/users/dto/create-user.dto';
 import FindUserDTO from 'src/users/dto/find-user.dto';
-import ChangeUserDTO from 'src/last_dto/change-user.dto';
+import ChangeUserDTO from './dto/change-user.dto';
 import SendDMDTO from 'src/dto/send-dm.dto';
 import { FriendMessage } from 'src/database/entities/FriendMessage';
 import { User } from 'src/database/entities/User';
@@ -95,8 +95,6 @@ export class UserService {
         // const oldPath = UserService.PP_PATH + user.login42 + '.jpg';
         // const newPath = UserService.PP_PATH + dto.username + '.jpg';
         // fs.rename(oldPath, newPath, (err) => {
-        //     console.log('I am bad developper :', err)
-        //     if (err) return HttpStatus.INTERNAL_SERVER_ERROR;
         // })
         await this.userRepository.save(user)
         return HttpStatus.OK;

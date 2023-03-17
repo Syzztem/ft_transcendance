@@ -44,7 +44,4 @@ export class GameService {
             where: {id: dto.id}
         });
     }
-
-
-    
 }

@@ -31,7 +31,6 @@ export default defineComponent({
         ...mapState(['status'])
     },
     mounted() {
-        // console.log('token: ', this.$route.query.token)
         if (this.$route.query.token) { 
             localStorage.setItem('token', this.$route.query.token as any)
             localStorage.setItem('id', this.$route.query.id?.toString() as any)
