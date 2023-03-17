@@ -3,10 +3,11 @@ import IUser from "./IUser"
 
 interface IChannel {
     name:     string,
-    id:       number,
+    password: string,
+    isPrivate: boolean,
     users:    Array<IUser>
     messages: Array<IMessage>,
-    password: string,
+    id:       number,
   }
 
 export default IChannel
