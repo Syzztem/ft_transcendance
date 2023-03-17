@@ -40,6 +40,7 @@ export default defineComponent({
       modeButtonText: 'BOT',
       ///
       gameSocket: socket,
+      gameId: this.$route.params.id
     }
   },
   methods: {
@@ -85,6 +86,7 @@ export default defineComponent({
     ///
   },
   mounted() {
+    this.gameId = this.$route.params.id
     socket
       .on('updateBoard', (response: Board) => {
         this.game?.updateBoard(response)
@@ -92,6 +94,7 @@ export default defineComponent({
       .on('endGame', (winner: string) => {
         this.game?.endScreen(winner)
       })
+      .emit('joinGame', this.$route.params.id)
   //   if (store.state.user.id == -1) {
   //       this.$router.push('/login')
   //       return
@@ -153,6 +156,7 @@ export default defineComponent({
   unmounted() {
     document.removeEventListener('keyup', this.handleKeyUp)
     document.removeEventListener('keydown', this.handleKeyDown)
+    this.gameSocket.emit('leaveGame', this.gameId)
   }
 })
 </script>

@@ -86,7 +86,7 @@ export class GameGateway implements OnGatewayDisconnect, OnGatewayConnection{
 	@SubscribeMessage('identity')
 	async identity(@MessageBody() data: number): Promise<number> {
 		return data;
-	}
+	} 
 
 	@SubscribeMessage('joinMatchmaking')
 	async joinMatchmaking(@ConnectedSocket() clientSocket: Socket, @Request() req) {
@@ -133,7 +133,7 @@ export class GameGateway implements OnGatewayDisconnect, OnGatewayConnection{
 		return (player.id === game.player1.id ? Side.OWNER : Side.ADVERSE)
 	}
 
-	isPlayerAuthorize(player: User, game: Game) : boolean {
+	isUserPlayer(player: User, game: Game) : boolean {
 		return (player === game.player1 || player === game.player2)
 	}
 
@@ -156,11 +156,24 @@ export class GameGateway implements OnGatewayDisconnect, OnGatewayConnection{
 
 	@SubscribeMessage('leaveMatchmaking')
 	leaveMatchmaking(@ConnectedSocket() clientSocket: Socket) {
+		const playload = this.jwtService.decode(clientSocket.handshake.auth.token) as {id: number, username: string}
+		this.logger.log(`${playload.username} left the room`)
 		this.pendingPlayer.forEach((player: WsUser) => {
 			if (player.socketId == clientSocket.id) {
 				this.pendingPlayer.splice(this.pendingPlayer.indexOf(player))
 			}
 		}) 
+	}
+
+	@SubscribeMessage('joinGame')
+	joinGame(@ConnectedSocket() clientSocket: Socket, @MessageBody() gameId: number) {
+		clientSocket.join(`game:${gameId}`)
+	}
+
+	@SubscribeMessage('leaveGame')
+	leaveGame(@ConnectedSocket() clientSocket: Socket, @MessageBody() gameId: number) {
+		console.log(`Left game ${gameId} Bouhou`)
+		clientSocket.leave(`game:${gameId}`)
 	}
 
 	updateBoard(gameId: number, board: Board) {
@@ -196,11 +209,6 @@ export class GameGateway implements OnGatewayDisconnect, OnGatewayConnection{
             match.gameConfig.lastFpsUpdate = timestamp
             match.gameConfig.framesThisSecond = 0
 			if (match.winner) {
-				clearInterval(match.interval)
-				this.gameService.updateGame(gameId, {
-					owner: match.ownerScore.score,
-					adverse: match.adverseScore.score
-				})
 				this.endGame(game, match)
 			}
 			match.loop(timestamp)
@@ -224,6 +232,11 @@ export class GameGateway implements OnGatewayDisconnect, OnGatewayConnection{
 	}
 	
 	endGame(game: Game, match: Match) {
+		clearInterval(match.interval)
+		this.gameService.updateGame(game.id, {
+			owner: match.ownerScore.score,
+			adverse: match.adverseScore.score
+		})
 		this.server.to(`game:${game.id}`).emit('endGame', match.winner)
 		this.server.to(`game:${game.id}`).socketsLeave(`game:${game.id}`)
 	}

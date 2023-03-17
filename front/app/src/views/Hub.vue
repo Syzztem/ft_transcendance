@@ -21,6 +21,10 @@ export default defineComponent({
       router.push({name: 'game', params: {id: response}})
     })  
   },
+  unmounted() {
+    if (this.isMatchmaking)
+      this.gameSocket.emit('leaveMatchmaking')
+  },
   methods: {
     JoinMatchmaking() {
       this.isMatchmaking = true
