@@ -8,6 +8,8 @@ import { Game } from '../controllers/Game'
 import IPlayer from '@/models/IPlayer'
 import { defineComponent } from "vue" 
 import store from '@/store'
+import socket from '@/websocket'
+import Board from '@/models/Board.interface'
 
 
 // power ups     : pokemons
@@ -35,8 +37,10 @@ export default defineComponent({
       table: Object() as ITable,
       player: Object() as IPlayer,
       /// temporaire /// bot / QA
-      modeButtonText: 'BOT'
+      modeButtonText: 'BOT',
       ///
+      gameSocket: socket,
+      gameId: this.$route.params.id
     }
   },
   methods: {
@@ -44,18 +48,22 @@ export default defineComponent({
       this.$router.push('/hub')
     },
     handleKeyUp(e: KeyboardEvent) {
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown')
+        this.gameSocket.emit('keyUp', {gameId: this.$route.params.id, key: e.key})
       if (e.key === 'ArrowUp')
         this.gameConfig.keyUp = false
       if (e.key === 'ArrowDown')
         this.gameConfig.keyDown = false
       /// temporaire /// bot / QA
-      if (e.key === 'q')
+      if (e.key === 'q') 
         this.gameConfig.QKey = false
       if (e.key === 'a')
         this.gameConfig.AKey = false
       ///
     },
     handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown')
+        this.gameSocket.emit('keyDown', {gameId: this.$route.params.id, key: e.key})
       if (e.key === 'ArrowUp')
         this.gameConfig.keyUp = true
       if (e.key === 'ArrowDown')
@@ -78,6 +86,19 @@ export default defineComponent({
     ///
   },
   mounted() {
+    this.gameId = this.$route.params.id
+    socket
+      .on('updateBoard', (response: Board) => {
+        this.game?.updateBoard(response)
+      })
+      .on('endGame', (winner: string) => {
+        this.game?.endScreen(winner)
+      })
+      .emit('joinGame', this.$route.params.id)
+  //   if (store.state.user.id == -1) {
+  //       this.$router.push('/login')
+  //       return
+  // }
     // 
     // temporaire, est censé recevoir les données depuis le backend
     //
@@ -135,6 +156,7 @@ export default defineComponent({
   unmounted() {
     document.removeEventListener('keyup', this.handleKeyUp)
     document.removeEventListener('keydown', this.handleKeyDown)
+    this.gameSocket.emit('leaveGame', this.gameId)
   }
 })
 </script>

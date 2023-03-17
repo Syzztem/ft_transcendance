@@ -31,8 +31,8 @@ import { UseGuards } from '@nestjs/common';
 	  return data;
 	}
 
-	@SubscribeMessage('hello')
-	printWebsocket() {
-		console.log("Hello websocket !")
-	}
+	// @SubscribeMessage('hello')
+	// printWebsocket() {
+	// 	console.log("Hello websocket !")
+	// }
   }

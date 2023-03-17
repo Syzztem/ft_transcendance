@@ -1,4 +1,4 @@
-import { BeforeInsert, Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { AfterLoad, BeforeInsert, Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { BanAndMute } from "./BanAndMute";
 import { ChannelMessage } from "./ChannelMessage";
 import { User } from "./User";
@@ -34,6 +34,10 @@ export class Channel {
     @JoinColumn()
     bannedOrMuted: BanAndMute[];
 
+    @AfterLoad()
+    async removepassword() {
+        this.password = undefined;
+    }
 
     @BeforeInsert()
     async hashPassword() {
