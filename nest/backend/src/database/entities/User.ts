@@ -1,4 +1,4 @@
-import { BeforeInsert, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { AfterLoad, BeforeInsert, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, Unique } from 'typeorm';
 import { Channel } from './Channel';
 import { Game } from './Game';
 import * as bcrypt from 'bcrypt'
@@ -22,7 +22,7 @@ export class User {
   rank: number = 0;
 
   @Column("varchar")
-  token: string;
+  token?: string;
 
   @Column("int")
   wins: number = 0;
@@ -53,6 +53,11 @@ export class User {
 
   @OneToMany(() => Game, (game) =>game.player2)
   games2: Game[]
+
+  @AfterLoad()
+  removeToken() {
+    this.token = undefined;
+  }
 
   @BeforeInsert()
   async hashToken() {

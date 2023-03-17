@@ -16,7 +16,10 @@ import CreateChannelDTO from 'src/channel/dto/create-channel.dto';
 import { ChannelMessage } from 'src/database/entities/ChannelMessage';
 import { JwtService } from '@nestjs/jwt';
 
-@WebSocketGateway()
+@WebSocketGateway(4343, {
+    path: '/chat',
+    namespace: 'chat'
+})
 export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
 
     constructor(@InjectRepository(Channel) private channelRepository: Repository<Channel>,                
