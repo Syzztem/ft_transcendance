@@ -10,7 +10,7 @@
                             </p>
                         </v-col>
                         <v-col>
-                            <input type="text" v-model="username" v-on:keyup.enter="ok" spellcheck="false">
+                            <input type="text" v-model="newUsername" v-on:keyup.enter="ok" spellcheck="false">
                         </v-col>
                     </v-card>
                 </v-row>
@@ -40,11 +40,12 @@
 import { defineComponent } from 'vue';
 import { useCookies } from 'vue3-cookies'
 import store from '@/store';
+import { computed } from '@vue/reactivity';
 
 export default defineComponent({
     data() {
         return {
-            username: ''
+            newUsername: ''
         }
     },
     mounted() {
@@ -52,14 +53,26 @@ export default defineComponent({
         // this.$router.push('/login')
         // return
     // }
+        this.$store.dispatch('getUserInfos')
+        .then((res: any) => {
+            if (res.data.username != '')
+                this.$router.push('/')
+        }
+        , (error: any) => {
+        })
+    },
+    setup() {
+        return {
+            username: computed(() => store.getters.getUsername)
+        }
     },
     methods: {
         ok() {
-            this.$store.dispatch('changeUsername', {username: this.username})
-            .then((res) => {
+            this.$store.dispatch('changeUsername', { username: this.newUsername })
+            .then((res: any) => {
                 this.$router.push('/')
             }
-            , (error) => {
+            , (error: any) => {
                 console.log(error)
             })
         }

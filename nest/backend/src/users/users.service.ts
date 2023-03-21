@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import CreateUserDTO from 'src/users/dto/create-user.dto';
 import ChangeUserDTO from 'src/last_dto/change-user.dto';
@@ -38,11 +38,12 @@ export class UserService {
     async getUserById(id: number): Promise<User> {
         return this.userRepository.findOne({
             select: {
-                username:   true,
-                rank:       true,
-                wins:       false,
-                losses:     false,
-                level:      true,
+                username:                       true,
+                rank:                           true,
+                wins:                           false,
+                losses:                         false,
+                level:                          true,
+                twoFactorAuthenticationSecret:  true,
             },
             where: {id: id}
         });
@@ -161,7 +162,32 @@ export class UserService {
         this.userRepository.save(user2);
         return HttpStatus.OK;
     }
+
+    async setTwoFactorAuthenticationSecret(secret: string, userId: number) {
+        this.userRepository.update(
+            {id: userId},
+            {twoFactorAuthenticationSecret: secret}
+        )
+    }
+
+    async turnOnTwoFactorAuthentication(userId: number) {
+        this.userRepository.update(
+            {id: userId},
+            {isTwoFactorAuthenticationEnabled: true}
+        )
+    }
+
     async updateToken(id: number, jwtToken: string){
         this.userRepository.update({id: id}, {token: jwtToken})
     }
+
+    // async updateOTP(id: number, secret?: string) {
+    //     const user = await this.getUserById(id)
+    //     try {
+    //         console.log("secret: ", secret)
+    //         await this.userRepository.update(user.id, {twoFactorAuthenticationSecret: secret})
+    //     } catch (error: any) {
+    //         throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+    //     }
+    // }
 }

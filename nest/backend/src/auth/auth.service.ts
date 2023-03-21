@@ -1,8 +1,10 @@
-import { Injectable, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { Injectable, BadRequestException, ForbiddenException, HttpException, HttpStatus } from '@nestjs/common';
 import { UserService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from './constants';
 import { User } from 'src/database/entities/User';
+import { toDataURL } from 'qrcode';
+import * as speakeasy from 'speakeasy'
 
 @Injectable()
 export class AuthService {
@@ -11,13 +13,47 @@ export class AuthService {
 	  private jwtService: JwtService
 	) {}
   
+	private secrets: Map<number, string> = new Map()
+
 	async validateUser(token: string): Promise<any> {
-		console.log('validateUser')
 		return this.jwtService.verify(token, {secret: jwtConstants.secret})
 	}
-  
+
+	async generateTwoFactorAuthenticationSecret(id: number) {
+		const secret = speakeasy.generateSecret()
+		console.log('secret generate: ', secret.base32)
+		await this.usersService.setTwoFactorAuthenticationSecret(secret.base32, id);
+		return secret.otpauth_url
+	}
+
+	async generateQrCodeDataURL(otpAuthUrl: string) {
+		return toDataURL(otpAuthUrl);
+	}
+
+	async isTwoFactorAuthenticationCodeValid(twoFactorAuthenticationCode: string, id: number) {
+		const user = await this.usersService.getUserById(id)
+		console.log('secret validation: ', user.twoFactorAuthenticationSecret)
+		const isValid = speakeasy.totp.verify({
+        	token: twoFactorAuthenticationCode,
+        	secret: user.twoFactorAuthenticationSecret,
+			encoding: 'base32'
+      	});
+		return isValid
+    }
+
+	async loginWith2fa(userWithoutPsw: Partial<User>) {
+		const payload = {
+			email: userWithoutPsw.email,
+			isTwoFactorAuthenticationEnabled: !!userWithoutPsw.isTwoFactorAuthenticationEnabled,
+			isTwoFactorAuthenticated: true,
+		};
+		return {
+			email: payload.email,
+			access_token: this.jwtService.sign(payload)
+		};
+	}
+
 	async login(user: any) {
-		console.log('login user', user)
 		const payload = { username: user.login42, sub: user.id };
 		return this.jwtService.sign(payload);
 	}

@@ -9,6 +9,7 @@ import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import 'material-design-icons-iconfont/dist/material-design-icons.css'
+import VOtpInput from "vue3-otp-input";
 
 const vuetify = createVuetify({
   components,
@@ -19,4 +20,4 @@ const app = createApp(App).use(vuetify).use(VueCropper).use(store).use(router)
 
 app.config.globalProperties.$store=store
 
-app.mount('#app')
+app.component('v-otp-input', VOtpInput).mount('#app')

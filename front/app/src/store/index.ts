@@ -1,8 +1,8 @@
 import IChannel from '@/models/IChannel'
 import { createStore } from 'vuex'
 import { AxiosInstance } from 'axios'
-
-const axios = require('axios')
+import { Buffer } from 'buffer'
+import axios from 'axios'
 
 const instance : AxiosInstance = axios.create({
   baseURL: 'http://' +  process.env.VUE_APP_URL + ':3000'
@@ -48,9 +48,12 @@ let id: any = localStorage.getItem('id')
 const store = createStore({
   state: {
     status: '',
+    isLogin: true,
     userInfos: {
       profilePic: '',
-      username: ''
+      username: '',
+      isotp: false,
+      qrcode: ''
     },
     profileInfos: {
       profilePic: '',
@@ -67,13 +70,23 @@ const store = createStore({
     setStatus(state, status) {
       state.status = status
     },
+    setisotp(state, infos) {
+      state.userInfos.isotp = infos
+    },
+    setqrcode(state, code) {
+      state.userInfos.qrcode = code
+    },
     profileInfos(state, profileInfos) {
       state.profileInfos.username = profileInfos.username
-      state.profileInfos.profilePic = 'http://' +  process.env.VUE_APP_URL + ':3000/user/profilepic/' + profileInfos.username
+    },
+    profilePic(state, avatar) {
+      console.log(avatar)
     },
     userInfos(state, userInfos) {
       state.userInfos.username = userInfos.username
-      state.userInfos.profilePic = 'http://' +  process.env.VUE_APP_URL + ':3000/user/profilepic/' + userInfos.username
+    },
+    isLogin(state, infos) {
+      state.isLogin = infos
     },
     logout(state) {
       id = -1
@@ -94,13 +107,28 @@ const store = createStore({
     },
   },
   actions: {
+    isLogin({ commit }) {
+      if (!localStorage.getItem('token')) {
+        commit('isLogin', false)
+      }
+      return new Promise((resolve, reject) => {
+        instance.post('/auth/islogin', { 'token': localStorage.getItem('token') })
+        .then((response: any) => {
+          commit('isLogin', true)
+          resolve(response)
+        })
+        .catch((error: any) => {
+          commit('isLogin', false)
+          reject(error)
+        })
+      })
+    },
     getUserInfos({commit}) {
       if (!localStorage.getItem('id')) // better solution ?
         return ;
       return new Promise((resolve, reject) => {
         instance.get("/user/id/" + localStorage.getItem('id'))
         .then((response: any) => {
-          console.log("Response from the front: ",response.data)
           commit('userInfos', response.data)
           resolve(response)
         })
@@ -113,8 +141,19 @@ const store = createStore({
       return new Promise((resolve, reject) => {
         instance.get("/user/id/" + id)
         .then((response: any) => {
-          console.log(response.data)
           commit('profileInfos', response.data)
+          resolve(response)
+        })
+        .catch((error: any) => {
+          reject(error)
+        })
+      })
+    },
+    getProfilePic({commit}, username) {
+      return new Promise((resolve, reject) => {
+        instance.get("/user/profilepic/" + 'test' + username)
+        .then((response: any) => {
+          commit('profilePic', Buffer.from(response.data, 'binary').toString('base64'))
           resolve(response)
         })
         .catch((error: any) => {
@@ -146,14 +185,62 @@ const store = createStore({
         })
       })
     },
-    logout({commit}) {
+    get2fa({commit}) {
       return new Promise((resolve, reject) => {
-        instance.post("/auth/logout")
+        instance.get('/auth/2fa/actived')
+        .then((response: any) => {
+          commit("setisotp", response.data)
+          resolve(response)
+        })
+        .catch((error: any) => {
+          reject(error)
+        })
+      })
+    },
+    turnOn2fa({commit}, code) {
+      return new Promise((resolve, reject) => {
+        instance.post('/auth/2fa/turn-on', { "code": code })
+        .then((response: any) => {
+          commit('setisotp', true)
+          resolve(response)
+        })
+        .catch((error: any) => {
+          reject(error)
+        })
+      })
+    },
+    auth2fa({commit}, code) {
+      return new Promise((resolve, reject) => {
+        instance.post('/auth/2fa/authenticate', { "code": code })
         .then((response: any) => {
           resolve(response)
         })
         .catch((error: any) => {
-          console.log(error)
+          reject(error)
+        })
+      })
+    },
+    qrcode({commit}) {
+      return new Promise((resolve, reject) => {
+        instance.post('/auth/2fa/generate')
+        .then((response: any) => {
+          commit("setqrcode", response.data)
+          resolve(response)
+        })
+        .catch((error: any) => {
+          reject(error)
+        })
+      })
+    },
+    logout({commit}) {
+      return new Promise((resolve, reject) => {
+        instance.post("/auth/logout")
+        .then((response: any) => {
+          commit('logout')
+          resolve(response)
+        })
+        .catch((error: any) => {
+          commit('logout')
           reject(error)
         })
       })

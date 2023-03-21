@@ -42,6 +42,7 @@ export default defineComponent({
     },
     mounted() {
         this.$store.dispatch('getUserInfos')
+        this.$store.dispatch('getProfilePic', this.username)
     }
 })
 </script>

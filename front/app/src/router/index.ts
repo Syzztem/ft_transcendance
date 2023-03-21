@@ -72,9 +72,8 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const publicPages = ['/login'];
   const authRequired = !publicPages.includes(to.path);
-  const loggedIn = localStorage.getItem('token');
-
-  if (authRequired && !loggedIn) {
+  store.dispatch('isLogin')
+  if (authRequired && !store.state.isLogin) {
     return next('/login');
   }
 

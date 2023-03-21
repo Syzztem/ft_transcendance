@@ -1,10 +1,12 @@
-import { Controller, UseGuards, Post, Request , Get, Query, Body, Redirect, Res } from "@nestjs/common";
+import { Controller, UseGuards, Post, Request , Get, Query, Body, Redirect, Res, Req, HttpCode, UnauthorizedException, Response, HttpStatus } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { AuthGuard } from "@nestjs/passport";
 import { ftAuthGuard } from "./guards/ft.guard";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import cookieParser from 'cookie-parser';
 import { UserService } from "src/users/users.service";
+import { User } from 'src/database/entities/User';
+import * as speakeasy from 'speakeasy'
 
 
 @Controller('auth')
@@ -27,15 +29,78 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Post('islogin')
+  isLogin(@Req() req, @Response() res, @Body() body) {
+    return res.status(HttpStatus.OK).send()
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@Request() req) {
     return req.user;
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('2fa/actived')
+  async ifActived(@Req() req,  @Response() res: any) {
+    const user = await this.userService.getUserById(req.user.id)
+    return res.status(HttpStatus.OK).send(user.isTwoFactorAuthenticationEnabled)
+  }
+
+  // @UseGuards(JwtAuthGuard)
+  // @Post('2fa/turn-on')
+  // async turnOnTwoFactorAuthentification(@Req() request, @Body() body) {
+  //   return this.authService.saveSecret(request.user.id, body.code)
+  // }
+
+  // @UseGuards(JwtAuthGuard)
+  // @Get('2fa/qrcode')
+  // async qrcode(@Req() req) {
+  //   const id: number = req.user.id
+  //   console.log(id)
+  //   return this.authService.generateQrCode(id)
+  // }
+
+  @Post('2fa/generate')
+  @UseGuards(JwtAuthGuard)
+  async register(@Response() response, @Request() request) {
+    const url = await this.authService.generateTwoFactorAuthenticationSecret(request.user.id);
+    response.send(url)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('2fa/turn-on')
+  async turnOnTwoFactorAuthentication(@Req() request, @Body() body) {
+    const isCodeValid =
+      await this.authService.isTwoFactorAuthenticationCodeValid(
+        body.code,
+        request.user.id,
+      );
+    if (!isCodeValid) {
+      throw new UnauthorizedException('Wrong authentication code');
+    }
+    await this.userService.turnOnTwoFactorAuthentication(request.user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('2fa/authenticate')
+  @HttpCode(200)
+  async authenticate(@Request() request, @Body() body) {
+    console.log(body)
+    const isCodeValid = this.authService.isTwoFactorAuthenticationCodeValid(
+      body.code,
+      request.user)
+    if (!isCodeValid)
+      throw new UnauthorizedException('Wrong authentication code')
+    return this.authService.loginWith2fa(request.user)
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('logout')
   async logout(@Request() req, @Res() res) {
-    res.clearCookie('jwt', {sameSite: "Lax"}) //not in cookies anymore
+    localStorage.removeItem('token')
+    localStorage.removeItem('id')
+    localStorage.clear()
     res.send("logged out")
   }
 }
