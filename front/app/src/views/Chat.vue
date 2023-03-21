@@ -8,6 +8,7 @@ import IUser from "@/models/IUser";
 import store from "@/store";
 import { defineComponent } from 'vue';
 import { mapActions ,mapState} from "vuex";
+import socket from "@/websocket";
 
 /*
 	TODO :
@@ -22,6 +23,7 @@ import { mapActions ,mapState} from "vuex";
 export default defineComponent({
 	data() {
 		return {
+			id: Number(localStorage.getItem('id')),
 			options: 
 			[
 				{ title: 'Send DM' },
@@ -36,18 +38,23 @@ export default defineComponent({
 				name: 'test',
 				password: '',
 				id: 0,
-				adminId: -1,
 			},
-			id: Number(localStorage.getItem('id')),
+			chatSocket: socket,
 		}
 	},
 	methods: {
 		...mapActions(["selectChannel", "rmChannel"]),
 		createChannel(newchan : any)
 		{
+			const data = {
+          name: newchan.name,
+          adminId: this.id,
+          password: newchan.password,
+        };
+		console.log('id in front : ', this.id)
+		this.chatSocket.emit('create', data);
 			newchan.id += 1;
-			newchan.adminId = this.id;
-			this.$store.dispatch('createChannel', newchan);
+			// this.$store.dispatch('createChannel', newchan);
 			this.dialog = false;
 		},
 	},

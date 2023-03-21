@@ -16,10 +16,8 @@ import CreateChannelDTO from 'src/channel/dto/create-channel.dto';
 import { ChannelMessage } from 'src/database/entities/ChannelMessage';
 import { JwtService } from '@nestjs/jwt';
 
-@WebSocketGateway(4343, {
-    path: '/chat',
-    namespace: 'chat'
-})
+@WebSocketGateway()
+    
 export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
 
     constructor(@InjectRepository(Channel) private channelRepository: Repository<Channel>,                
@@ -36,8 +34,11 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect,
     private sockets = new Map<Socket, number>();
 
     private verifyId(client: Socket, id: number) {
-        if (this.sockets.get(client) != id)
-            throw new BadRequestException("Nice try");
+        if (this.sockets.get(client) != id) {
+            console.log('id :', id);
+            // console.log('client :', client);
+            throw new BadRequestException("Nice try test");
+        }
     }
 
     @SubscribeMessage('newmsg')
@@ -170,16 +171,20 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect,
         this.server.to(chan.id.toString()).emit("/" + chan.id + ":Channel was deleted");
         this.server.socketsLeave(chan.id.toString());
         this.channelRepository.delete(id);
-    }                                                               
-
+    }
+                                                      
     @SubscribeMessage('create')
     async createChannel(@MessageBody() dto: CreateChannelDTO,
                         @ConnectedSocket() client: Socket) {
+        console.log('HELLO FROM CREATE');
+        console.log(dto.adminId);
         this.verifyId(client, dto.adminId);
         const channel = this.channelRepository.create();
         const user = await this.userRepository.findOneBy({id: dto.adminId});
+        console.log(channel);
+        console.log("chan id :", channel.id);
         client.join(channel.id.toString());
-        if (!user) return null;
+        if (!user) throw new BadRequestException("User doesn't exist");
         channel.name = dto.name;
         channel.admin = user;
         channel.users = [user];
@@ -277,10 +282,10 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect,
             where: {id: uid}
         });
         if(!user) client.disconnect();
-        client.emit(user.channels.toString());
+        // client.emit(user.channels.toString());
         this.clients.set(user.id, client);
         this.sockets.set(client, user.id);
-        client.join(user.channels.map(chan => chan.id.toString()));
+        // client.join(user.channels.map(chan => chan.id.toString()));
         console.log('User connected');
     }
 
