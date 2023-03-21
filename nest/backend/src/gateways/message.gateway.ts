@@ -185,7 +185,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect,
         channel.users = [user];
         channel.password = dto.password;
         channel.isPrivate = dto.password == null ? false : true;
-        const out = await this.channelRepository.save(channel);
+        const out = JSON.stringify(await this.channelRepository.save(channel));
         console.log(out);
         client.emit(JSON.stringify(out));
     }
