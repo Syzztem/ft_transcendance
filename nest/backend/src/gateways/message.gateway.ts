@@ -35,16 +35,14 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect,
 
     private verifyId(client: Socket, id: number) {
         if (this.sockets.get(client) != id) {
-            console.log('id :', id);
-            // console.log('client :', client);
-            throw new BadRequestException("Nice try test");
+            throw new BadRequestException("Nice try");
         }
     }
 
     @SubscribeMessage('newmsg')
     async handleMessage(@MessageBody() dto: PostMessageDTO,
                         @ConnectedSocket() client: Socket) {
-        this.verifyId(client, dto.senderId);
+        //this.verifyId(client, dto.senderId);
         const chan: Channel = await this.channelRepository.findOneBy({id: dto.channelId})
         if (!chan) throw new BadRequestException("Channel Doesn't exist")
         const user = chan.users.find(user => user.id === dto.senderId);
@@ -176,21 +174,19 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect,
     @SubscribeMessage('create')
     async createChannel(@MessageBody() dto: CreateChannelDTO,
                         @ConnectedSocket() client: Socket) {
-        console.log('HELLO FROM CREATE');
-        console.log(dto.adminId);
         this.verifyId(client, dto.adminId);
-        const channel = this.channelRepository.create();
+        let channel = this.channelRepository.create();
         const user = await this.userRepository.findOneBy({id: dto.adminId});
-        console.log(channel);
-        console.log("chan id :", channel.id);
-        client.join(channel.id.toString());
         if (!user) throw new BadRequestException("User doesn't exist");
         channel.name = dto.name;
         channel.admin = user;
         channel.users = [user];
         channel.password = dto.password;
         channel.isPrivate = dto.password == null ? false : true;
-        client.emit(JSON.stringify(await this.channelRepository.save(channel)));
+        channel = await this.channelRepository.save(channel);;
+        client.join(channel.id.toString());
+        //console.log(JSON.stringify(channel)); this is here to check that the server returns a proper json
+        client.emit(JSON.stringify(channel));
     }
 
     @SubscribeMessage('leave')
