@@ -19,7 +19,7 @@
 import router from '@/router'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
-import socket from '@/websocket'
+import { socket, chatSocket} from '@/websocket'
 
 export default defineComponent({
     data() {
@@ -35,6 +35,7 @@ export default defineComponent({
             localStorage.setItem('token', this.$route.query.token as any)
             localStorage.setItem('id', this.$route.query.id?.toString() as any)
             socket.connect()
+            chatSocket.connect()
             this.$router.push('userInfos')
             return
         }

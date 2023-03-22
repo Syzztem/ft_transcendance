@@ -8,7 +8,7 @@ import IUser from "@/models/IUser";
 import store from "@/store";
 import { defineComponent } from 'vue';
 import { mapActions ,mapState} from "vuex";
-import socket from "@/websocket";
+import { chatSocket } from "@/websocket";
 
 /*
 	TODO :
@@ -39,7 +39,7 @@ export default defineComponent({
 				password: '',
 				id: 0,
 			},
-			chatSocket: socket,
+			chatSocket: chatSocket,
 		}
 	},
 	methods: {
@@ -79,7 +79,7 @@ export default defineComponent({
 		},
 	},
 	mounted() {
-		socket.
+		chatSocket.
 		on('create', (response: IChannel) => {
 			console.log('basic_test');
 			console.log('reponse :' , response);

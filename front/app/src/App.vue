@@ -2,7 +2,7 @@
 import Header from './components/header/Header.vue'
 import Footer from './components/Footer.vue'
 import { defineComponent } from 'vue'
-import socket from './websocket'
+import {socket, chatSocket} from './websocket'
 
 export default defineComponent({
   data() {
@@ -33,8 +33,10 @@ export default defineComponent({
   },
   mounted() {
     this.resize();
-    if (localStorage.getItem('token'))
+    if (localStorage.getItem('token')){
       socket.connect()
+      chatSocket.connect()
+    }
   }
 })
 </script>

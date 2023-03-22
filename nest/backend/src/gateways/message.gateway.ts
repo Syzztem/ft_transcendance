@@ -15,10 +15,12 @@ import { FriendMessage } from 'src/database/entities/FriendMessage';
 import CreateChannelDTO from 'src/channel/dto/create-channel.dto';
 import { ChannelMessage } from 'src/database/entities/ChannelMessage';
 import { JwtService } from '@nestjs/jwt';
+import { Logger } from '@nestjs/common';
+import { UserService } from 'src/users/users.service';
 
-@WebSocketGateway()
-    
-export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
+@WebSocketGateway({ namespace: 'chat' })
+export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect {
+    private logger = new Logger('ChatGateway')
 
     constructor(@InjectRepository(Channel) private channelRepository: Repository<Channel>,                
                 @InjectRepository(ChannelMessage) private messageRepository: Repository<ChannelMessage>,
@@ -296,23 +298,21 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect,
             },
             where: {id: uid}
         });
+        console.log(`chat user: ${user}`)
         if(!user)
-            await client.disconnect();
+            client.disconnect();
         // client.emit(user.channels.toString());
         this.clients.set(user.id, client);
         this.sockets.set(client, user.id);
         // client.join(user.channels.map(chan => chan.id.toString()));
-        console.log('User connected');
+        this.logger.log('New client connected in chat gateway');
     }
 
     async handleDisconnect(client: Socket) {
         this.clients.delete(this.sockets.get(client));
         this.sockets.delete(client);
         client.disconnect();
-        console.log('User disconnected');
+        this.logger.log('Client disconnected from chat gateway');
     }
 
-    afterInit(server: any) {
-        console.log('Socket is live')
-    }
 }

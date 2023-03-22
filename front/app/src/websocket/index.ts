@@ -1,11 +1,13 @@
-import { io, Socket } from "socket.io-client";
+import { io, Socket, ManagerOptions, SocketOptions} from "socket.io-client";
 
-const socket: Socket = io("http://127.0.0.1:3000/", {
+const options: Partial<ManagerOptions & SocketOptions> = {
     transports: ["websocket"],
     autoConnect: false,
     auth: (cb) => {
         cb({token: localStorage.getItem('token')})
     }
-});
+}
 
-export default socket
+export const socket: Socket = io("http://127.0.0.1:3000/", options);
+export const chatSocket: Socket = io("http://127.0.0.1:3000/chat", options)
+

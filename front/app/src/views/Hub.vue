@@ -2,7 +2,7 @@
 import IGameConfig from '../models/IGameConfig'
 import { defineComponent } from 'vue'
 import store from '@/store'
-import socket from '../websocket'
+import { socket } from '../websocket'
 import router from '@/router'
 
 export default defineComponent({

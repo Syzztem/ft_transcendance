@@ -1,7 +1,7 @@
 <script lang='ts'>
 import { Game } from '../controllers/Game'
 import { defineComponent } from "vue"
-import socket from '@/websocket'
+import { socket } from '@/websocket'
 import Board from '@/models/Board.interface'
 
 export default defineComponent({
