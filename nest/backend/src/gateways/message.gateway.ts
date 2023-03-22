@@ -174,6 +174,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect,
     @SubscribeMessage('create')
     async createChannel(@MessageBody() dto: CreateChannelDTO,
                         @ConnectedSocket() client: Socket) {
+        console.log('hello from create');
+        console.log(dto);
         this.verifyId(client, dto.adminId);
         let channel = this.channelRepository.create();
         const user = await this.userRepository.findOneBy({id: dto.adminId});
@@ -184,8 +186,9 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect,
         channel.password = dto.password;
         channel.isPrivate = dto.password == null ? false : true;
         channel = await this.channelRepository.save(channel);;
+        console.log('channel :', channel);
         client.join(channel.id.toString());
-        //console.log(JSON.stringify(channel)); this is here to check that the server returns a proper json
+        console.log('stringified channel :', JSON.stringify(channel));
         client.emit(JSON.stringify(channel));
     }
 

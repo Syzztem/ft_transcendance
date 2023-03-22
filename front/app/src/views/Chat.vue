@@ -35,7 +35,7 @@ export default defineComponent({
 			],
 			dialog: false,
 			newChannel: {
-				name: 'test',
+				name: '',
 				password: '',
 				id: 0,
 			},
@@ -47,16 +47,18 @@ export default defineComponent({
 		createChannel(newchan : any)
 		{
 			const data = {
-          name: newchan.name,
-          adminId: this.id,
-          password: newchan.password,
+				name: newchan.name,
+				adminId: this.id,
+				password: newchan.password,
         };
-		console.log('id in front : ', this.id)
+		console.log('data inside create_channel : ', data);
+		console.log(this.chatSocket);
 		this.chatSocket.emit('create', data);
-			newchan.id += 1;
-			// this.$store.dispatch('createChannel', newchan);
-			this.dialog = false;
+		newchan.id += 1;
+		// this.$store.dispatch('createChannel', newchan);
+		this.dialog = false;
 		},
+
 	},
     computed: {
 		username()
@@ -77,6 +79,23 @@ export default defineComponent({
 		},
 	},
 	mounted() {
+		socket.
+		on('create', (response: IChannel) => {
+			console.log('basic_test');
+			console.log('reponse :' , response);
+		})
+		// this.chatSocket.on
+		// ('create', (channel) => 
+		// 	{
+		// 		console.log('hi');
+		// 		// this.channels.push(channel);
+		// 	}
+		// );
+
+
+		// this.chatSocket.on("connect", () => {
+  		// 	console.log('fct test', socket.connected); // true
+		// 	});
 	},
 })
 
