@@ -1,3 +1,4 @@
+import IChannel from '@/models/IChannel'
 import { createStore } from 'vuex'
 import { AxiosInstance } from 'axios'
 
@@ -26,6 +27,12 @@ const store = createStore({
     profileInfos: {
       profilePic: '',
       username: ''
+    },
+    chat: {
+      joined_channels:  [] as IChannel[],
+      current_channel:  null as IChannel | null,
+      blocked_users:    [],
+      current_message:  "",
     }
   },
   mutations: {
@@ -45,7 +52,19 @@ const store = createStore({
       token = ''
       localStorage.removeItem('id')
       localStorage.removeItem('token')
-    }
+    },
+    addChannel(state, newchan) {
+      const { name, password, isPrivate, users, messages } = newchan;
+      const newfront = {name : name, password : password, isPrivate : isPrivate, users: users, messages : [], id: newchan.id}
+      state.chat.joined_channels.push(newfront);
+    },
+    setCurrentChannel(state, channel) {
+      state.chat.current_channel = channel;
+    },
+    removeChannel(state, id) {
+      state.chat.joined_channels = state.chat.joined_channels.filter(c => c.id !== id);
+      state.chat.current_channel = null;
+    },
   },
   actions: {
     getUserInfos({commit}) {
@@ -109,7 +128,17 @@ const store = createStore({
           reject(error)
         })
       })
-    }
+    },
+    selectChannel({ commit }, channel) {
+      commit("setCurrentChannel", channel);
+    },
+    rmChannel({ commit }, id) {
+      commit("removeChannel", id);
+    },
+    createChannel({ commit }, channelInfos) {
+      commit("addChannel", channelInfos);
+    },
+
   },
   getters: {
     getUsername(state) {

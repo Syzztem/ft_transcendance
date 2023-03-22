@@ -1,4 +1,3 @@
-# compiled output
 /dist
 /front/app/yarn.lock
 /front/app/node_modules
@@ -36,10 +35,9 @@ lerna-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 
-.*.swp
-
-
+**/.*.swp
 # ENV
 **.env
 .env
+**/*.env
 */*/*.env

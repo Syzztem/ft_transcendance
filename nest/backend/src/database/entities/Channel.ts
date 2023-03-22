@@ -1,4 +1,4 @@
-import { BeforeInsert, Column, Entity, JoinColumn, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { AfterLoad, BeforeInsert, Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { BanAndMute } from "./BanAndMute";
 import { ChannelMessage } from "./ChannelMessage";
 import { User } from "./User";
@@ -12,19 +12,19 @@ export class Channel {
     @Column("varchar")
     name: string;
 
-    @OneToOne(() => User)
+    @ManyToOne(() =>User)
     @JoinColumn()
     admin: User;
 
     @ManyToMany(() => User)
-    @JoinColumn()
+    @JoinTable()
     users: User[]
 
     @OneToMany(() => ChannelMessage, message => message.channel)
     @JoinColumn()
     messages: ChannelMessage[]
 
-    @Column("boolean")
+    @Column({type: "boolean", default: false})
     isPrivate: boolean;
 
     @Column({type: "varchar", nullable: true, default: null})
@@ -34,6 +34,10 @@ export class Channel {
     @JoinColumn()
     bannedOrMuted: BanAndMute[];
 
+    @AfterLoad()
+    async removepassword() {
+        this.password = undefined;
+    }
 
     @BeforeInsert()
     async hashPassword() {

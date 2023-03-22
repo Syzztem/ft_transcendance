@@ -38,8 +38,6 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { useCookies } from 'vue3-cookies'
-import store from '@/store';
 
 export default defineComponent({
     data() {

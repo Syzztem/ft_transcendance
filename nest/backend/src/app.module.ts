@@ -10,11 +10,11 @@ import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { User } from './database/entities/User';
-import { Channel } from './database/entities/Channel';
 import { Game } from './database/entities/Game';
 import { ChannelMessage } from './database/entities/ChannelMessage';
 import { FriendMessage } from './database/entities/FriendMessage';
 import { BanAndMute } from './database/entities/BanAndMute';
+import { Channel } from './database/entities/Channel';
 
 @Module({
   imports: [PassportModule, AuthModule, UsersModule, ConfigModule.forRoot({
@@ -31,7 +31,8 @@ import { BanAndMute } from './database/entities/BanAndMute';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PW,
       database: process.env.POSTGRES_DB,
-      entities: [User, Channel, Game, ChannelMessage, FriendMessage, BanAndMute],
+      autoLoadEntities: true,
+      //entities: [User, Channel, Game, ChannelMessage, FriendMessage, BanAndMute],
       synchronize: true
     })
   ],

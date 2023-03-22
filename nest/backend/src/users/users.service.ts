@@ -74,6 +74,8 @@ export class UserService {
     }
 
     async add(createUserDTO: CreateUserDTO) : Promise<User> {
+        if (createUserDTO.username.length > 8 || createUserDTO.login42.length > 8)
+            return null;
         if (createUserDTO.username == 'default') return null;
         if (await this.userRepository.count({ where: { login42: createUserDTO.login42 } }) != 0)
             return null;

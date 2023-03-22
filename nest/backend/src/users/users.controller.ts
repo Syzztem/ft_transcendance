@@ -17,7 +17,7 @@ export class UsersController {
                   @Response() res: any) : Promise<User> {
         const user = await this.userService.getUserById(id);
         if (!user) return res.status(HttpStatus.NOT_FOUND).send();
-        return res.status(HttpStatus.OK).json({username: {user}.user.username, profilePic: {user}.user.profilePic});
+        return res.status(HttpStatus.OK).send(user);
     }
     @UseGuards(JwtAuthGuard)
     @Get("profilepic/:username")
@@ -27,6 +27,7 @@ export class UsersController {
         if (!fs.existsSync(path)) return res.status(HttpStatus.OK).sendFile('/usr/app/profilepics/defaultpp.jpg');
         res.status(HttpStatus.OK).sendFile(path);
     }
+
     @UseGuards(JwtAuthGuard)
     @Post("/setpp/:username")
     @UseInterceptors(FileInterceptor('file'))
@@ -36,7 +37,7 @@ export class UsersController {
         const path = UserService.PP_PATH + username + '.jpg';
         fs.writeFile(path, file.buffer, (err) => {
             if (err) res.status(HttpStatus.INTERNAL_SERVER_ERROR).send();
-            else res.status(HttpStatus.OK).send();
+            else res.status(HttpStatus.OK).send(username);
         })
     }
 
@@ -45,7 +46,7 @@ export class UsersController {
     async verifyToken(@Body() token: string,
                       @Param('id') id: number,
                       @Response() res: any) {
-        res.status(await this.userService.verifyToken(id, token)).send();
+        res.status(await this.userService.verifyToken(id, token)).send(id);
     }
 
     @UseGuards(JwtAuthGuard)
@@ -54,8 +55,7 @@ export class UsersController {
                   @Response() res: any) {
         const user = await this.userService.add(createUserDTO);
         if (!user) return res.status(HttpStatus.CONFLICT).send();
-        res.status(HttpStatus.OK).send();
-        return user;
+        res.status(HttpStatus.OK).send(user);
     }
 
     @Post("login")
@@ -63,7 +63,7 @@ export class UsersController {
                     @Response() res: any) {
         const user = await this.userService.getUserByName(username)
         if (!user) return res.status(HttpStatus.NOT_FOUND).send();
-        return res.status(HttpStatus.OK).json({user})
+        return res.status(HttpStatus.OK).send(user)
     }
     
     @UseGuards(JwtAuthGuard)
@@ -81,7 +81,7 @@ export class UsersController {
     async addFriend(@Param('id1') id1:number,
                     @Param('id2') id2:number,
                     @Response() res: any) {
-        res.status(await this.userService.addFriend(id1, id2)).send();
+        res.status(await this.userService.addFriend(id1, id2)).send(id2);
     }
 
     @UseGuards(JwtAuthGuard)
@@ -89,7 +89,7 @@ export class UsersController {
     @HttpCode(HttpStatus.NO_CONTENT)
     async removeFriend(@Param('id1') id1:number, @Param('id2') id2:number,
                        @Response() res: any) {
-        res.status(await this.userService.removeFriend(id1, id2)).send();
+        res.status(await this.userService.removeFriend(id1, id2)).send(id2);
     }
 
     @UseGuards(JwtAuthGuard)
@@ -97,7 +97,7 @@ export class UsersController {
     @HttpCode(HttpStatus.CREATED)
     async blockUser(@Param('id1') id1:number, @Param('id2') id2:number,
                     @Response() res: any) {
-        res.status(await this.userService.blockUser(id1, id2)).send();
+        res.status(await this.userService.blockUser(id1, id2)).send(id2);
     }
 
     @UseGuards(JwtAuthGuard)
@@ -105,7 +105,7 @@ export class UsersController {
     @HttpCode(HttpStatus.CREATED)
     async unBlockUser(@Param('id1') id1:number, @Param('id2') id2:number,
                       @Response() res: any) {
-        res.status(await this.userService.unBlockUser(id1, id2)).send();
+        res.status(await this.userService.unBlockUser(id1, id2)).send(id2);
     }
 
     @UseGuards(JwtAuthGuard)
@@ -113,7 +113,7 @@ export class UsersController {
     @HttpCode(HttpStatus.CREATED)
     async sendDM(@Body() sendDMDTO: SendDMDTO,
                  @Response() res: any) {
-        res.status(await this.userService.sendDM(sendDMDTO)).send();
+        res.status(await this.userService.sendDM(sendDMDTO)).send(sendDMDTO);
     }
 
     @UseGuards(JwtAuthGuard)
@@ -121,7 +121,7 @@ export class UsersController {
     @HttpCode(HttpStatus.NO_CONTENT)
     async deleteDM(@Param('id') id: number,
                    @Response() res: any) {
-        res.status(await this.userService.deleteDM(id)).send();
+        res.status(await this.userService.deleteDM(id)).send(id);
     }
     
     @UseGuards(JwtAuthGuard)
