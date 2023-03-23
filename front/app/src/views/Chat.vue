@@ -8,23 +8,22 @@ import IUser from "@/models/IUser";
 import store from "@/store";
 import { defineComponent } from 'vue';
 import { mapActions ,mapState} from "vuex";
+import socket from "@/websocket";
 
 /*
 	TODO :
 
-	-	use louis API to create channels
-	- add front protection so channels with same name can t be created?
 	- create a dialog to search for existing channels
 	- clickable profile on user -> opens 	OPTIONS PANEL	:	dm, profile page, add to friends, remove from friend block user, unblock user
 											ADVANCED PANEL	:	promote/demote/ban/kick/unban
 	- v-if (blocked) -> display red block icon
 	- v-if display only available options (don t block if already blocked etc)
-	ajouter superman 64 en fond d ecran 42
 */
 
 export default defineComponent({
 	data() {
 		return {
+			id: Number(localStorage.getItem('id')),
 			options: 
 			[
 				{ title: 'Send DM' },
@@ -36,22 +35,30 @@ export default defineComponent({
 			],
 			dialog: false,
 			newChannel: {
-				name: 'test',
-				adminId: 0,
+				name: '',
 				password: '',
 				id: 0,
 			},
-			id: Number(localStorage.getItem('id')),
+			chatSocket: socket,
 		}
 	},
 	methods: {
 		...mapActions(["selectChannel", "rmChannel"]),
 		createChannel(newchan : any)
 		{
-			newchan.id += 1;
-			this.$store.dispatch('createChannel', newchan);
-			this.dialog = false;
+			const data = {
+				name: newchan.name,
+				adminId: this.id,
+				password: newchan.password,
+        };
+		console.log('data inside create_channel : ', data);
+		console.log(this.chatSocket);
+		this.chatSocket.emit('create', data);
+		newchan.id += 1;
+		// this.$store.dispatch('createChannel', newchan);
+		this.dialog = false;
 		},
+
 	},
     computed: {
 		username()
@@ -72,8 +79,23 @@ export default defineComponent({
 		},
 	},
 	mounted() {
+		socket.
+		on('create', (response: IChannel) => {
+			console.log('basic_test');
+			console.log('reponse :' , response);
+		})
+		// this.chatSocket.on
+		// ('create', (channel) => 
+		// 	{
+		// 		console.log('hi');
+		// 		// this.channels.push(channel);
+		// 	}
+		// );
 
-		// store.commit('addChannel', {name: 'channeltest', id: 42, users: [{name :'user99'}], messages:[{sender:'user99',content:'yo'}]} );
+
+		// this.chatSocket.on("connect", () => {
+  		// 	console.log('fct test', socket.connected); // true
+		// 	});
 	},
 })
 
@@ -138,7 +160,7 @@ export default defineComponent({
 											</v-badge>
 											</v-badge>
 											<v-card-text>
-												{{user.name}}
+												{{user.username}}
 												<v-menu activator="parent">
 													<v-list>
 														<v-list-item v-for="(item, index) in options" :key="index" :value="index">

@@ -30,7 +30,7 @@ services:
     build: nest
     depends_on:
       - db
-    restart: always
+    restart: on-failure
     networks:
       - transcendence
     ports:
@@ -49,7 +49,7 @@ services:
   vue: 
     container_name: vue
     build: front
-    image: frontend
+    image: frotend
     restart: unless-stopped
     networks:
       - transcendence

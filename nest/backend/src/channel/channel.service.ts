@@ -50,7 +50,8 @@ export class ChannelService {
 
     async postMessage(dto: PostMessageDTO) : Promise<number> {
         const chan: Channel = await this.channelRepository.findOneBy({id: dto.channelId})
-        if (!chan) return HttpStatus.NOT_FOUND;
+        if (!chan)
+            return HttpStatus.NOT_FOUND;
         const user = chan.users.find(user => user.id === dto.senderId);
         if (!user || chan.isMuted(dto.senderId))
             return HttpStatus.FORBIDDEN;
@@ -67,10 +68,13 @@ export class ChannelService {
 
     async banUser(chanId: number, userId: number, date: Date) : Promise<number> {
         const chan = await this.channelRepository.findOneBy({id: chanId});
-        if (!chan) return HttpStatus.NOT_FOUND;
-        if (chan.isBanned(userId)) return HttpStatus.NO_CONTENT;
+        if (!chan)
+            return HttpStatus.NOT_FOUND;
+        if (chan.isBanned(userId))
+            return HttpStatus.NO_CONTENT;
         const user = chan.users.find(user => user.id === userId);
-        if (!user) return HttpStatus.NOT_FOUND;
+        if (!user)
+            return HttpStatus.NOT_FOUND;
         const banAndMute = this.bansAndMutesRepository.create({
             user: user,
             channel: chan,
@@ -85,9 +89,11 @@ export class ChannelService {
 
     async muteUser(chanId: number, userId: number, date: Date) : Promise<number> {
         const chan = await this.channelRepository.findOneBy({id: chanId});
-        if (!chan) return HttpStatus.NOT_FOUND;
+        if (!chan)
+            return HttpStatus.NOT_FOUND;
         const user = chan.users.find(user => user.id === userId);
-        if (!user) return HttpStatus.NOT_FOUND;
+        if (!user) 
+            return HttpStatus.NOT_FOUND;
         if (chan.isMuted(userId)) return HttpStatus.NO_CONTENT;
         const banAndMute = this.bansAndMutesRepository.create({
             user: user,
@@ -105,30 +111,40 @@ export class ChannelService {
             channel: {id: chanId},
             user: {id: uid}
         });
-        if (!ban) return HttpStatus.NOT_FOUND;
+        if (!ban)
+            return HttpStatus.NOT_FOUND;
         this.bansAndMutesRepository.delete(ban.id);
         return HttpStatus.OK;
     }
 
     async joinChannel(chanId: number, uid: number) : Promise<number> {
         const chan = await this.channelRepository.findOneBy({id: chanId});
-        if (!chan) return HttpStatus.NOT_FOUND;
+        if (!chan)
+            return HttpStatus.NOT_FOUND;
         const user = await this.userRepository.findOneBy({id: uid});
-        if (!user) return HttpStatus.NOT_FOUND;
-        if(chan.isBanned(uid)) return HttpStatus.FORBIDDEN;
-        if (chan.password != null) return HttpStatus.UNAUTHORIZED;
+        if (!user)
+            return HttpStatus.NOT_FOUND;
+        if(chan.isBanned(uid))
+            return HttpStatus.FORBIDDEN;
+        if (chan.password != null)
+            return HttpStatus.UNAUTHORIZED;
         chan.users.push(user);
         return HttpStatus.OK;
     }
 
     async joinChannelWithPassword(chanId: number, uid: number, password: string) {
         const chan = await this.channelRepository.findOneBy({id: chanId});
-        if (!chan) return HttpStatus.NOT_FOUND;
+        if (!chan)
+            return HttpStatus.NOT_FOUND;
         const user = await this.userRepository.findOneBy({id: uid});
-        if (!user) return HttpStatus.NOT_FOUND;
-        if (chan.password == null) return HttpStatus.BAD_REQUEST;
-        if(chan.isBanned(uid)) return HttpStatus.FORBIDDEN;
-        if (!await chan.verifyPassword(password)) return HttpStatus.UNAUTHORIZED;
+        if (!user)
+            return HttpStatus.NOT_FOUND;
+        if (chan.password == null)
+            return HttpStatus.BAD_REQUEST;
+        if(chan.isBanned(uid))
+            return HttpStatus.FORBIDDEN;
+        if (!await chan.verifyPassword(password))
+            return HttpStatus.UNAUTHORIZED;
         chan.users.push(user);
         return HttpStatus.OK;
     }
@@ -163,7 +179,6 @@ export class ChannelService {
         channel.users = [user];
         channel.password = dto.password;
         channel.isPrivate = dto.password == null ? false : true;
-        this.channelRepository.save(channel);
-        return channel;
+        return await this.channelRepository.save(channel);
     }
 }

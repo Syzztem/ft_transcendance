@@ -16,20 +16,17 @@ export class ftStrategy extends PassportStrategy(Strategy, 'ft') {
   }
 
   async validate(accessToken: string, refreshToken: string, profile: Profile): Promise<any> {
-    console.log('42 Strategy')
     let user = await this.userService.findByLogin(profile.username)
-    // console.log("user ? :", user)
     if (!user) {
       const newUser : CreateUserDTO = {
         username: '', // WARNING Boolean needed
         login42: profile.username,
         email: "", // besoin reel ?
-        token: accessToken
+        token: accessToken,
+        twofaActivated: false,
       }
       user = await this.userService.add(newUser);
-      // console.log("new user", user)
     }
-    // console.log("final user", user)
     return user;
   }
 }

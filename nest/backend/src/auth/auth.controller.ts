@@ -1,13 +1,10 @@
 import { Controller, UseGuards, Post, Request , Get, Query, Body, Redirect, Res, Req, HttpCode, UnauthorizedException, Response, HttpStatus } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { AuthGuard } from "@nestjs/passport";
 import { ftAuthGuard } from "./guards/ft.guard";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
-import cookieParser from 'cookie-parser';
 import { UserService } from "src/users/users.service";
 import { User } from 'src/database/entities/User';
 import * as speakeasy from 'speakeasy'
-
 
 @Controller('auth')
 export class AuthController {
@@ -18,13 +15,11 @@ export class AuthController {
   async redirect(@Request() req, @Res() res) {
     const access_token = await this.authService.login(req.user)
     await this.userService.updateToken(req.user.id, access_token);
-    //res.json({token: access_token}) avec ca la requete est envoyee au back
     const url = new URL('http://' + process.env.URL)
     url.port = '8080'
     url.pathname = 'login'
     url.searchParams.set('token', access_token)
     url.searchParams.set('id', req.user.id)
-    console.log("url= ", url.href)
     res.redirect(url.href)
   }
 
@@ -38,6 +33,36 @@ export class AuthController {
   @Get('profile')
   getProfile(@Request() req) {
     return req.user;
+  }
+
+  @Post('2fa/turn-on')
+  @UseGuards(JwtAuthGuard)
+  async turnOnTwoFactorAuthentication(@Req() request, @Body() body) {
+    const isCodeValid =
+      this.authService.isTwoFactorAuthenticationCodeValid(
+        body.twoFactorAuthenticationCode,
+        request.user,
+      );
+    if (!isCodeValid) {
+      throw new UnauthorizedException('Wrong authentication code');
+    }
+    await this.userService.turnOnTwoFactorAuthentication(request.user.id);
+  }
+
+  @Post('2fa/authenticate')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
+  async authenticate(@Request() request, @Body() body) {
+    const isCodeValid = this.authService.isTwoFactorAuthenticationCodeValid(
+      body.twoFactorAuthenticationCode,
+      request.user,
+    );
+
+    if (!isCodeValid) {
+      throw new UnauthorizedException('Wrong authentication code');
+    }
+
+    return this.authService.loginWith2fa(request.user);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -68,32 +93,32 @@ export class AuthController {
     response.send(url)
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Post('2fa/turn-on')
-  async turnOnTwoFactorAuthentication(@Req() request, @Body() body) {
-    const isCodeValid =
-      await this.authService.isTwoFactorAuthenticationCodeValid(
-        body.code,
-        request.user.id,
-      );
-    if (!isCodeValid) {
-      throw new UnauthorizedException('Wrong authentication code');
-    }
-    await this.userService.turnOnTwoFactorAuthentication(request.user.id);
-  }
+  // @UseGuards(JwtAuthGuard)
+  // @Post('2fa/turn-on')
+  // async turnOnTwoFactorAuthentication(@Req() request, @Body() body) {
+  //   const isCodeValid =
+  //     await this.authService.isTwoFactorAuthenticationCodeValid(
+  //       body.code,
+  //       request.user.id,
+  //     );
+  //   if (!isCodeValid) {
+  //     throw new UnauthorizedException('Wrong authentication code');
+  //   }
+  //   await this.userService.turnOnTwoFactorAuthentication(request.user.id);
+  // }
 
-  @UseGuards(JwtAuthGuard)
-  @Post('2fa/authenticate')
-  @HttpCode(200)
-  async authenticate(@Request() request, @Body() body) {
-    console.log(body)
-    const isCodeValid = this.authService.isTwoFactorAuthenticationCodeValid(
-      body.code,
-      request.user)
-    if (!isCodeValid)
-      throw new UnauthorizedException('Wrong authentication code')
-    return this.authService.loginWith2fa(request.user)
-  }
+  // @UseGuards(JwtAuthGuard)
+  // @Post('2fa/authenticate')
+  // @HttpCode(200)
+  // async authenticate(@Request() request, @Body() body) {
+  //   console.log(body)
+  //   const isCodeValid = this.authService.isTwoFactorAuthenticationCodeValid(
+  //     body.code,
+  //     request.user)
+  //   if (!isCodeValid)
+  //     throw new UnauthorizedException('Wrong authentication code')
+  //   return this.authService.loginWith2fa(request.user)
+  // }
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')

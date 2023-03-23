@@ -13,6 +13,9 @@ import Login from '@/views/Login.vue'
 import Profil from '@/views/Profil.vue'
 import FirstConnection from '@/views/FirstConnection.vue'
 
+import TestWebsocket from '@/views/TestWebsocket.vue'
+
+
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/userinfos',
@@ -27,7 +30,8 @@ const routes: Array<RouteRecordRaw> = [
     component: Profil
   },
   {
-    path: '/game',
+    name: 'game',
+    path: '/game/:id',
     component: Game
   },
   {
@@ -61,7 +65,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     component: Home
-  }
+  },
 ]
 
 const router = createRouter({

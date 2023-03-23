@@ -17,34 +17,6 @@ instance.interceptors.request.use(function (request) {
 let token: any = localStorage.getItem('token')
 let id: any = localStorage.getItem('id')
 
-// if (!token) {
-//   token: ''
-// }
-// else {
-//   try {
-//     instance.defaults.headers.common.Authorization = `Bearer ${token}`;
-//   } catch (ex) {
-//     token: ''
-//   }
-// }
-
-// if (!token) {
-//   token: ''
-// }
-// else {
-//   try {
-    // instance.defaults.headers.common = {'Authorization': `Bearer ${token}`};
-//   } catch (ex) {
-//     token: ''
-//   }
-// }
-
-// const config = {
-//   headers: {
-//     Authorization: 'Bearer ${token}'
-//   }
-// }
-
 const store = createStore({
   state: {
     status: '',
@@ -95,8 +67,9 @@ const store = createStore({
       localStorage.removeItem('token')
     },
     addChannel(state, newchan) {
-      const copy = Object.assign({}, newchan);
-      state.chat.joined_channels.push(copy);
+      const { name, password, isPrivate, users, messages } = newchan;
+      const newfront = {name : name, password : password, isPrivate : isPrivate, users: users, messages : [], id: newchan.id}
+      state.chat.joined_channels.push(newfront);
     },
     setCurrentChannel(state, channel) {
       state.chat.current_channel = channel;
@@ -124,7 +97,7 @@ const store = createStore({
       })
     },
     getUserInfos({commit}) {
-      if (!localStorage.getItem('id')) // better solution ?
+      if (!localStorage.getItem('id'))
         return ;
       return new Promise((resolve, reject) => {
         instance.get("/user/id/" + localStorage.getItem('id'))
@@ -251,24 +224,10 @@ const store = createStore({
     rmChannel({ commit }, id) {
       commit("removeChannel", id);
     },
-    createChannel({ commit }, channel)
-    {
-      commit("addChannel", channel);
+    createChannel({ commit }, channelInfos) {
+      commit("addChannel", channelInfos);
     },
-  //   createChannel({ commit }, channelInfos) {
-  //   return new Promise((resolve, reject) => {
-  //     instance
-  //       .post("new", channelInfos)
-  //       .then((response : any) => {
-  //         const newChannel = response.data;
-  //         commit("addChannel", newChannel);
-  //         resolve(response);
-  //       })
-  //       .catch((error : any) => {
-  //         reject(error);
-  //       });
-  //   });
-  // },
+
   },
   getters: {
     getUsername(state) {
