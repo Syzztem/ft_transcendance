@@ -279,7 +279,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect,
             where: {id: uid}
         });
         if(!user) client.disconnect();
-        client.emit(user.channels.toString());
+        client.emit("response", user);
         this.clients.set(user.id, client);
         this.sockets.set(client, user.id);
         client.join(user.channels.map(chan => chan.id.toString()));
