@@ -1,6 +1,5 @@
-import { WsException, HttpStatus} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, ConnectedSocket } from '@nestjs/websockets';
+import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, ConnectedSocket, WsException } from '@nestjs/websockets';
 import {Server, Socket} from 'socket.io'
 import PostMessageDTO from 'src/dto/post-message.dto';
 import { Repository } from 'typeorm';
@@ -15,12 +14,11 @@ import { FriendMessage } from 'src/database/entities/FriendMessage';
 import CreateChannelDTO from 'src/channel/dto/create-channel.dto';
 import { ChannelMessage } from 'src/database/entities/ChannelMessage';
 import { JwtService } from '@nestjs/jwt';
+import { HttpStatus, Logger } from '@nestjs/common';
 
-@WebSocketGateway(4343, {
-    path: '/chat',
-    namespace: 'chat'
-})
-export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
+@WebSocketGateway({ namespace: 'chat' })
+export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect {
+    private logger = new Logger('ChatGateway')
 
     constructor(@InjectRepository(Channel) private channelRepository: Repository<Channel>,                
                 @InjectRepository(ChannelMessage) private messageRepository: Repository<ChannelMessage>,
@@ -170,24 +168,25 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect,
         this.server.to(chan.id.toString()).emit("/" + chan.id + ":Channel was deleted");
         this.server.socketsLeave(chan.id.toString());
         this.channelRepository.delete(id);
-    }                                                               
-
+    }
+                                                      
     @SubscribeMessage('create')
     async createChannel(@MessageBody() dto: CreateChannelDTO,
                         @ConnectedSocket() client: Socket) {
+        console.log("this is printed twice !");
         this.verifyId(client, dto.adminId);
-        const channel = this.channelRepository.create();
+        let channel = this.channelRepository.create();
         const user = await this.userRepository.findOneBy({id: dto.adminId});
-        client.join(channel.id.toString());
-        if (!user) return null;
+        if (!user)
+            throw new WsException("User doesn't exist");
         channel.name = dto.name;
         channel.admin = user;
         channel.users = [user];
         channel.password = dto.password;
         channel.isPrivate = dto.password == null ? false : true;
-        const out = JSON.stringify(await this.channelRepository.save(channel));
-        console.log(out);
-        client.emit(JSON.stringify(out));
+        channel = await this.channelRepository.save(channel);
+        client.join(channel.id.toString());
+        client.emit('response', (channel));
     }
 
     @SubscribeMessage('leave')
@@ -222,7 +221,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect,
         const user1 = await this.userRepository.findOneBy({id: dto.id1});
         const user2 = await this.userRepository.findOneBy({id: dto.id2});
 
-        if (!user1 || !user2) return HttpStatus.NOT_FOUND;
+        if (!user1 || !user2)
+            return HttpStatus.NOT_FOUND;
         if (user1.blocked.includes(user2) || user2.blocked.includes(user1))
             throw new WsException("Users blocked each other");
         const socket = this.clients.get(user2.id);
@@ -274,26 +274,30 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect,
         const user = await this.userRepository.findOne({
             select: {
                 id: true,
+                channels: true,
+            },
+            relations: {
                 channels: true
             },
             where: {id: uid}
         });
-        if(!user) client.disconnect();
-        client.emit("response", user);
+        console.log('uid  :', uid);
+        console.log(`chat user: ${user}`);
+        if(!user)
+            client.disconnect();
+        client.emit("login", user);
         this.clients.set(user.id, client);
         this.sockets.set(client, user.id);
+        console.log(user);
         client.join(user.channels.map(chan => chan.id.toString()));
-        console.log('User connected');
+        this.logger.log('New client connected in chat gateway');
     }
 
     async handleDisconnect(client: Socket) {
         this.clients.delete(this.sockets.get(client));
         this.sockets.delete(client);
         client.disconnect();
-        console.log('User disconnected');
+        this.logger.log('Client disconnected from chat gateway');
     }
 
-    afterInit(server: any) {
-        console.log('Socket is live')
-    }
 }

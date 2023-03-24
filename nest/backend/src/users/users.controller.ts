@@ -1,28 +1,16 @@
 import CreateUserDTO from './dto/create-user.dto';
-import {Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Response, UploadedFile, UseGuards, UseInterceptors, Req } from '@nestjs/common';
 import SendDMDTO from 'src/dto/send-dm.dto';
 import { User } from '../database/entities/User';
+import {Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Response, UploadedFile, UseGuards, UseInterceptors, Req } from '@nestjs/common';
 import { UserService } from './users.service';
 import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { ftAuthGuard } from 'src/auth/guards/ft.guard';
 
-// @UseGuards(JwtAuthGuard)
 @Controller('user')
 export class UsersController {
     constructor(private userService: UserService) {}
 
-    // @Get()
-    // testNewUser() {
-    //     let def: CreateUserDTO = {
-    //         username: "toto",
-    //         email: "toto@tata.fr",
-    //         token: "lwknef",
-    //     }
-    //     this.userService.add(def);
-    //     return this.userService.getUserByName("toto");
-    // }
     @UseGuards(JwtAuthGuard)
     @Get("id/:id")
     async getUser(@Param('id') id: number,
@@ -84,22 +72,8 @@ export class UsersController {
     async changeUsername(   @Body() data: {username: string}, // {user: wour}
                             @Req() req,
                             @Response() res: any) {
-        res.status(await this.userService.changeUsername({id: req.user.id, username: data.username})).send()
+        res.status(await this.userService.changeUsername({id: req.user.sub, username: data.username, token: req.user.token})).send()
     }
-
-    // @Patch("username")
-    // @HttpCode(HttpStatus.OK)
-    // async changeUsername( @Req() req,  @Body() changeUserDTO: ChangeUserDTO, @Response() res: any) {
-    //     console.log("ID ?: ", req)
-    //     const user = await this.userService.getUserById(req.user.id)
-    //     if (!user) return res.status(HttpStatus.NOT_FOUND).send()
-    //     const oldPath = '/usr/app/profilepics/' + user.username + '.jpg'
-    //     const newPath = '/usr/app/profilepics/' + changeUserDTO.username + '.jpg'
-    //     fs.rename(oldPath, newPath, (err) => {
-    //         if (err) return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send()
-    //     })
-    //     res.status(await this.userService.changeUsername(changeUserDTO)).json({username: changeUserDTO.username})
-    // }
 
     @UseGuards(JwtAuthGuard)
     @Patch("friend/:id1/:id2")

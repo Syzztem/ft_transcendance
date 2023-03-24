@@ -1,16 +1,12 @@
-// class IMessage {
-//     constructor(content :string, sender:string) {
-//       this.content = content;
-//       this.sender = sender;
-//     }
-//     content: string
-//     sender:string
-//   }
+import IChannel from "./IChannel"
+import IUser from "./IUser"
 
 interface	IMessage
 {
-	sender:string,
 	content:string,
+	sender: IUser,
+	channel: IChannel,
+	timestamp: Date,
 }
 
 export default IMessage

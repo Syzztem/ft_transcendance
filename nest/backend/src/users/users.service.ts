@@ -1,11 +1,13 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import CreateUserDTO from 'src/users/dto/create-user.dto';
-import ChangeUserDTO from 'src/last_dto/change-user.dto';
+import FindUserDTO from 'src/users/dto/find-user.dto';
+import ChangeUserDTO from './dto/change-user.dto';
 import SendDMDTO from 'src/dto/send-dm.dto';
 import { FriendMessage } from 'src/database/entities/FriendMessage';
 import { User } from 'src/database/entities/User';
 import { Repository } from 'typeorm';
+import { authenticator } from 'otplib';
 import * as fs from 'fs';
 
 @Injectable()
@@ -28,6 +30,22 @@ export class UserService {
             where: {username: username}
         })
     }
+
+    async findOneByUsername(username: string): Promise<User | undefined> {
+        return this.userRepository.findOne({
+            where: {
+                username: username,
+            }
+        });
+      }
+
+      async findOneById(userId: number): Promise<User | undefined> {
+        return this.userRepository.findOne({
+            where: {
+                id: userId,
+            }
+        });
+      }
 
     async findByLogin(login: string): Promise<User> {
         return this.userRepository.findOne({
@@ -72,11 +90,13 @@ export class UserService {
         if (await this.userRepository.count({ where: { username: dto.username } }) != 0)
             return HttpStatus.CONFLICT;
         user.username = dto.username;
+        /*******************************
+            Crash when username > 8
+        ********************************/
+
         // const oldPath = UserService.PP_PATH + user.login42 + '.jpg';
         // const newPath = UserService.PP_PATH + dto.username + '.jpg';
         // fs.rename(oldPath, newPath, (err) => {
-        //     console.log('I am bad developper :', err)
-        //     if (err) return HttpStatus.INTERNAL_SERVER_ERROR;
         // })
         await this.userRepository.save(user)
         return HttpStatus.OK;
@@ -163,7 +183,30 @@ export class UserService {
         this.userRepository.save(user2);
         return HttpStatus.OK;
     }
+
+    async setTwoFactorAuthenticationSecret(secret: string, userId: number) {
+        this.userRepository.update(
+            {id: userId},
+            {twoFactorAuthenticationSecret: secret}
+        )
+      }    
+
+      async turnOnTwoFactorAuthentication(userId: number) {
+        this.userRepository.update(
+            {id: userId},
+            {twofaActivated: true}
+        )
+      }
+
     async updateToken(id: number, jwtToken: string){
         this.userRepository.update({id: id}, {token: jwtToken})
+    }
+
+    async incrementWins(userId: number) {
+        this.userRepository.increment({id: userId}, 'wins', 1)
+    }
+
+    async incrementLosses(userId: number) {
+        this.userRepository.increment({id: userId}, 'losses', 1)
     }
 }

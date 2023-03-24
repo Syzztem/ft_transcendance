@@ -38,8 +38,6 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { useCookies } from 'vue3-cookies'
-import store from '@/store';
 
 export default defineComponent({
     data() {
@@ -48,10 +46,6 @@ export default defineComponent({
         }
     },
     mounted() {
-    // if (store.state.user.id == -1) {
-        // this.$router.push('/login')
-        // return
-    // }
     },
     methods: {
         ok() {
@@ -60,7 +54,6 @@ export default defineComponent({
                 this.$router.push('/')
             }
             , (error) => {
-                console.log(error)
             })
         }
     }

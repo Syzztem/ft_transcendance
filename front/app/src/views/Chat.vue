@@ -8,23 +8,22 @@ import IUser from "@/models/IUser";
 import store from "@/store";
 import { defineComponent } from 'vue';
 import { mapActions ,mapState} from "vuex";
+import { chatSocket } from "@/websocket";
 
 /*
 	TODO :
 
-	-	use louis API to create channels
-	- add front protection so channels with same name can t be created?
 	- create a dialog to search for existing channels
 	- clickable profile on user -> opens 	OPTIONS PANEL	:	dm, profile page, add to friends, remove from friend block user, unblock user
 											ADVANCED PANEL	:	promote/demote/ban/kick/unban
 	- v-if (blocked) -> display red block icon
 	- v-if display only available options (don t block if already blocked etc)
-	ajouter superman 64 en fond d ecran 42
 */
 
 export default defineComponent({
 	data() {
 		return {
+			id: Number(localStorage.getItem('id')),
 			options: 
 			[
 				{ title: 'Send DM' },
@@ -36,20 +35,26 @@ export default defineComponent({
 			],
 			dialog: false,
 			newChannel: {
-				name: 'test',
-				adminId: 0,
+				name: '',
 				password: '',
 				id: 0,
 			},
-			id: Number(localStorage.getItem('id')),
+			chatSocket: chatSocket,
 		}
 	},
 	methods: {
 		...mapActions(["selectChannel", "rmChannel"]),
 		createChannel(newchan : any)
 		{
+			const data = {	name: newchan.name,
+							adminId: this.id,
+							password: newchan.password,};
+			this.chatSocket.emit('create', data);
+			chatSocket.
+			once('response', (response: any) => {
+				this.$store.dispatch('createChannel', response);
+			})
 			newchan.id += 1;
-			this.$store.dispatch('createChannel', newchan);
 			this.dialog = false;
 		},
 	},
@@ -72,8 +77,6 @@ export default defineComponent({
 		},
 	},
 	mounted() {
-
-		// store.commit('addChannel', {name: 'channeltest', id: 42, users: [{name :'user99'}], messages:[{sender:'user99',content:'yo'}]} );
 	},
 })
 
@@ -138,7 +141,7 @@ export default defineComponent({
 											</v-badge>
 											</v-badge>
 											<v-card-text>
-												{{user.name}}
+												{{user.username}}
 												<v-menu activator="parent">
 													<v-list>
 														<v-list-item v-for="(item, index) in options" :key="index" :value="index">

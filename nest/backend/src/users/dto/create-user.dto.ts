@@ -3,4 +3,6 @@ export default class CreateUserDTO {
     login42: string;
     email: string;
     token: string;
+    twoFactorAuthenticationSecret ? : string;
+    twofaActivated : boolean;
 }

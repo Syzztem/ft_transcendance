@@ -2,6 +2,8 @@
 import IGameConfig from '../models/IGameConfig'
 import { defineComponent } from 'vue'
 import store from '@/store'
+import { socket } from '../websocket'
+import router from '@/router'
 
 export default defineComponent({
   data() {
@@ -9,17 +11,37 @@ export default defineComponent({
       gameConfig: Object() as IGameConfig,
       route: "",
       showOriginal: false,
-      showPowerUps: false
+      showPowerUps: false,
+      gameSocket: socket,
+      isMatchmaking: false
     }
   },
+  mounted() {
+    this.gameSocket.on('redirectGame', (response: number) => {
+      router.push({name: 'game', params: {id: response}})
+    })  
+  },
+  unmounted() {
+    if (this.isMatchmaking)
+      this.gameSocket.emit('leaveMatchmaking')
+  },
   methods: {
+    JoinMatchmaking() {
+      this.isMatchmaking = true
+      this.gameSocket.emit('joinMatchmaking')
+    },
     originalModeToggle() {
+      if (this.isMatchmaking)
+        return ;
       this.gameConfig.mode = 'original'
-      this.route = "game"
+      this.route = ""
       this.showOriginal = true
       this.showPowerUps = false
+      this.JoinMatchmaking()
     },
     powerUpsModeToggle() {
+      if (this.isMatchmaking)
+        return ;
       this.gameConfig.mode = 'powerUps'
       this.route = ""
       this.showPowerUps = true
