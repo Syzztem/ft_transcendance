@@ -54,9 +54,12 @@ const store = createStore({
       localStorage.removeItem('token')
     },
     addChannel(state, newchan) {
-      const { name, password, isPrivate, users, messages } = newchan;
-      const newfront = {name : name, password : password, isPrivate : isPrivate, users: users, messages : [], id: newchan.id}
-      state.chat.joined_channels.push(newfront);
+      if (newchan) {
+        const { name, password, isPrivate, users } = newchan;
+        const newfront = { name, password, isPrivate, users, id: newchan.id, messages: [] };
+        console.log('new channel in front : ', newfront);
+        state.chat.joined_channels.push(newfront);
+      }
     },
     setCurrentChannel(state, channel) {
       state.chat.current_channel = channel;

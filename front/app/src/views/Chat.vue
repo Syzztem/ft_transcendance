@@ -46,19 +46,17 @@ export default defineComponent({
 		...mapActions(["selectChannel", "rmChannel"]),
 		createChannel(newchan : any)
 		{
-			const data = {
-				name: newchan.name,
-				adminId: this.id,
-				password: newchan.password,
-        };
-		console.log('data inside create_channel : ', data);
-		console.log(this.chatSocket);
-		this.chatSocket.emit('create', data);
-		newchan.id += 1;
-		// this.$store.dispatch('createChannel', newchan);
-		this.dialog = false;
+			const data = {	name: newchan.name,
+							adminId: this.id,
+							password: newchan.password,};
+			this.chatSocket.emit('create', data);
+			chatSocket.
+			once('response', (response: any) => {
+				this.$store.dispatch('createChannel', response);
+			})
+			newchan.id += 1;
+			this.dialog = false;
 		},
-
 	},
     computed: {
 		username()
@@ -79,23 +77,6 @@ export default defineComponent({
 		},
 	},
 	mounted() {
-		chatSocket.
-		on('create', (response: IChannel) => {
-			console.log('basic_test');
-			console.log('reponse :' , response);
-		})
-		// this.chatSocket.on
-		// ('create', (channel) => 
-		// 	{
-		// 		console.log('hi');
-		// 		// this.channels.push(channel);
-		// 	}
-		// );
-
-
-		// this.chatSocket.on("connect", () => {
-  		// 	console.log('fct test', socket.connected); // true
-		// 	});
 	},
 })
 

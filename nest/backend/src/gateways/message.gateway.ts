@@ -193,6 +193,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     @SubscribeMessage('create')
     async createChannel(@MessageBody() dto: CreateChannelDTO,
                         @ConnectedSocket() client: Socket) {
+        console.log("this is printed twice !");
         this.verifyId(client, dto.adminId);
         let channel = this.channelRepository.create();
         const user = await this.userRepository.findOneBy({id: dto.adminId});
@@ -205,7 +206,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         channel.isPrivate = dto.password == null ? false : true;
         channel = await this.channelRepository.save(channel);
         client.join(channel.id.toString());
-        client.emit(JSON.stringify(channel));
+        client.emit('response', (channel));
     }
 
     @SubscribeMessage('leave')
@@ -298,10 +299,11 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
             },
             where: {id: uid}
         });
-        console.log(`chat user: ${user}`)
+        console.log('uid  :', uid);
+        console.log(`chat user: ${user}`);
         if(!user)
             client.disconnect();
-        // client.emit(user.channels.toString());
+        //client.emit(user.channels.toString());
         this.clients.set(user.id, client);
         this.sockets.set(client, user.id);
         // client.join(user.channels.map(chan => chan.id.toString()));
