@@ -13,7 +13,7 @@ import { JwtService } from '@nestjs/jwt';
 @Module({
     imports: [TypeOrmModule.forFeature([User, FriendMessage, Channel, ChannelMessage, BanAndMute])],
     controllers: [UsersController],
-    providers: [UserService, MessageGateway, JwtService],
+    providers: [UserService, JwtService],
     exports: [UserService],
 })
 export class UsersModule {}
