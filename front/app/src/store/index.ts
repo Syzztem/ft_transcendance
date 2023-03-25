@@ -1,6 +1,7 @@
 import IChannel from '@/models/IChannel'
 import { createStore } from 'vuex'
 import { AxiosInstance } from 'axios'
+import { chatSocket } from '@/websocket'
 
 const axios = require('axios')
 
@@ -68,6 +69,31 @@ const store = createStore({
       state.chat.joined_channels = state.chat.joined_channels.filter(c => c.id !== id);
       state.chat.current_channel = null;
     },
+    joinChannel(state, id)
+    {
+      chatSocket.emit('join', {chanId : 3, uid : 33, password : ''});
+    },
+    broadcast(state, message)
+    {
+      // channel
+      // content
+      // sender
+      // const send_chan = message.channel.id;
+      // const content = message.content;
+      // const sender = message.sender;
+
+      // console.log('id channel :', send_chan);
+      // console.log('message content : ', content);
+      // console.log('sender :', message.sender.username);
+
+
+      const {channel, sender, content} = message;
+      const newMessage = {channel, sender, content};
+      console.log(newMessage);
+
+      
+      state.chat.current_channel?.messages.push(newMessage);
+    }
   },
   actions: {
     getUserInfos({commit}) {
@@ -141,7 +167,23 @@ const store = createStore({
     createChannel({ commit }, channelInfos) {
       commit("addChannel", channelInfos);
     },
+    joinChannel({commit}, id)
+    {
+      commit("joinChannel", id);
+    },
+    sendMessage()
+    {
 
+    },
+    receiveMessage({commit})
+		{
+			chatSocket.
+			on('displayMessage', (message : any) =>
+			{
+				console.log('message from back :', message);
+        commit("broadcast", message);
+			})
+		},
   },
   getters: {
     getUsername(state) {

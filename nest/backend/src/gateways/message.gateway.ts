@@ -46,18 +46,25 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
                         @ConnectedSocket() client: Socket) {
         //this.verifyId(client, dto.senderId);
         const chan: Channel = await this.channelRepository.findOneBy({id: dto.channelId})
-        if (!chan)
-            throw new BadRequestException("Channel Doesn't exist")
-        const user = chan.users.find(user => user.id === dto.senderId);
-        if (!user || chan.isMuted(dto.senderId))
-            throw new BadRequestException("User doesn't exist, is not on this channel or is muted");
-        this.server.to(chan.id.toString()).emit(user.username + "@" + chan.id + ":" + dto.message);
+        if (!chan) throw new WsException("Channel Doesn't exist")
+        
+        // const user = chan.users.find(user => user.id === dto.senderId);
+        const user = await this.userRepository.findOneBy({id : dto.senderId});
+        // const user = this.channelRepository.findOneBy({id: dto.senderId});
+
+        // if (!user || chan.isMuted(dto.senderId))
+            // throw new WsException("User doesn't exist, is not on this channel or is muted");
+        //this.server.to(chan.id.toString()).emit(user.username + "@" + chan.id + ":" + dto.message);
+        
         const message = this.messageRepository.create({
             content: dto.message,
             sender: user,
             channel: chan
         })
+        console.log('message saved in This.messageReposity : ', message);
         this.messageRepository.save(message);
+
+        client.emit('displayMessage', message);
     }
 
     @SubscribeMessage('join')
@@ -77,7 +84,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         client.join(chan.id.toString());
         chan.users.push(user);
         this.channelRepository.save(chan);
-        client.emit(JSON.stringify(chan));
+        client.emit('joined_channel', chan);
     }
 
     @SubscribeMessage('search')
@@ -105,7 +112,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         client.join(chan.id.toString());
         chan.users.push(user);
         this.channelRepository.save(chan);
-        client.emit(JSON.stringify(chan));
+        client.emit('joined_channel_pw', chan);
     }
 
     @SubscribeMessage('ban')
@@ -155,8 +162,9 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
             take: 50,
             skip: 50 * dto.page
         })
-        client.emit(messages.toString());
-    }
+        console.log(messages);
+        client.emit('displayMessage', messages);
+    } 
 
     @SubscribeMessage('unban')
     async unBanUser(@MessageBody() dto: JoinChannelDTO,
@@ -193,7 +201,6 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     @SubscribeMessage('create')
     async createChannel(@MessageBody() dto: CreateChannelDTO,
                         @ConnectedSocket() client: Socket) {
-        console.log("this is printed twice !");
         this.verifyId(client, dto.adminId);
         let channel = this.channelRepository.create();
         const user = await this.userRepository.findOneBy({id: dto.adminId});
@@ -300,7 +307,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
             where: {id: uid}
         });
         console.log('uid  :', uid);
-        console.log(`chat user: ${user}`);
+        console.log('chat user: ', user);
         if(!user)
             client.disconnect();
         //client.emit(user.channels.toString());

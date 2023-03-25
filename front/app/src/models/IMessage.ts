@@ -6,7 +6,6 @@ interface	IMessage
 	content:string,
 	sender: IUser,
 	channel: IChannel,
-	timestamp: Date,
 }
 
 export default IMessage
