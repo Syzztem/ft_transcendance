@@ -107,6 +107,10 @@ export default defineComponent({
 		}
 	},
     computed: {
+		user()
+		{
+			return this.$store.state.userInfos
+		},
 		username()
 		{
 			return this.$store.state.userInfos.username;
@@ -125,7 +129,7 @@ export default defineComponent({
 		},
 	},
 	mounted() {
-		this.startReceivingMessages();
+		// this.startReceivingMessages();
 	},
 })
 

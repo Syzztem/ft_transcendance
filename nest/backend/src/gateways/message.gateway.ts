@@ -1,6 +1,6 @@
 import { BadRequestException, HttpStatus} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, ConnectedSocket } from '@nestjs/websockets';
+import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, ConnectedSocket, WsException } from '@nestjs/websockets';
 import {Server, Socket} from 'socket.io'
 import PostMessageDTO from 'src/dto/post-message.dto';
 import { Repository } from 'typeorm';

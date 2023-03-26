@@ -75,23 +75,9 @@ const store = createStore({
     },
     broadcast(state, message)
     {
-      // channel
-      // content
-      // sender
-      // const send_chan = message.channel.id;
-      // const content = message.content;
-      // const sender = message.sender;
-
-      // console.log('id channel :', send_chan);
-      // console.log('message content : ', content);
-      // console.log('sender :', message.sender.username);
-
-
       const {channel, sender, content} = message;
       const newMessage = {channel, sender, content};
       console.log(newMessage);
-
-      
       state.chat.current_channel?.messages.push(newMessage);
     }
   },
