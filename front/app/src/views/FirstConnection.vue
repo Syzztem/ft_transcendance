@@ -46,6 +46,12 @@ export default defineComponent({
         }
     },
     mounted() {
+        this.$store.dispatch('getUserInfos')
+        .then((res: any) => {
+            if (res.data.username)
+                this.$router.push('/')
+        },
+        (error: any) => {})
     },
     methods: {
         ok() {

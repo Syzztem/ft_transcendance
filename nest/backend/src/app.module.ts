@@ -23,7 +23,6 @@ import { Channel } from './database/entities/Channel';
     UsersModule,
     GameModule,
     ChannelModule,
-    UsersModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.POSTGRES_HOST,
