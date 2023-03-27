@@ -227,7 +227,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         channel.isPrivate = dto.password == null ? false : true;
         channel = await this.channelRepository.save(channel);
         client.join(channel.id.toString());
-        client.emit('response', (channel));
+        client.emit('newChannel', (channel));
     }
 
     @SubscribeMessage('leave')
@@ -360,25 +360,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         client.join(user.channels.map(chan => chan.id.toString()));
         this.logger.log('New client connected in chat gateway');
     }
-
-
-    // async handleConnection(@ConnectedSocket() clientSocket: Socket) {
-
-	// 	const payload = clientSocket.handshake.auth
-    //         const uid = this.jwtService.decode(clientSocket.handshake.auth.token).sub;
-    //         console.log('uid :', uid);
-	// 	  const user = await this.userRepository.findOneBy({id : uid})  
-	// 	  if (!user)
-	// 	  	clientSocket.disconnect();
-	// 	    else
-    //         {
-    //             this.clients.set(user.id, clientSocket);
-    //             this.sockets.set(clientSocket, user.id);
-    //             this.logger.log('New client connected in chat gateway test');
-    //         }
-	// }
     
-
     async handleDisconnect(client: Socket) {
         this.clients.delete(this.sockets.get(client));
         this.sockets.delete(client);

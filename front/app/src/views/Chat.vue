@@ -9,6 +9,7 @@ import store from "@/store";
 import { defineComponent } from 'vue';
 import { mapActions ,mapState} from "vuex";
 import { chatSocket } from "@/websocket";
+import { onBeforeMount } from "vue";
 
 /*
 	TODO :
@@ -56,7 +57,7 @@ export default defineComponent({
 		}
 	},
 	methods: {
-		...mapActions(["selectChannel", "rmChannel", "sendMessage", "receiveMessage", "joinChannel",],),
+		...mapActions(["selectChannel", "rmChannel", "sendMessage", "receiveMessage", "joinChannel","stopReceiving"],),
 		createChannel(newChan : any)
 		{
 			const channel_dto = {
@@ -66,7 +67,7 @@ export default defineComponent({
 			};
 			this.chatSocket.emit('create', channel_dto);
 			chatSocket.
-			once('response', (response: any) => {
+			once('newChannel', (response: any) => {
 				this.$store.dispatch('createChannel', response);
 			})
 			this.dialog = false;
@@ -78,12 +79,14 @@ export default defineComponent({
 				channelId : this.current_channel.id,
 				senderId : this.id,
 			};
-			//this.$store.dispatch('newmessage');
-			console.log(' message_dto', message_dto);
 			this.chatSocket.emit('newmsg' , message_dto);
 		},
 		async startReceivingMessages() {
 			await this.receiveMessage();
+		},
+		async stopReceivingMessages()
+		{
+			await this.stopReceiving();
 		},
 		joinChannel()
 		{
@@ -113,7 +116,7 @@ export default defineComponent({
 		},
 		username()
 		{
-			return this.$store.state.userInfos.username;
+			return this.$store.state.userInfos.username
 		},
 		channels() {
 			return this.$store.state.chat.channels
@@ -128,10 +131,18 @@ export default defineComponent({
 			return this.$store.state.chat.blocked_users
 		},
 	},
+
+
 	mounted() {
+		console.log('start receiving messages');
 		this.startReceivingMessages();
 	},
+	unmounted() {
+		console.log('hey we stop receiving ===> unmount');
+  		this.stopReceivingMessages();
+	},
 })
+
 
 // const state = reactive
 // 	<{

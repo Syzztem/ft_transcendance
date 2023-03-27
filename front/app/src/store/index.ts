@@ -58,7 +58,6 @@ const store = createStore({
       if (newchan) {
         const { name, password, isPrivate, users } = newchan;
         const newfront = { name, password, isPrivate, users, id: newchan.id, messages: [] };
-        console.log('new channel in front : ', newfront);
         state.chat.joined_channels.push(newfront);
       }
     },
@@ -170,6 +169,11 @@ const store = createStore({
         commit("broadcast", message);
 			})
 		},
+    stopReceiving()
+    {
+      chatSocket.off('displayMessage');
+    }
+
   },
   getters: {
     getUsername(state) {
