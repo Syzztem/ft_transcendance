@@ -13,6 +13,17 @@ import { chatSocket } from "@/websocket";
 /*
 	TODO :
 
+	WEBSOCKETS :
+
+	- channel join
+	- check for two users to join a channel
+	- messages
+
+	FRONT :
+
+	- channel list
+	- channel staying after logout()?
+	- search channel
 	- create a dialog to search for existing channels
 	- clickable profile on user -> opens 	OPTIONS PANEL	:	dm, profile page, add to friends, remove from friend block user, unblock user
 											ADVANCED PANEL	:	promote/demote/ban/kick/unban
@@ -32,6 +43,7 @@ export default defineComponent({
 				{ title: 'remove friend' },
 				{ title: 'block user' },
 				{ title: 'unblock user' },
+				{ title: 'invite to game' },
 			],
 			dialog: false,
 			newChannel: {
@@ -39,24 +51,60 @@ export default defineComponent({
 				password: '',
 				id: 0,
 			},
+			newMessage: '',
 			chatSocket: chatSocket,
 		}
 	},
 	methods: {
-		...mapActions(["selectChannel", "rmChannel"]),
-		createChannel(newchan : any)
+		...mapActions(["selectChannel", "rmChannel", "sendMessage", "receiveMessage", "joinChannel",],),
+		createChannel(newChan : any)
 		{
-			const data = {	name: newchan.name,
-							adminId: this.id,
-							password: newchan.password,};
-			this.chatSocket.emit('create', data);
+			const channel_dto = {
+				name: newChan.name,
+				adminId: this.id,
+				password: newChan.password,
+			};
+			this.chatSocket.emit('create', channel_dto);
 			chatSocket.
 			once('response', (response: any) => {
 				this.$store.dispatch('createChannel', response);
 			})
-			newchan.id += 1;
 			this.dialog = false;
 		},
+		sendMessage(newMessage : string)
+		{		
+			const message_dto = {
+				message : newMessage,
+				channelId : this.current_channel.id,
+				senderId : this.id,
+			};
+			//this.$store.dispatch('newmessage');
+			console.log(' message_dto', message_dto);
+			this.chatSocket.emit('newmsg' , message_dto);
+		},
+		async startReceivingMessages() {
+			await this.receiveMessage();
+		},
+		joinChannel()
+		{
+
+		},
+		leaveChannel()
+		{
+
+		},
+		kick()
+		{
+
+		},
+		ban()
+		{
+
+		},
+		mute()
+		{
+
+		}
 	},
     computed: {
 		username()
@@ -77,6 +125,7 @@ export default defineComponent({
 		},
 	},
 	mounted() {
+		this.startReceivingMessages();
 	},
 })
 
@@ -173,7 +222,7 @@ export default defineComponent({
 										<ul v-if="current_channel">
 											<div v-for="message in current_channel.messages">
 												<li v-if="message.content != ''">
-													{{message.sender}}: {{message.content}}
+													{{message.sender.username}}: {{message.content}}
 												</li>
 											</div>
 										</ul>
@@ -181,10 +230,12 @@ export default defineComponent({
 								</v-card>
 								<v-row justify="center">
 									<v-card id="Inputbox" class="d-flex justify-center align-center rounded-xl" height="10vh" width="50vw" elevation="8">
-										<v-text-field hide-details variant="plain" id="Inputfield" class = "ml-5" autofocus>
+										<v-text-field v-model="newMessage" hide-details variant="plain" id="Inputfield" class = "ml-5" autofocus >
 										</v-text-field>
 										<v-card-actions>
-											<v-btn id="Btnsend" height="5vh" width="7vw">
+											<v-btn id="Btnsend" height="5vh" width="7vw"
+											@click="sendMessage(newMessage)"	
+											>
 												Send
 											</v-btn>
 										</v-card-actions>
