@@ -259,8 +259,20 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     async sendDM(   @MessageBody() dto : SendDMDTO,
                     @ConnectedSocket() client: Socket) {
         this.verifyId(client, dto.id1);
-        const user1 = await this.userRepository.findOneBy({id: dto.id1});
-        const user2 = await this.userRepository.findOneBy({id: dto.id2});
+        const user1 = await this.userRepository.findOne({
+            select: {id: true},
+            relations: {
+                blocked: true
+            },
+            where :{id: dto.id1}
+        });
+        const user2 = await this.userRepository.findOne({
+            select: {id: true},
+            relations: {
+                blocked: true
+            },
+            where :{id: dto.id2}
+        });
 
         if (!user1 || !user2)
             return HttpStatus.NOT_FOUND;
@@ -295,8 +307,22 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     async addFriend(@MessageBody() ids: number[],
                     @ConnectedSocket() client: Socket) {
         this.verifyId(client, ids[0]);
-        const user1 = await this.userRepository.findOneBy({id: ids[0]});
-        const user2 = await this.userRepository.findOneBy({id: ids[1]});
+        const user1 = await this.userRepository.findOne({
+            select: {id: true},
+            relations: {
+                friends: true,
+                blocked: true
+            },
+            where :{id: ids[0]}
+        });
+        const user2 = await this.userRepository.findOne({
+            select: {id: true},
+            relations: {
+                friends: true,
+                blocked: true
+            },
+            where :{id: ids[1]}
+        });
 
         if (!user1 || !user2) throw new WsException("One or more of the users doesn't exist");
         if (user1.friends.includes(user2))
