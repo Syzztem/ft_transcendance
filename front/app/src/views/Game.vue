@@ -24,7 +24,7 @@ export default defineComponent({
     handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'ArrowUp' || e.key === 'ArrowDown')
         this.gameSocket.emit('keyDown', {gameId: Number(this.$route.params.id), key: e.key})
-  
+
     },
   },
   mounted() {
