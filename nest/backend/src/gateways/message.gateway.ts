@@ -297,7 +297,6 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         this.userRepository.save(user2);
     }
 
-
     async handleConnection(client: Socket) {
         const uid: number = this.jwtService.decode(client.handshake.auth.token).sub;
         const user = await this.userRepository.findOne({
@@ -319,24 +318,6 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         //client.join(user.channels.map(chan => chan.id.toString()));
         this.logger.log('New client connected in chat gateway');
     }
-
-
-    // async handleConnection(@ConnectedSocket() clientSocket: Socket) {
-
-	// 	const payload = clientSocket.handshake.auth
-    //         const uid = this.jwtService.decode(clientSocket.handshake.auth.token).sub;
-    //         console.log('uid :', uid);
-	// 	  const user = await this.userRepository.findOneBy({id : uid})  
-	// 	  if (!user)
-	// 	  	clientSocket.disconnect();
-	// 	    else
-    //         {
-    //             this.clients.set(user.id, clientSocket);
-    //             this.sockets.set(clientSocket, user.id);
-    //             this.logger.log('New client connected in chat gateway test');
-    //         }
-	// }
-    
 
     async handleDisconnect(client: Socket) {
         this.clients.delete(this.sockets.get(client));

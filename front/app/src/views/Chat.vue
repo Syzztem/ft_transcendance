@@ -129,7 +129,7 @@ export default defineComponent({
 		},
 	},
 	mounted() {
-		// this.startReceivingMessages();
+		this.startReceivingMessages();
 	},
 })
 

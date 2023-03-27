@@ -45,7 +45,7 @@ export default defineComponent({
 <v-container id="background" fluid>
   <v-app style="background: rgba(0,0,0,0);">
     <div style="overflow: hidden;">
-      <img v-for="n in 1" :key="n" src="@/assets/lorenzo_head.png" class="master" style=""/>
+      <!-- <img v-for="n in 1" :key="n" src="@/assets/lorenzo_head.png" class="master" style=""/>
       <img v-for="n in 2" :key="n" src="@/assets/pikachu.png" class="master" style=""/>
       <img v-for="n in 2" :key="n" src="@/assets/bulbizarre.png" class="master" style=""/>
       <img v-for="n in 2" :key="n" src="@/assets/evoli.png" class="master" style=""/>
@@ -53,7 +53,7 @@ export default defineComponent({
       <img v-for="n in 2" :key="n" src="@/assets/rondoudou.png" class="master" style=""/>
       <img v-for="n in 2" :key="n" src="@/assets/ronflex.png" class="master" style=""/>
       <img v-for="n in 2" :key="n" src="@/assets/salameche.png" class="master" style=""/>
-      <img v-for="n in 2" :key="n" src="@/assets/carapuce.png" class="master" style=""/>
+      <img v-for="n in 2" :key="n" src="@/assets/carapuce.png" class="master" style=""/> -->
     </div>
       <Header v-if="$route.path != '/game' && $route.path != '/login' && $route.path != '/userInfos'"/>
     <v-main>
