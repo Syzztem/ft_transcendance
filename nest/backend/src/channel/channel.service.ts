@@ -181,4 +181,10 @@ export class ChannelService {
         channel.isPrivate = dto.password == null ? false : true;
         return await this.channelRepository.save(channel);
     }
+
+    async getListChannel() : Promise<Channel []> {
+        const channels = await this.channelRepository.find({});
+        console.log(`repo channel ${channels}(${typeof(channels)})`)
+        return channels;
+    }
 }

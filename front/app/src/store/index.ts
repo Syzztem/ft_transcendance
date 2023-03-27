@@ -5,7 +5,7 @@ import { chatSocket } from '@/websocket'
 
 const axios = require('axios')
 
-const instance : AxiosInstance = axios.create({
+export const instance : AxiosInstance = axios.create({
   baseURL: 'http://' +  process.env.VUE_APP_URL + ':3000'
 })
 

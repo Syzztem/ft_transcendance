@@ -101,4 +101,11 @@ export class ChannelController {
         if (!channel) return res.status(HttpStatus.NOT_FOUND).send();
         res.status(HttpStatus.OK).send(channel);
     }
+
+    @Get("list")
+    async getListChannel() {
+        const channels = await this.channelService.getListChannel()
+        console.log(`channels : ${channels}`)
+        return channels
+    }
 }

@@ -12,8 +12,7 @@ import Hall from '@/views/Hall.vue'
 import Login from '@/views/Login.vue'
 import Profil from '@/views/Profil.vue'
 import FirstConnection from '@/views/FirstConnection.vue'
-
-import TestWebsocket from '@/views/TestWebsocket.vue'
+import ListChat from '@/views/ListChat.vue'
 
 
 const routes: Array<RouteRecordRaw> = [
@@ -41,6 +40,10 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/chat',
     component: Chat
+  },
+  {
+    path: '/chat/list',
+    component: ListChat
   },
   {
     path: '/hall',
