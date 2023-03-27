@@ -31,7 +31,6 @@ import { Channel } from './database/entities/Channel';
       password: process.env.POSTGRES_PW,
       database: process.env.POSTGRES_DB,
       autoLoadEntities: true,
-      //entities: [User, Channel, Game, ChannelMessage, FriendMessage, BanAndMute],
       synchronize: true
     })
   ],
