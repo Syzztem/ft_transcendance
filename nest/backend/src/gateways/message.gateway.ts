@@ -43,12 +43,19 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     async handleMessage(@MessageBody() dto: PostMessageDTO,
                         @ConnectedSocket() client: Socket) {
         this.verifyId(client, dto.senderId);
-        const chan: Channel = await this.channelRepository.findOneBy({id: dto.channelId})
+        const chan: Channel = await this.channelRepository.findOne( {
+            select: {id: true},
+            relations: {
+                users: true,
+                bannedOrMuted: true
+            },
+            where: {id: dto.channelId}
+        })
         if (!chan) throw new WsException("Channel Doesn't exist")
         const user = chan.users.find(user => user.id === dto.senderId);
         if (!user || chan.isMuted(dto.senderId))
             throw new WsException("User doesn't exist, is not on this channel or is muted");
-        this.server.to(chan.id.toString()).emit(user.username + "@" + chan.id + ":" + dto.message);
+        this.server.to(chan.id.toString()).emit("msg", user.username + "@" + chan.id + ":" + dto.message);
         const message = this.messageRepository.create({
             content: dto.message,
             sender: user,
@@ -64,7 +71,14 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     async joinChannel(  @MessageBody() dto: JoinChannelDTO,
                         @ConnectedSocket() client: Socket) {
         this.verifyId(client, dto.uid);
-        const chan = await this.channelRepository.findOneBy({id: dto.chanId});
+        const chan = await this.channelRepository.findOne({
+            select: {id: true},
+            relations: {
+                users: true,
+                bannedOrMuted: true
+            },
+            where: {id: dto.chanId}
+        });
         if (!chan) throw new WsException("Channel Doesn't exist")
         const user = await this.userRepository.findOneBy({id: dto.uid});
         if (!user) throw new WsException("User doesn't exist");
@@ -88,7 +102,14 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     async joinChannelWithPassword(  @MessageBody() dto: JoinChannelDTO,
                         @ConnectedSocket() client: Socket) {
         this.verifyId(client, dto.uid);
-        const chan = await this.channelRepository.findOneBy({id: dto.chanId});
+        const chan = await this.channelRepository.findOne({
+            select: {id: true},
+            relations: {
+                users: true,
+                bannedOrMuted: true
+            },
+            where: {id: dto.chanId}
+        });
         if (!chan) throw new WsException("Channel Doesn't exist")
         const user = await this.userRepository.findOneBy({id: dto.uid});
         if (!user) throw new WsException("User doesn't exist");
@@ -103,7 +124,15 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     @SubscribeMessage('ban')
     async banUser(  @MessageBody() dto: BanUserDTO,
                     @ConnectedSocket() client: Socket) {
-        const chan = await this.channelRepository.findOneBy({id: dto.chanId});
+        const chan = await this.channelRepository.findOne({
+            select: {id: true},
+            relations: {
+                admin: true,
+                users: true,
+                bannedOrMuted: true
+            },
+            where: {id: dto.chanId}
+        });
         if (!chan) throw new WsException("Channel Doesn't exist");
         if (chan.admin.id != this.sockets.get(client)) throw new WsException("Nice try");
         const user = chan.users.find(user => user.id === dto.uid);
@@ -151,7 +180,15 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     @SubscribeMessage('unban')
     async unBanUser(@MessageBody() dto: JoinChannelDTO,
                     @ConnectedSocket() client: Socket) {
-        const chan = await this.channelRepository.findOneBy({id: dto.chanId});
+        const chan = await this.channelRepository.findOne({
+            select: {id: true},
+            relations: {
+                admin: true,
+                users: true,
+                bannedOrMuted: true
+            },
+            where: {id: dto.chanId}
+        });
         const user = await this.userRepository.findOneBy({id : dto.uid});
         if (!chan || !user) throw new WsException("Channel or user doesn't exist");
         if (chan.admin.id != this.sockets.get(client)) throw new WsException("Nice try");
