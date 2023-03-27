@@ -25,7 +25,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
                 @InjectRepository(BanAndMute) private bansAndMutesRepository: Repository<BanAndMute>,
                 @InjectRepository(User) private userRepository: Repository<User>,
                 @InjectRepository(FriendMessage) private usrmessageRepository: Repository<FriendMessage>,
-                private jwtService: JwtService) {}
+                private jwtService: JwtService,) {}
+                
                 
     @WebSocketServer()
     server: Server;
@@ -286,8 +287,10 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         });
         console.log('uid  :', uid);
         console.log('chat user: ', user);
-        if(!user)
+        if(!user) {
             client.disconnect();
+            return ;
+        }
         client.emit("login", user);
         this.clients.set(user.id, client);
         this.sockets.set(client, user.id);
@@ -295,6 +298,24 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         client.join(user.channels.map(chan => chan.id.toString()));
         this.logger.log('New client connected in chat gateway');
     }
+
+
+    // async handleConnection(@ConnectedSocket() clientSocket: Socket) {
+
+	// 	const payload = clientSocket.handshake.auth
+    //         const uid = this.jwtService.decode(clientSocket.handshake.auth.token).sub;
+    //         console.log('uid :', uid);
+	// 	  const user = await this.userRepository.findOneBy({id : uid})  
+	// 	  if (!user)
+	// 	  	clientSocket.disconnect();
+	// 	    else
+    //         {
+    //             this.clients.set(user.id, clientSocket);
+    //             this.sockets.set(clientSocket, user.id);
+    //             this.logger.log('New client connected in chat gateway test');
+    //         }
+	// }
+    
 
     async handleDisconnect(client: Socket) {
         this.clients.delete(this.sockets.get(client));
