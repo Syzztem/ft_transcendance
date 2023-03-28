@@ -37,6 +37,9 @@ const store = createStore({
       current_channel:  null as IChannel | null,
       blocked_users:    [],
       current_message:  "",
+    },
+    game: {
+      colorBackground: 'blue'
     }
   },
   mutations: {
@@ -100,6 +103,9 @@ const store = createStore({
       const newMessage = {channel, sender, content};
       console.log(newMessage);
       state.chat.current_channel?.messages.push(newMessage);
+    },
+    setColorBackground(state, color) {
+      state.game.colorBackground = color
     }
   },
   actions: {

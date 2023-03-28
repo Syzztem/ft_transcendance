@@ -13,7 +13,8 @@ export default defineComponent({
       showOriginal: false,
       showPowerUps: false,
       gameSocket: socket,
-      isMatchmaking: false
+      isMatchmaking: false,
+      colorBackground: this.$store.state.game.colorBackground
     }
   },
   mounted() {
@@ -46,6 +47,9 @@ export default defineComponent({
       this.route = ""
       this.showPowerUps = true
       this.showOriginal = false
+    },
+    HandleColorBackground(e: Event) {
+      this.$store.commit("setColorBackground", e)
     }
   }
 })
@@ -63,18 +67,29 @@ export default defineComponent({
       </v-card>
     </v-row>
     <v-row justify="center">
-      <v-card id="card" color="rgb(0, 75, 255, 0.5)" height="420" width="650" rounded flat black class="mx-16">
+      <v-card id="card" color="rgb(0, 75, 255, 0.5)" height="auto" width="650" rounded flat black class="mx-16 pb-2">
           <v-row justify="center" class="mt-4 ml-16 mr-16 mb-2">
 
             <button id="ball-btn" @click="originalModeToggle" :class="[showOriginal ? 'active' : 'default-btn']">
               Original Pong
             </button>
 
-            <v-spacer></v-spacer>
+            <!-- <v-spacer></v-spacer>
 
             <button id="ball-btn" @click="powerUpsModeToggle" :class="[showPowerUps ? 'active' : 'default-btn']">
                 Poké Pong
-            </button>
+            </button> -->
+            <v-card class="px-3 py-5" width="200">
+              <v-radio-group
+                @update:model-value="HandleColorBackground($event)"
+                label="Board color"
+                v-model="colorBackground"
+              >
+                <v-radio label="Black" value="black" color="grey-darken-4"></v-radio>
+                <v-radio label="Blue" value="blue" color="blue"></v-radio>
+                <v-radio label="Red" value="red" color="red"></v-radio>
+              </v-radio-group>
+            </v-card>
 
           </v-row>
           <v-row justify="center" class=" mt-10 mb-1">
@@ -83,7 +98,7 @@ export default defineComponent({
             </v-btn>
           </v-row>
         </v-card>
-    </v-row>
+      </v-row>
   </v-container>
 </template>
   
