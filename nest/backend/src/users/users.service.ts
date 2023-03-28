@@ -56,12 +56,16 @@ export class UserService {
     async getUserById(id: number): Promise<User> {
         return this.userRepository.findOne({
             select: {
-                username:                       true,
-                rank:                           true,
-                wins:                           false,
-                losses:                         false,
-                level:                          true,
-                twoFactorAuthenticationSecret:  true,
+                username:                           true,
+                rank:                               true,
+                wins:                               false,
+                losses:                             false,
+                level:                              true,
+                twoFactorAuthenticationSecret:      true,
+                isTwoFactorAuthenticationEnabled:   true,
+                TwoFactorAuthenticated:             true,
+                lastSuccessfulAuth:                 true,
+                id:                                 true
             },
             where: {id: id}
         });
@@ -85,20 +89,20 @@ export class UserService {
     }
 
     async changeUsername(dto: ChangeUserDTO): Promise<number> {
-        const user = await this.userRepository.findOneBy({ id: dto.id })
-
-        if (!user) return HttpStatus.NOT_FOUND;
+        const user = await this.getUserById(dto.id)
+        if (!user)
+            return HttpStatus.NOT_FOUND;
+        console.log('dto: ', dto)
         if (await this.userRepository.count({ where: { username: dto.username } }) != 0)
             return HttpStatus.CONFLICT;
+        const oldUsername = user.username
         user.username = dto.username;
-        /*******************************
-            Crash when username > 8
-        ********************************/
-
-        // const oldPath = UserService.PP_PATH + user.login42 + '.jpg';
-        // const newPath = UserService.PP_PATH + dto.username + '.jpg';
-        // fs.rename(oldPath, newPath, (err) => {
-        // })
+        if (dto.username.length <= 8) {
+            const oldPath = UserService.PP_PATH + oldUsername + '.jpg';
+            const newPath = UserService.PP_PATH + dto.username + '.jpg';
+            fs.rename(oldPath, newPath, (err) => {
+            })
+        }
         await this.userRepository.save(user)
         return HttpStatus.OK;
     }
@@ -199,8 +203,25 @@ export class UserService {
         )
     }
 
+    async turnOffTwoFactorAuthentication(userId: number) {
+        this.userRepository.update(
+            {id: userId},
+            {isTwoFactorAuthenticationEnabled: false}
+        )
+    }
+
+    async updateLastSuccessfulAuth(userId: number, lastSuccessfulAuth: Date) {
+        const user = await this.userRepository.findOneBy({id: userId})
+        user.lastSuccessfulAuth = lastSuccessfulAuth
+        await this.userRepository.save(user)
+      }
+
     async updateToken(id: number, jwtToken: string){
-        this.userRepository.update({id: id}, {token: jwtToken})
+        await this.userRepository.update({id: id}, {token: jwtToken})
+    }
+
+    async update2fa(id: number, twofa: boolean) {
+        await this.userRepository.update({id: id}, {TwoFactorAuthenticated: twofa})
     }
 
     // async updateOTP(id: number, secret?: string) {

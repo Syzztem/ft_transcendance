@@ -12,9 +12,7 @@ import Hall from '@/views/Hall.vue'
 import Login from '@/views/Login.vue'
 import Profil from '@/views/Profil.vue'
 import FirstConnection from '@/views/FirstConnection.vue'
-
-import TestWebsocket from '@/views/TestWebsocket.vue'
-
+import twofa from '@/views/2fa.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -63,6 +61,10 @@ const routes: Array<RouteRecordRaw> = [
     component: TwoFactor
   },
   {
+    path: '/2fa',
+    component: twofa
+  },
+  {
     path: '/',
     component: Home
   },
@@ -73,15 +75,41 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, from, next) => {
-  const publicPages = ['/login'];
-  const authRequired = !publicPages.includes(to.path);
-  store.dispatch('isLogin')
-  if (authRequired && !store.state.isLogin) {
-    return next('/login');
+router.beforeEach(async (to, from, next) => {
+  await store.dispatch('isLogin')
+  .then((res: any) => {}
+  , (error: any) => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('id')
+    return next('/login')
+  })
+  await store.dispatch('getUserInfos')
+  if (!store.state.isLogin) {
+    if (to.path === '/login') {
+      return next();
+    } else {
+      return next('/login');
+    }
   }
-
-  next();
-})
+  if (store.state.userInfos.isotp && !store.state.twoFactorAuthenticated) {
+    if (to.path === '/2fa') {
+      return next();
+    } else {
+      return next('/2fa');
+    }
+  }
+  if (!store.state.userInfos.username) {
+    if (to.path === '/userInfos') {
+      return next();
+    } else {
+      return next('/userInfos');
+    }
+  }
+  if (to.path === '/login' || to.path === '/2fa' || to.path === '/userInfos') {
+    return next('/');
+  } else {
+    return next();
+  }
+});
 
 export default router

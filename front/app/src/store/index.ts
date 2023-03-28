@@ -1,7 +1,6 @@
 import IChannel from '@/models/IChannel'
 import { createStore } from 'vuex'
 import { AxiosInstance } from 'axios'
-import { Buffer } from 'buffer'
 import axios from 'axios'
 
 const instance : AxiosInstance = axios.create({
@@ -20,6 +19,7 @@ let id: any = localStorage.getItem('id')
 const store = createStore({
   state: {
     status: '',
+    twoFactorAuthenticated: false,
     isLogin: true,
     userInfos: {
       profilePic: '',
@@ -52,10 +52,14 @@ const store = createStore({
       state.profileInfos.username = profileInfos.username
     },
     profilePic(state, avatar) {
-      console.log(avatar)
+      state.userInfos.profilePic = avatar
     },
     userInfos(state, userInfos) {
       state.userInfos.username = userInfos.username
+      state.twoFactorAuthenticated = userInfos.TwoFactorAuthenticated
+    },
+    username(state, username) {
+      state.userInfos.username = username
     },
     isLogin(state, infos) {
       state.isLogin = infos
@@ -63,6 +67,7 @@ const store = createStore({
     logout(state) {
       id = -1
       token = ''
+      state.twoFactorAuthenticated = false
       localStorage.removeItem('id')
       localStorage.removeItem('token')
     },
@@ -78,11 +83,15 @@ const store = createStore({
       state.chat.joined_channels = state.chat.joined_channels.filter(c => c.id !== id);
       state.chat.current_channel = null;
     },
+    setTwoFA(state, infos) {
+      state.twoFactorAuthenticated = infos
+    },
   },
   actions: {
     isLogin({ commit }) {
       if (!localStorage.getItem('token')) {
         commit('isLogin', false)
+        return
       }
       return new Promise((resolve, reject) => {
         instance.post('/auth/islogin', { 'token': localStorage.getItem('token') })
@@ -92,7 +101,7 @@ const store = createStore({
         })
         .catch((error: any) => {
           commit('isLogin', false)
-          reject(error)
+          resolve(error)
         })
       })
     },
@@ -106,7 +115,7 @@ const store = createStore({
           resolve(response)
         })
         .catch((error: any) => {
-          reject(error)
+          resolve(error)
         })
       })
     },
@@ -118,19 +127,19 @@ const store = createStore({
           resolve(response)
         })
         .catch((error: any) => {
-          reject(error)
+          resolve(error)
         })
       })
     },
     getProfilePic({commit}, username) {
       return new Promise((resolve, reject) => {
-        instance.get("/user/profilepic/" + 'test' + username)
+        instance.get("/user/profilepic/" + username)
         .then((response: any) => {
-          commit('profilePic', Buffer.from(response.data, 'binary').toString('base64'))
+          commit('profilePic', response.data)
           resolve(response)
         })
         .catch((error: any) => {
-          reject(error)
+          resolve(error)
         })
       })
     },
@@ -138,11 +147,12 @@ const store = createStore({
       return new Promise((resolve, reject) => {
         instance.patch("/user/username", userInfos)
         .then((response: any) => {
-          commit('userInfos', response.data)
+          commit('username', userInfos.username)
+          commit('profilePic', 'http://' + process.env.VUE_APP_URL + ':3000/profilepics/' + userInfos.username + '.jpg')
           resolve(response)
         })
         .catch((error: any) => {
-          reject(error)
+          resolve(error)
         })
       })
     },
@@ -150,11 +160,13 @@ const store = createStore({
       return new Promise((resolve, reject) => {
         instance.post("/user/setpp/" + this.state.userInfos.username, data.formData)
         .then((response: any) => {
+          console.log('New profile pic URL:', response.data)
+          commit('profilePic', response.data)
           resolve(response)
         })
         .catch((error: any) => {
           console.log(error)
-          reject(error)
+          resolve(error)
         })
       })
     },
@@ -166,7 +178,7 @@ const store = createStore({
           resolve(response)
         })
         .catch((error: any) => {
-          reject(error)
+          resolve(error)
         })
       })
     },
@@ -174,11 +186,21 @@ const store = createStore({
       return new Promise((resolve, reject) => {
         instance.post('/auth/2fa/turn-on', { "code": code })
         .then((response: any) => {
-          commit('setisotp', true)
           resolve(response)
         })
         .catch((error: any) => {
-          reject(error)
+          resolve(error)
+        })
+      })
+    },
+    turnOff2fa({commit}) {
+      return new Promise((resolve, reject) => {
+        instance.post('/auth/2fa/turn-off')
+        .then((response: any) => {
+          resolve(response)
+        })
+        .catch((error: any) => {
+          resolve(error)
         })
       })
     },
@@ -189,7 +211,7 @@ const store = createStore({
           resolve(response)
         })
         .catch((error: any) => {
-          reject(error)
+          resolve(error)
         })
       })
     },
@@ -201,7 +223,7 @@ const store = createStore({
           resolve(response)
         })
         .catch((error: any) => {
-          reject(error)
+          resolve(error)
         })
       })
     },
@@ -214,7 +236,7 @@ const store = createStore({
         })
         .catch((error: any) => {
           commit('logout')
-          reject(error)
+          resolve(error)
         })
       })
     },

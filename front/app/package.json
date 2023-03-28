@@ -18,6 +18,7 @@
     "canvg": "^4.0.1",
     "fork-ts-checker-webpack-plugin": "^7.3.0",
     "js-cookie": "^3.0.1",
+    "mitt": "3.0.0",
     "npm": "^9.3.1",
     "qrcode": "^1.5.1",
     "save-svg-as-png": "^1.4.17",

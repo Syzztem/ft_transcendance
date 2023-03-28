@@ -40,7 +40,13 @@ export class User {
   twoFactorAuthenticationSecret: string;
 
   @Column({type:'boolean'})
-  isTwoFactorAuthenticationEnabled : boolean = false;
+  TwoFactorAuthenticated: boolean = false;
+
+  @Column({type:'boolean'})
+  isTwoFactorAuthenticationEnabled: boolean = false;
+
+  @Column({type: 'timestamp', nullable: true})
+  lastSuccessfulAuth: Date;
 
   @ManyToMany(() => User)
   @JoinTable()

@@ -164,7 +164,7 @@ export default defineComponent({
     upload() {
       this.ifRd = false
     },
-    sendPic() {
+    async sendPic() {
       if (this.ifRd) {
         const $el = (this.$refs.niceAvatar as any).$el
         if ($el) {
@@ -182,9 +182,10 @@ export default defineComponent({
               this.$store.dispatch('changeProfilePic', {
                 formData: formData
               })
-                .then(() => { },
-                  () => {
-                  })
+              .then((response: any) => {
+                console.log('Profile pic update response:', response)
+                this.$store.dispatch('getProfilePic', this.$store.state.userInfos.username)
+              })
             }, "image/jpg")
           }
         }
@@ -193,14 +194,15 @@ export default defineComponent({
         const { canvas } = (this.$refs.cropper as any).getResult()
         if (canvas) {
           const formData = new FormData()
-          canvas.toBlob((blob: any) => {
+          canvas.toBlob(async (blob: any) => {
             formData.append('file', blob)
-            this.$store.dispatch('changeProfilePic', {
+            await this.$store.dispatch('changeProfilePic', {
               formData: formData
             })
-              .then(() => { },
-                () => {
-                })
+            .then((response: any) => {
+              this.$store.dispatch('getProfilePic', this.$store.state.userInfos.username)
+              this.$router.push('/')
+            })
           }, "image/jpg")
         }
       }

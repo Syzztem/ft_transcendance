@@ -23,9 +23,10 @@ export class UsersController {
     @Get("profilepic/:username")
     async getProfilePic(@Param('username') username : string,
                         @Response() res : any) {
-        const path = UserService.PP_PATH + username + '.jpg';
-        if (!fs.existsSync(path)) return res.status(HttpStatus.OK).sendFile('/usr/app/profilepics/defaultpp.jpg');
-        res.status(HttpStatus.OK).sendFile(path);
+        const path = 'http://' + process.env.URL + ':3000/profilepics/' + username + '.jpg';
+        if (!fs.existsSync(UserService.PP_PATH + username + '.jpg'))
+            return res.status(HttpStatus.OK).send('http://' + process.env.URL + ':3000/profilepics/defaultpp.jpg');
+        res.status(HttpStatus.OK).send(path);
     }
 
     @UseGuards(JwtAuthGuard)
@@ -34,10 +35,12 @@ export class UsersController {
     async setProflePic(@Param('username') username: string,
                         @UploadedFile() file: Express.Multer.File,
                         @Response() res : any) {
-        const path = UserService.PP_PATH + username + '.jpg';
-        fs.writeFile(path, file.buffer, (err) => {
-            if (err) res.status(HttpStatus.INTERNAL_SERVER_ERROR).send();
-            else res.status(HttpStatus.OK).send(username);
+        const path = 'http://' + process.env.URL + ':3000/profilepics/' + username + '.jpg';
+        fs.writeFile(UserService.PP_PATH + username + '.jpg', file.buffer, (err) => {
+            if (err)
+                res.status(HttpStatus.NOT_FOUND).send();
+            else
+                res.status(HttpStatus.OK).send(path);
         })
     }
 

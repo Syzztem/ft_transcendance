@@ -54,13 +54,11 @@ export class AuthService {
 	// 	};
 	// }
 
-	async generateTwoFactorAuthenticationSecret(user: User) {
-		const secret = authenticator.generateSecret();
-	
-		const otpauthUrl = authenticator.keyuri(user.email, 'AUTH_APP_NAME', secret);
-	
-		await this.usersService.setTwoFactorAuthenticationSecret(secret, user.id);
-	
+	async generateTwoFactorAuthenticationSecret(user: any) {
+		const secret = authenticator.generateSecret()
+		const User = await this.usersService.getUserById(user.sub)
+		const otpauthUrl = authenticator.keyuri(User.username, 'PokePong', secret)
+		await this.usersService.setTwoFactorAuthenticationSecret(secret, user.sub)
 		return {
 		  secret,
 		  otpauthUrl
@@ -71,8 +69,9 @@ export class AuthService {
 		return toDataURL(otpAuthUrl);
 	  }	
 
-	  isTwoFactorAuthenticationCodeValid(twoFactorAuthenticationCode: string, user: User) {
-        return authenticator.verify({
+	  async isTwoFactorAuthenticationCodeValid(twoFactorAuthenticationCode: string, id: number) {
+		const user = await this.usersService.getUserById(id)
+		return authenticator.verify({
           token: twoFactorAuthenticationCode,
           secret: user.twoFactorAuthenticationSecret,
         });

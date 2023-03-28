@@ -28,14 +28,20 @@ export default defineComponent({
         }
     },
     computed: {
-        ...mapState(['status'])
+        ...mapState(['status', 'twoFactorAuthenticated'])
     },
-    mounted() {
+    async mounted() {
         if (this.$route.query.token) { 
             localStorage.setItem('token', this.$route.query.token as any)
             localStorage.setItem('id', this.$route.query.id?.toString() as any)
             socket.connect()
-            this.$router.push('userInfos')
+            await this.$store.dispatch('get2fa')
+            console.log("twoFactorAuthenticated: ", this.$store.state.twoFactorAuthenticated)
+            console.log("isotp: ", this.$store.state.userInfos.isotp)
+            if (this.$store.state.userInfos.isotp && !this.$store.state.twoFactorAuthenticated)
+                await this.$router.push('2fa')
+            else
+                await this.$router.push('userInfos')
             return
         }
     }

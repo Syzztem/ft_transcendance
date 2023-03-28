@@ -55,10 +55,11 @@ export default defineComponent({
     </div>
       <Header v-if="$route.path != '/game' && $route.path != '/login' && $route.path != '/userInfos'"/>
     <v-main>
-      <transition name="bounce" mode="out-in">
-        <router-view>
-        </router-view>
-      </transition>
+      <router-view v-slot="{ Component }">
+        <transition name="bounce" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
     </v-main>
   </v-app>
 </v-container>
