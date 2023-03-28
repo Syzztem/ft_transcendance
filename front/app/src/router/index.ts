@@ -76,35 +76,25 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  await store.dispatch('isLogin')
-  .then((res: any) => {}
-  , (error: any) => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('id')
-    return next('/login')
-  })
-  await store.dispatch('getUserInfos')
+  try {
+    await store.dispatch('isLogin');
+  } catch (error) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('id');
+    return next('/login');
+  }
+  await store.dispatch('getUserInfos');
   if (!store.state.isLogin) {
-    if (to.path === '/login') {
-      return next();
-    } else {
-      return next('/login');
-    }
+    return to.path === '/login' ? next() : next('/login');
   }
   if (store.state.userInfos.isotp && !store.state.twoFactorAuthenticated) {
-    if (to.path === '/2fa') {
-      return next();
-    } else {
-      return next('/2fa');
-    }
+    return to.path === '/2fa' ? next() : next('/2fa');
   }
+
   if (!store.state.userInfos.username) {
-    if (to.path === '/userInfos') {
-      return next();
-    } else {
-      return next('/userInfos');
-    }
+    return to.path === '/userInfos' ? next() : next('/userInfos');
   }
+
   if (to.path === '/login' || to.path === '/2fa' || to.path === '/userInfos') {
     return next('/');
   } else {

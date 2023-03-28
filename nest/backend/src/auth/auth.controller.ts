@@ -26,13 +26,13 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('islogin')
   async isLogin(@Req() req, @Response() res, @Body() body) {
-    const user = await this.userService.getUserById(req.user.sub)
-    console.log("isTwoFactorAuthenticationEnabled: ", user.isTwoFactorAuthenticationEnabled)
-    console.log("TwoFactorAuthenticated: ", user.TwoFactorAuthenticated)
-    if (user.isTwoFactorAuthenticationEnabled && !user.TwoFactorAuthenticated)
-      return res.status(HttpStatus.FORBIDDEN).send()
-    else
-      return res.status(HttpStatus.OK).send()
+    // const user = await this.userService.getUserById(req.user.sub)
+    // console.log("isTwoFactorAuthenticationEnabled: ", user.isTwoFactorAuthenticationEnabled)
+    // console.log("TwoFactorAuthenticated: ", user.TwoFactorAuthenticated)
+    // if (user.isTwoFactorAuthenticationEnabled && !user.TwoFactorAuthenticated)
+    //   return res.status(HttpStatus.FORBIDDEN).send()
+    // else
+    return res.status(HttpStatus.OK).send()
   }
 
   @UseGuards(JwtAuthGuard)

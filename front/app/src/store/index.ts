@@ -104,6 +104,7 @@ const store = createStore({
   },
   actions: {
     isLogin({ commit }) {
+      console.log('isLogin: début');
       if (!localStorage.getItem('token')) {
         commit('isLogin', false)
         return
