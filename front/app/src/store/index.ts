@@ -70,7 +70,7 @@ const store = createStore({
     },
     joinChannel(state, id)
     {
-      chatSocket.emit('join', {chanId : 3, uid : 33, password : ''});
+      // chatSocket.emit('join', {chanId : 3, uid : 33, password : ''});
     },
     broadcast(state, message)
     {
@@ -78,6 +78,10 @@ const store = createStore({
       const newMessage = {channel, sender, content};
       console.log(newMessage);
       state.chat.current_channel?.messages.push(newMessage);
+    },
+    getAllChannels(state, channels)
+    {
+      console.log("getallchannels in front :", channels)
     }
   },
   actions: {
@@ -143,6 +147,20 @@ const store = createStore({
         })
       })
     },
+    getUserChannels({commit}) {
+      if (!localStorage.getItem('id'))
+        return ;
+      return new Promise((resolve, reject) => {
+        instance.get("/channel/getAll")
+        .then((response: any) => {
+          commit('getAllChannels', response.data)
+          resolve(response)
+        })
+        .catch((error: any) => {
+          reject(error)
+        })
+      })
+    },
     selectChannel({ commit }, channel) {
       commit("setCurrentChannel", channel);
     },
@@ -156,10 +174,6 @@ const store = createStore({
     {
       commit("joinChannel", id);
     },
-    sendMessage()
-    {
-
-    },
     receiveMessage({commit})
 		{
 			chatSocket.
@@ -168,12 +182,16 @@ const store = createStore({
 				console.log('message from back :', message);
         commit("broadcast", message);
 			})
+      .on('sendAllChannels', (channels : any) =>
+			{
+				console.log('channels in front :', channels);
+			})
 		},
     stopReceiving()
     {
       chatSocket.off('displayMessage');
+      chatSocket.off('sendAllChannels');
     }
-
   },
   getters: {
     getUsername(state) {

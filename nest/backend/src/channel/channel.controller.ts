@@ -101,4 +101,11 @@ export class ChannelController {
         if (!channel) return res.status(HttpStatus.NOT_FOUND).send();
         res.status(HttpStatus.OK).send(channel);
     }
+
+    @Get("getAll")
+    @HttpCode(HttpStatus.OK)
+    async getAllChannels( @Response() res: any) {
+        console.log("getting inside getAll");
+        res.send( await this.channelService.getAll())
+    }
 }

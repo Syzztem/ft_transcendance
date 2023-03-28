@@ -48,6 +48,13 @@ export class ChannelService {
         })
     }
 
+    async getAll() : Promise<Channel[]>
+    {
+        const channels = await this.channelRepository.find();
+        console.log('channel list in back', channels);
+        return channels;
+    }
+
     async postMessage(dto: PostMessageDTO) : Promise<number> {
         const chan: Channel = await this.channelRepository.findOneBy({id: dto.channelId})
         if (!chan)

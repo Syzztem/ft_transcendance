@@ -61,7 +61,6 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
             sender: user,
             channel: chan
         })
-        console.log('message saved in This.messageReposity : ', message);
         this.messageRepository.save(message);
 
         client.emit('displayMessage', message);
@@ -87,6 +86,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         client.join(chan.id.toString());
         chan.users.push(user);
         this.channelRepository.save(chan);
+        this.logger.debug('call join');
         client.emit('joined_channel', chan);
     }
 
@@ -173,7 +173,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
             take: 50,
             skip: 50 * dto.page
         })
-        console.log(messages);
+        this.logger.log('message sent');
         client.emit('displayMessage', messages);
     } 
 
@@ -228,6 +228,12 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         channel = await this.channelRepository.save(channel);
         client.join(channel.id.toString());
         client.emit('newChannel', (channel));
+    }
+
+    @SubscribeMessage("getAll")
+    async getAllChannels(@ConnectedSocket() client: Socket) {
+        const channels = await this.channelRepository.find();
+        client.emit("sendAllChannels", channels);
     }
 
     @SubscribeMessage('leave')
@@ -347,8 +353,6 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
             },
             where: {id: uid}
         });
-        console.log('uid  :', uid);
-        console.log('chat user: ', user);
         if(!user) {
             client.disconnect();
             return ;

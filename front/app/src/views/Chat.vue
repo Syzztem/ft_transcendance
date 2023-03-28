@@ -14,22 +14,22 @@ import { onBeforeMount } from "vue";
 /*
 	TODO :
 
-	WEBSOCKETS :
+	current :  add panel
 
-	- channel join
-	- check for two users to join a channel
-	- messages
+	broadcast in correct channel id when receiving a message
+	list channels -> front
+	join , leave
+	search channel
+	moderation front -> todo : basic request tests
+	channel history
 
-	FRONT :
 
-	- channel list
-	- channel staying after logout()?
-	- search channel
-	- create a dialog to search for existing channels
+
 	- clickable profile on user -> opens 	OPTIONS PANEL	:	dm, profile page, add to friends, remove from friend block user, unblock user
 											ADVANCED PANEL	:	promote/demote/ban/kick/unban
 	- v-if (blocked) -> display red block icon
 	- v-if display only available options (don t block if already blocked etc)
+
 */
 
 export default defineComponent({
@@ -57,7 +57,7 @@ export default defineComponent({
 		}
 	},
 	methods: {
-		...mapActions(["selectChannel", "rmChannel", "sendMessage", "receiveMessage", "joinChannel","stopReceiving"],),
+		...mapActions(["selectChannel", "rmChannel", "sendMessage", "receiveMessage", "joinChannel","stopReceiving", "getUserChannels"],),
 		createChannel(newChan : any)
 		{
 			const channel_dto = {
@@ -88,26 +88,24 @@ export default defineComponent({
 		{
 			await this.stopReceiving();
 		},
-		joinChannel()
+		getAllChannels()
 		{
-
+			this.getUserChannels();
 		},
-		leaveChannel()
-		{
-
-		},
-		kick()
-		{
-
-		},
-		ban()
-		{
-
-		},
-		mute()
-		{
-
-		}
+		// joinChannel()
+		// {
+		// 	const chan_id = 1;
+		// 	const join_dto = {chanId: chan_id, uid: this.id, password : ''};
+		// 	console.log('join DTO', join_dto);
+		// 	this.chatSocket.emit('join', join_dto);
+		// },
+		// leaveChannel()
+		// {
+		// 	const chan_id = 1;
+		// 	const join_dto = {chanId: chan_id, uid: this.id, password : ''};
+		// 	console.log('join DTO', join_dto);
+		// 	this.chatSocket.emit('leave', join_dto);
+		// },
 	},
     computed: {
 		user()
@@ -131,11 +129,10 @@ export default defineComponent({
 			return this.$store.state.chat.blocked_users
 		},
 	},
-
-
 	mounted() {
 		console.log('start receiving messages');
 		this.startReceivingMessages();
+
 	},
 	unmounted() {
 		console.log('hey we stop receiving ===> unmount');
@@ -143,35 +140,12 @@ export default defineComponent({
 	},
 })
 
-
-// const state = reactive
-// 	<{
-// 	  messages: [IMessage],
-// 	  channels: [IChannel],
-// 	  users: [IUser],
-// 	  currentMessage: string,
-// 	  UserName: string,
-// 	}>
-// 	({
-// 	  messages: [{content: '', sender: ''}],
-// 	  users:[{name: 'user1', channel_status:0}, {name: 'user2', channel_status:1},{name: 'user3', channel_status:1}],
-// 	  channels: [{name: 'channel1'}, {name: 'channel2'},{name: 'channel3'}],
-// 	  currentMessage: '',
-// 	  UserName:'JHoWn',
-// 	})
-
-// function UpdateMessagesButton()
-// {
-// 	var message = new IMessage(state.currentMessage, state.UserName);
-// 	state.messages.push(message);
-// 	state.currentMessage = '';
-// }
-
 // function UpdateMessages(e: KeyboardEvent)
 // {
 //   if (e.key === 'Enter')
 // 	  UpdateMessagesButton();
 // }
+
 </script>
 
 <template>
@@ -287,7 +261,9 @@ export default defineComponent({
 									</v-card-actions>
 								</v-card>
 								</v-dialog>
-								<v-btn id="Btnchannel" class="mt-2 mb-2">
+								<v-btn id="Btnchannel" class="mt-2 mb-2"
+									@click="getAllChannels"
+								>
 									🔎
 								</v-btn>
 							</v-card>
