@@ -387,12 +387,86 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
             return ;
         if(user1.blocked.includes(user2) || user2.blocked.includes(user1))
             throw new WsException("Users blocked each other");
-        this.clients.get(ids[1]).emit("+" + ids[0]);
-        this.clients.get(ids[0]).emit("+" + ids[1]);
+        this.clients.get(ids[1]).emit("friend", user1);
+        this.clients.get(ids[0]).emit("friend" + user2);
         user1.friends.push(user2);
         this.userRepository.save(user2);
     }
 
+    async blockUser(@MessageBody() ids: number[],
+                    @ConnectedSocket() client: Socket) : Promise<number> {
+        this.verifyId(client, ids[0]);
+        const user1 = await this.userRepository.findOne({
+            select: {
+                id: true
+            },
+            relations: {
+                blocked: true
+            },
+            where: {id: ids[1]}
+        });
+        const user2 = await this.userRepository.findOneBy({id: ids[2]});
+        if (!user1 || !user2) return HttpStatus.NOT_FOUND;
+        if (user1.blocked.includes(user2)) throw new WsException("Users blocked each other");
+        this.clients.get(user1.id).emit("block", user2)
+        this.clients.get(user2.id).emit("blocked", user1)
+        user1.blocked.push(user2);
+        user1.friends.filter(usr => usr.id !== user2.id);
+        user2.friends.filter(usr => usr.id !== user1.id);
+        this.userRepository.save(user1);
+        this.userRepository.save(user2);
+    }
+
+    async unBlockUser(  @MessageBody() ids: number[],
+                        @ConnectedSocket() client: Socket) {
+        this.verifyId(client, ids[0]);
+        const user1 = await this.userRepository.findOne({
+            select: {
+                id: true
+            },
+            relations: {
+                blocked: true
+            },
+            where: {id: ids[1]}
+        });
+        const user2 = await this.userRepository.findOneBy({id: ids[2]});
+        if (!user1 || !user2) return HttpStatus.NOT_FOUND;
+        if (!user1.blocked.includes(user2)) throw new WsException("User is already blocked")
+        client.emit("unblocked", user2);
+        user1.blocked.filter(usr => usr.id !== ids[2]);
+        this.userRepository.save(user1);
+    }
+
+    async removeFriend( @MessageBody() ids : number,
+                        @ConnectedSocket() client : Socket) {
+        const user1 = await this.userRepository.findOne({
+            select: {
+                id: true
+            },
+            relations: {
+                friends: true
+            },
+            where: {id: ids[1]}
+        });
+        const user2 = await this.userRepository.findOne({
+            select: {
+                id: true
+            },
+            relations: {
+                friends: true
+            },
+            where: {id: ids[2]}
+        });
+
+        if (!user1 || !user2) return HttpStatus.NOT_FOUND;
+        if (!user1.friends.includes(user2)) throw new WsException("Not friends")
+        user1.friends.filter(usr => usr.id !== user2.id);
+        user2.friends.filter(usr => usr.id !== user1.id);
+        this.userRepository.save(user1);
+        this.userRepository.save(user2);
+        this.clients.get(user1.id).emit("unfriend", user2)
+        this.clients.get(user2.id).emit("unfriend", user1)
+    }
 
     async handleConnection(client: Socket) {
         const uid: number = this.jwtService.decode(client.handshake.auth.token).sub;
