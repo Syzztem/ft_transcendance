@@ -19,7 +19,7 @@
 import router from '@/router'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
-import socket from '@/websocket'
+import { socket, chatSocket} from '@/websocket'
 
 export default defineComponent({
     data() {
@@ -35,6 +35,7 @@ export default defineComponent({
             localStorage.setItem('token', this.$route.query.token as any)
             localStorage.setItem('id', this.$route.query.id?.toString() as any)
             socket.connect()
+<<<<<<< HEAD
             await this.$store.dispatch('get2fa')
             console.log("twoFactorAuthenticated: ", this.$store.state.twoFactorAuthenticated)
             console.log("isotp: ", this.$store.state.userInfos.isotp)
@@ -42,6 +43,10 @@ export default defineComponent({
                 await this.$router.push('2fa')
             else
                 await this.$router.push('userInfos')
+=======
+            chatSocket.connect()
+            this.$router.push('userInfos')
+>>>>>>> d610307b92766e01ede123af2fb3c955d4ed377f
             return
         }
     }

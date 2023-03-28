@@ -25,7 +25,6 @@ import { join } from 'path';
     UsersModule,
     GameModule,
     ChannelModule,
-    UsersModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.POSTGRES_HOST,
@@ -34,7 +33,6 @@ import { join } from 'path';
       password: process.env.POSTGRES_PW,
       database: process.env.POSTGRES_DB,
       autoLoadEntities: true,
-      //entities: [User, Channel, Game, ChannelMessage, FriendMessage, BanAndMute],
       synchronize: true
     }),
     ServeStaticModule.forRoot({

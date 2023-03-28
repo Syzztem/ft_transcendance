@@ -1,7 +1,7 @@
 <script lang='ts'>
 import { Game } from '../controllers/Game'
 import { defineComponent } from "vue"
-import socket from '@/websocket'
+import { socket } from '@/websocket'
 import Board from '@/models/Board.interface'
 
 export default defineComponent({
@@ -24,7 +24,7 @@ export default defineComponent({
     handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'ArrowUp' || e.key === 'ArrowDown')
         this.gameSocket.emit('keyDown', {gameId: Number(this.$route.params.id), key: e.key})
-  
+
     },
   },
   mounted() {

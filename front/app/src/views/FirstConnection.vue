@@ -64,6 +64,7 @@ export default defineComponent({
             changeProfilePicDialog: false
         }
     },
+<<<<<<< HEAD
     async mounted() {
         await this.$store.dispatch('getProfilePic')
         this.profilePicURL = this.$store.state.userInfos.profilePic
@@ -72,6 +73,15 @@ export default defineComponent({
         return {
             username: computed(() => store.getters.getUsername)
         }
+=======
+    mounted() {
+        this.$store.dispatch('getUserInfos')
+        .then((res: any) => {
+            if (res.data.username)
+                this.$router.push('/')
+        },
+        (error: any) => {})
+>>>>>>> d610307b92766e01ede123af2fb3c955d4ed377f
     },
     methods: {
         async ok() {

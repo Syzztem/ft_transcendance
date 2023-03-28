@@ -1,7 +1,13 @@
 import IChannel from '@/models/IChannel'
 import { createStore } from 'vuex'
 import { AxiosInstance } from 'axios'
+<<<<<<< HEAD
 import axios from 'axios'
+=======
+import { chatSocket } from '@/websocket'
+
+const axios = require('axios')
+>>>>>>> d610307b92766e01ede123af2fb3c955d4ed377f
 
 const instance : AxiosInstance = axios.create({
   baseURL: 'http://' +  process.env.VUE_APP_URL + ':3000'
@@ -72,9 +78,12 @@ const store = createStore({
       localStorage.removeItem('token')
     },
     addChannel(state, newchan) {
-      const { name, password, isPrivate, users, messages } = newchan;
-      const newfront = {name : name, password : password, isPrivate : isPrivate, users: users, messages : [], id: newchan.id}
-      state.chat.joined_channels.push(newfront);
+      if (newchan) {
+        const { name, password, isPrivate, users } = newchan;
+        const newfront = { name, password, isPrivate, users, id: newchan.id, messages: [] };
+        console.log('new channel in front : ', newfront);
+        state.chat.joined_channels.push(newfront);
+      }
     },
     setCurrentChannel(state, channel) {
       state.chat.current_channel = channel;
@@ -83,9 +92,23 @@ const store = createStore({
       state.chat.joined_channels = state.chat.joined_channels.filter(c => c.id !== id);
       state.chat.current_channel = null;
     },
+<<<<<<< HEAD
     setTwoFA(state, infos) {
       state.twoFactorAuthenticated = infos
     },
+=======
+    joinChannel(state, id)
+    {
+      chatSocket.emit('join', {chanId : 3, uid : 33, password : ''});
+    },
+    broadcast(state, message)
+    {
+      const {channel, sender, content} = message;
+      const newMessage = {channel, sender, content};
+      console.log(newMessage);
+      state.chat.current_channel?.messages.push(newMessage);
+    }
+>>>>>>> d610307b92766e01ede123af2fb3c955d4ed377f
   },
   actions: {
     isLogin({ commit }) {
@@ -249,7 +272,23 @@ const store = createStore({
     createChannel({ commit }, channelInfos) {
       commit("addChannel", channelInfos);
     },
+    joinChannel({commit}, id)
+    {
+      commit("joinChannel", id);
+    },
+    sendMessage()
+    {
 
+    },
+    receiveMessage({commit})
+		{
+			chatSocket.
+			on('displayMessage', (message : any) =>
+			{
+				console.log('message from back :', message);
+        commit("broadcast", message);
+			})
+		},
   },
   getters: {
     getUsername(state) {
