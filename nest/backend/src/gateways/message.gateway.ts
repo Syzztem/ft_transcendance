@@ -347,13 +347,6 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
             },
             where: {id: uid}
         });
-<<<<<<< HEAD
-        if(!user) {
-            await client.disconnect();
-            return
-        }
-        // client.emit(user.channels.toString());
-=======
         console.log('uid  :', uid);
         console.log('chat user: ', user);
         if(!user) {
@@ -361,7 +354,6 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
             return ;
         }
         client.emit("login", user);
->>>>>>> d610307b92766e01ede123af2fb3c955d4ed377f
         this.clients.set(user.id, client);
         this.sockets.set(client, user.id);
         console.log(user);

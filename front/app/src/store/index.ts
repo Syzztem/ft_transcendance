@@ -1,13 +1,8 @@
 import IChannel from '@/models/IChannel'
 import { createStore } from 'vuex'
 import { AxiosInstance } from 'axios'
-<<<<<<< HEAD
 import axios from 'axios'
-=======
 import { chatSocket } from '@/websocket'
-
-const axios = require('axios')
->>>>>>> d610307b92766e01ede123af2fb3c955d4ed377f
 
 const instance : AxiosInstance = axios.create({
   baseURL: 'http://' +  process.env.VUE_APP_URL + ':3000'
@@ -92,11 +87,9 @@ const store = createStore({
       state.chat.joined_channels = state.chat.joined_channels.filter(c => c.id !== id);
       state.chat.current_channel = null;
     },
-<<<<<<< HEAD
     setTwoFA(state, infos) {
       state.twoFactorAuthenticated = infos
     },
-=======
     joinChannel(state, id)
     {
       chatSocket.emit('join', {chanId : 3, uid : 33, password : ''});
@@ -108,7 +101,6 @@ const store = createStore({
       console.log(newMessage);
       state.chat.current_channel?.messages.push(newMessage);
     }
->>>>>>> d610307b92766e01ede123af2fb3c955d4ed377f
   },
   actions: {
     isLogin({ commit }) {
