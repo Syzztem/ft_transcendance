@@ -19,6 +19,7 @@ export class UsersController {
         if (!user) return res.status(HttpStatus.NOT_FOUND).send();
         return res.status(HttpStatus.OK).send(user);
     }
+
     @UseGuards(JwtAuthGuard)
     @Get("profilepic/:username")
     async getProfilePic(@Param('username') username : string,
