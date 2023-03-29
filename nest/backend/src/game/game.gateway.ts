@@ -23,6 +23,7 @@ import { Logger, Request } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Game } from 'src/database/entities/Game';
 import Match from './Match';
+import { WsException } from '@nestjs/websockets';
  
 export enum Side {
 	OWNER,
@@ -83,6 +84,11 @@ export class GameGateway implements OnGatewayDisconnect, OnGatewayConnection{
 		const challenger = { socketId: clientSocket.id, user: user}
 		this.logger.log('Player ' + challenger.user.username +  ' joined the queue');
 		
+		this.pendingPlayer.forEach((player: WsUser) => {
+			console.log(`cmp ${player.user.id} <=> ${user.id}`)
+			if (player.user.id === user.id)
+				throw new WsException('Already in queue');
+		})
 		if (this.pendingPlayer.length == 0){
 			this.pendingPlayer.push(challenger)
 			return ;

@@ -137,10 +137,8 @@ export class AuthController {
   @Post('logout')
   async logout(@Request() req, @Res() res) {
     const user = await this.userService.getUserById(req.user.sub)
-    console.log('user: ', user)
     if (user.isTwoFactorAuthenticationEnabled)
       await this.userService.update2fa(user.id, false)
-    console.log('user: ', user)
     res.send("logged out")
   }
 }
