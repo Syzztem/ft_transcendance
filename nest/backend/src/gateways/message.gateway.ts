@@ -281,7 +281,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
     @SubscribeMessage("getAll")
     async getAllChannels(@ConnectedSocket() client: Socket) {
-        const channels = await this.channelRepository.find();
+        const channels = await this.channelRepository.find({where : {isPrivate: false}});
         client.emit("sendAllChannels", channels);
     }
 
