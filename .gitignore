@@ -36,8 +36,9 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 **/.*.swp
+**/package-lock.json
 # ENV
 **.env
 .env
 **/*.env
-*/*/*.env
+nginx
