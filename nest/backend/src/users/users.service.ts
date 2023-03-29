@@ -55,13 +55,9 @@ export class UserService {
 
     async getUserById(id: number): Promise<User> {
         return this.userRepository.findOne({
-            select: {
-                username:                           true,
-                rank:                               true,
-                wins:                               true,
-                losses:                             true,
-                level:                              true,
-                id:                                 true,
+            relations: {
+                games: true,
+                games2: true
             },
             where: {id: id}
         });

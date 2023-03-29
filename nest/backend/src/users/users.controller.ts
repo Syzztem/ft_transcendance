@@ -16,7 +16,7 @@ export class UsersController {
                   @Response() res: any) : Promise<User> {
         const user = await this.userService.getUserById(id);
         if (!user) return res.status(HttpStatus.NOT_FOUND).send();
-        return res.status(HttpStatus.OK).send({ rank: user.rank, wins: user.wins, losses: user.losses, level: user.level, id: user.id, username: user.username });
+        return res.status(HttpStatus.OK).send({ rank: user.rank, wins: user.wins, losses: user.losses, level: user.level, id: user.id, username: user.username, games: user.games });
     }
 
     @UseGuards(JwtAuthGuard)
@@ -26,6 +26,15 @@ export class UsersController {
         if (!user)
             return res.status(HttpStatus.NOT_FOUND).send();
         return res.status(HttpStatus.OK).send(user);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get("/stats")
+    async getStats(@Req() req: any, @Response() res: any) {
+        const user = await this.userService.getUserById(req.user.sub)
+        if (!user)
+            return res.status(HttpStatus.NOT_FOUND).send();
+        return res.status(HttpStatus.OK).send({ rank: user.rank, wins: user.wins, losses: user.losses, level: user.level, id: user.id, username: user.username, games: user.games })
     }
 
     @UseGuards(JwtAuthGuard)

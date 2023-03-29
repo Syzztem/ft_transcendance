@@ -3,6 +3,7 @@ import { createStore } from 'vuex'
 import { AxiosInstance } from 'axios'
 import axios from 'axios'
 import { chatSocket } from '@/websocket'
+import { statusSocket } from '@/websocket'
 
 const instance : AxiosInstance = axios.create({
   baseURL: 'http://' +  process.env.VUE_APP_URL + ':3000'
@@ -19,14 +20,14 @@ let id: any = localStorage.getItem('id')
 
 const store = createStore({
   state: {
-    status: '',
     twoFactorAuthenticated: false,
     isLogin: true,
     userInfos: {
       profilePic: '',
       username: '',
       isotp: false,
-      qrcode: ''
+      qrcode: '',
+      friends: []
     },
     profileInfos: {
       profilePic: '',
@@ -36,7 +37,7 @@ const store = createStore({
       isBlock: false,
       wins: 0,
       losses: 0,
-      games: [{date: '10/01/2023', score: '11:6', winner: 'test', looser: 'qwerty', id: 1}, {date: '10/01/2023', score: '11:9', winner: 'qwerty', looser: 'neo', id: 2}]
+      games: []
     },
     chat: {
       joined_channels:  [] as IChannel[],
@@ -49,9 +50,6 @@ const store = createStore({
     }
   },
   mutations: {
-    setStatus(state, status) {
-      state.status = status
-    },
     setisotp(state, infos) {
       state.userInfos.isotp = infos
     },
@@ -81,7 +79,9 @@ const store = createStore({
     setStats(state, stats) {
       state.profileInfos.wins = stats.wins
       state.profileInfos.losses = stats.losses
+      state.profileInfos.games = stats.games
     },
+    setStatus() {},
     username(state, username) {
       state.userInfos.username = username
     },
@@ -191,6 +191,18 @@ const store = createStore({
         instance.get("/user/profilepic/" + username)
         .then((response: any) => {
           commit('setPic', response.data)
+          resolve(response)
+        })
+        .catch((error: any) => {
+          resolve(error)
+        })
+      })
+    },
+    getStats({commit}) {
+      return new Promise((resolve, reject) => {
+        instance.get("/user/stats")
+        .then((response: any) => {
+          commit('setStats', response.data)
           resolve(response)
         })
         .catch((error: any) => {
@@ -369,6 +381,11 @@ const store = createStore({
         commit("broadcast", message);
 			})
 		},
+    receiveStatus({commit}) {
+      statusSocket.on('displayStatus', (status: any) => {
+        commit('', status)
+      })
+    }
   },
   getters: {
     getUsername(state) {

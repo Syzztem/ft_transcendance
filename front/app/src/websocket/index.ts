@@ -9,5 +9,5 @@ const options: Partial<ManagerOptions & SocketOptions> = {
 }
 
 export const socket: Socket = io("http://" + process.env.VUE_APP_URL + ":3000/", options);
-export const chatSocket: Socket = io("http://" + process.env.VUE_APP_URL + ":3000/chat", options)
-
+export const chatSocket: Socket = io("http://" + process.env.VUE_APP_URL + ":3000/chat", options);
+export const statusSocket: Socket = io("http://" + process.env.VUE_APP_URL + ":3000/status", options);
