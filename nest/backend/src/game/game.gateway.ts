@@ -85,7 +85,6 @@ export class GameGateway implements OnGatewayDisconnect, OnGatewayConnection{
 		this.logger.log('Player ' + challenger.user.username +  ' joined the queue');
 		
 		this.pendingPlayer.forEach((player: WsUser) => {
-			console.log(`cmp ${player.user.id} <=> ${user.id}`)
 			if (player.user.id === user.id)
 				throw new WsException('Already in queue');
 		})
