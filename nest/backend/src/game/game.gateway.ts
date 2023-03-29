@@ -126,6 +126,8 @@ export class GameGateway implements OnGatewayDisconnect, OnGatewayConnection{
 
 	handleKey(clientSocket: Socket, data: Key, event: KeyEvent) {
 		const clientId: number = this.jwtService.decode(clientSocket.handshake.auth.token).sub
+		if (!this.matchsList.has(data.gameId))
+			return ;
 		let game: Game = this.matchsList.get(data.gameId).game
 		let match: Match = this.matchsList.get(data.gameId).match
 		let user: User = new User()
