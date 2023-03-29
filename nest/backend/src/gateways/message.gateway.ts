@@ -175,8 +175,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         })
         this.logger.log('message sent');
         client.emit('displayMessage', messages);
-    } 
-
+    }
+    
     @SubscribeMessage('unban')
     async unBanUser(@MessageBody() dto: JoinChannelDTO,
                     @ConnectedSocket() client: Socket) {

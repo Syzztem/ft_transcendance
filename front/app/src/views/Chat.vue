@@ -14,6 +14,9 @@ import { onBeforeMount } from "vue";
 /*
 	TODO :
 
+
+	current : broadcast, dialog pop
+
 	current :  add panel
 
 	broadcast in correct channel id when receiving a message
@@ -47,6 +50,7 @@ export default defineComponent({
 				{ title: 'invite to game' },
 			],
 			dialog: false,
+			allchans_dialog: false,
 			newChannel: {
 				name: '',
 				password: '',
@@ -57,7 +61,7 @@ export default defineComponent({
 		}
 	},
 	methods: {
-		...mapActions(["selectChannel", "rmChannel", "sendMessage", "receiveMessage", "joinChannel","stopReceiving", "getUserChannels"],),
+		...mapActions(["selectChannel", "rmChannel", "sendMessage", "receiveMessage", "joinChannel","stopReceiving", "getUserChannels", "getAllChannelsStore"],),
 		createChannel(newChan : any)
 		{
 			const channel_dto = {
@@ -72,6 +76,15 @@ export default defineComponent({
 			})
 			this.dialog = false;
 		},
+		getAllChannels()
+		{
+			console.log('getallchannels chat.vue')
+			this.getAllChannelsStore();
+			chatSocket.emit('getAll');
+			this.allchans_dialog = true;
+
+			
+		},
 		sendMessage(newMessage : string)
 		{		
 			const message_dto = {
@@ -81,6 +94,7 @@ export default defineComponent({
 			};
 			this.chatSocket.emit('newmsg' , message_dto);
 		},
+
 		async startReceivingMessages() {
 			await this.receiveMessage();
 		},
@@ -88,10 +102,7 @@ export default defineComponent({
 		{
 			await this.stopReceiving();
 		},
-		getAllChannels()
-		{
-			this.getUserChannels();
-		},
+
 		// joinChannel()
 		// {
 		// 	const chan_id = 1;
@@ -108,35 +119,24 @@ export default defineComponent({
 		// },
 	},
     computed: {
-		user()
-		{
-			return this.$store.state.userInfos
-		},
-		username()
-		{
-			return this.$store.state.userInfos.username
-		},
-		channels() {
-			return this.$store.state.chat.channels
-		},
-		joined_channels() {
-			return this.$store.state.chat.joined_channels
-		},
-		current_channel() {
-			return this.$store.state.chat.current_channel
-		},
-		blocked_users() {
-			return this.$store.state.chat.blocked_users
-		},
+		user() {return this.$store.state.userInfos},
+		username() {return this.$store.state.userInfos.username},
+		channels() {return this.$store.state.chat.channels},
+		joined_channels() {return this.$store.state.chat.joined_channels},
+		current_channel() {return this.$store.state.chat.current_channel},
+		blocked_users() {return this.$store.state.chat.blocked_users},
+		available_channels() {return this.$store.state.chat.available_channels}
 	},
 	mounted() {
 		console.log('start receiving messages');
 		this.startReceivingMessages();
-
+		chatSocket.on('sendAllChannels', (channels : any) =>
+		{this.$store.state.chat.available_channels = channels;})
 	},
 	unmounted() {
 		console.log('hey we stop receiving ===> unmount');
   		this.stopReceivingMessages();
+		chatSocket.off('sendAllChannels');
 	},
 })
 
@@ -266,6 +266,46 @@ export default defineComponent({
 								>
 									🔎
 								</v-btn>
+								<v-dialog v-model="allchans_dialog" max-width="500">
+  <v-card>
+    <v-card-title class="text-h4 font-weight-bold text-center">
+      Channels list
+    </v-card-title>
+    <v-divider></v-divider>
+    <v-list-item-group>
+      <v-list-item v-for="channel in available_channels" :key="channel.id">
+        <v-card
+          id="Channelcard"
+          class="d-flex flex-column align-center justify-center mt-4 mx-4 pa-4"
+          height="auto"
+          elevation="2"
+        >
+          <div class="d-flex align-center justify-center mb-2">
+            <span class="font-weight-bold">{{channel.name}}</span>
+          </div>
+          <div class="d-flex align-center justify-center mb-2">
+            <v-btn color="primary" class="mr-2" @click="joinChannel(channel.id)">
+              Join
+            </v-btn>
+          </div>
+          <div class="d-flex align-center justify-center">
+            <v-text-field
+              class="mx-2"
+              label="Password"
+              type="password"
+              single-line
+              dense
+              hide-details
+              outlined
+              style="width: 150px;"
+            ></v-text-field>
+          </div>
+        </v-card>
+      </v-list-item>
+    </v-list-item-group>
+  </v-card>
+</v-dialog>
+
 							</v-card>
 							<v-card id="Channelscontent" height="65vh" v-if="joined_channels">
 								<v-list-item v-for="channel in joined_channels" :key="channel.id">

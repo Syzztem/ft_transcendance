@@ -34,6 +34,7 @@ const store = createStore({
       current_channel:  null as IChannel | null,
       blocked_users:    [],
       current_message:  "",
+      available_channels: [] as IChannel []
     }
   },
   mutations: {
@@ -56,8 +57,10 @@ const store = createStore({
     },
     addChannel(state, newchan) {
       if (newchan) {
-        const { name, password, isPrivate, users } = newchan;
-        const newfront = { name, password, isPrivate, users, id: newchan.id, messages: [] };
+
+        const { name, password, isPrivate, users, id, messages } = newchan;
+        console.log('messages in channel creation :', messages);
+        const newfront = { name, password, isPrivate, users, id: id, messages: [] };
         state.chat.joined_channels.push(newfront);
       }
     },
@@ -77,13 +80,23 @@ const store = createStore({
       const {channel, sender, content} = message;
       const newMessage = {channel, sender, content};
       console.log(newMessage);
-      state.chat.current_channel?.messages.push(newMessage);
+      const targetChannel = state.chat.joined_channels.find(ch => ch.id === channel.id);
+      // Check if the target channel exists
+      if (targetChannel) {
+        // Push the new message to the target channel's messages array
+        targetChannel.messages.push(newMessage);
+      } else {
+        console.error(`Channel not found: ${channel}`);
+      }
     },
     getAllChannels(state, channels)
     {
       console.log("getallchannels in front :", channels)
+      this.available_channels = channels;
+      console.log('' , channels);
     }
   },
+
   actions: {
     getUserInfos({commit}) {
       if (!localStorage.getItem('id'))
@@ -147,20 +160,20 @@ const store = createStore({
         })
       })
     },
-    getUserChannels({commit}) {
-      if (!localStorage.getItem('id'))
-        return ;
-      return new Promise((resolve, reject) => {
-        instance.get("/channel/getAll")
-        .then((response: any) => {
-          commit('getAllChannels', response.data)
-          resolve(response)
-        })
-        .catch((error: any) => {
-          reject(error)
-        })
-      })
-    },
+    // getUserChannels({commit}) {
+    //   if (!localStorage.getItem('id'))
+    //     return ;
+    //   return new Promise((resolve, reject) => {
+    //     instance.get("/channel/getAll")
+    //     .then((response: any) => {
+    //       commit('getAllChannels', response.data)
+    //       resolve(response)
+    //     })
+    //     .catch((error: any) => {
+    //       reject(error)
+    //     }ter)
+    //   })
+    // },
     selectChannel({ commit }, channel) {
       commit("setCurrentChannel", channel);
     },
@@ -182,15 +195,18 @@ const store = createStore({
 				console.log('message from back :', message);
         commit("broadcast", message);
 			})
-      .on('sendAllChannels', (channels : any) =>
-			{
-				console.log('channels in front :', channels);
-			})
 		},
+    getAllChannelsStore()
+    {
+      console.log('opening front socket.on ');
+      chatSocket.emit('getAll');
+
+      //chatSocket.off('sendAllChannels');
+    },
     stopReceiving()
     {
       chatSocket.off('displayMessage');
-      chatSocket.off('sendAllChannels');
+      
     }
   },
   getters: {
