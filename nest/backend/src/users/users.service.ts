@@ -58,14 +58,10 @@ export class UserService {
             select: {
                 username:                           true,
                 rank:                               true,
-                wins:                               false,
-                losses:                             false,
+                wins:                               true,
+                losses:                             true,
                 level:                              true,
-                twoFactorAuthenticationSecret:      true,
-                isTwoFactorAuthenticationEnabled:   true,
-                TwoFactorAuthenticated:             true,
-                lastSuccessfulAuth:                 true,
-                id:                                 true
+                id:                                 true,
             },
             where: {id: id}
         });
@@ -120,7 +116,7 @@ export class UserService {
         const user2 = await this.userRepository.findOneBy({id: sendDMDTO.id2});
 
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
-        if (user1.blocked.includes(user2) || user2.blocked.includes(user1))
+        if (user1.isBlocked(user2) || user2.isBlocked(user1))
             return HttpStatus.FORBIDDEN;
         const message = this.messageRepository.create({
             content: sendDMDTO.message,
@@ -139,22 +135,41 @@ export class UserService {
     }
 
     async blockUser(id1: number, id2: number) : Promise<number> {
-        const user1 = await this.userRepository.findOneBy({id: id1});
+        const user1 = await this.userRepository.findOne({
+            select: {
+                id: true
+            },
+            relations: {
+                blocked: true,
+                friends: true
+            },
+            where: {id: id1}
+        });
         const user2 = await this.userRepository.findOneBy({id: id2});
-
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
-        if (user1.blocked.includes(user2))
+        if (user1.isBlocked(user2))
             return HttpStatus.NO_CONTENT;
         user1.blocked.push(user2);
+        user1.friends.filter(usr => usr.id !== user2.id);
+        user2.friends.filter(usr => usr.id !== user1.id);
         this.userRepository.save(user1);
+        this.userRepository.save(user2);
     }
 
     async unBlockUser(id1: number, id2: number) {
-        const user1 = await this.userRepository.findOneBy({id: id1});
+        const user1 = await this.userRepository.findOne({
+            select: {
+                id: true
+            },
+            relations: {
+                blocked: true
+            },
+            where: {id: id1}
+        });
         const user2 = await this.userRepository.findOneBy({id: id2});
 
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
-        if (!user1.blocked.includes(user2))
+        if (!user1.isBlocked(user2))
             return HttpStatus.NO_CONTENT;
         user1.blocked.filter(usr => usr.id !== id2);
         this.userRepository.save(user1);
@@ -162,25 +177,60 @@ export class UserService {
     }
 
     async addFriend(id1: number, id2: number) {
-        const user1 = await this.userRepository.findOneBy({id: id1});
-        const user2 = await this.userRepository.findOneBy({id: id2});
+        const user1 = await this.userRepository.findOne({
+            select: {
+                id: true
+            },
+            relations: {
+                blocked: true,
+                friends: true
+            },
+            where: {id: id1}
+        });
+        const user2 = await this.userRepository.findOne({
+            select: {
+                id: true
+            },
+            relations: {
+                blocked: true,
+                friends: true,
+            },
+            where: {id: id2}
+        });
 
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
-        if (user1.friends.includes(user2))
+        if (user1.isFriend(user2))
             return HttpStatus.NO_CONTENT;
-        if(user1.blocked.includes(user2) || user2.blocked.includes(user1))
+        if(user1.isBlocked(user2) || user2.isBlocked(user1))
             return HttpStatus.FORBIDDEN
         user1.friends.push(user2);
         this.userRepository.save(user2);
+        console.log(this.userRepository.findOneBy({id: id1}))
         return HttpStatus.OK;
     }
 
     async removeFriend(id1: number, id2: number) {
-        const user1 = await this.userRepository.findOneBy({id: id1});
-        const user2 = await this.userRepository.findOneBy({id: id2});
+        const user1 = await this.userRepository.findOne({
+            select: {
+                id: true
+            },
+            relations: {
+                friends: true
+            },
+            where: {id: id1}
+        });
+        const user2 = await this.userRepository.findOne({
+            select: {
+                id: true
+            },
+            relations: {
+                friends: true
+            },
+            where: {id: id2}
+        });
 
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
-        if (!user1.friends.includes(user2))
+        if (!user1.isFriend(user2))
             return HttpStatus.NO_CONTENT;
         user1.friends.filter(usr => usr.id !== user2.id);
         user2.friends.filter(usr => usr.id !== user1.id);

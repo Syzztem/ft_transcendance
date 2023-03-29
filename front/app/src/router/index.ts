@@ -13,6 +13,7 @@ import Login from '@/views/Login.vue'
 import Profil from '@/views/Profil.vue'
 import FirstConnection from '@/views/FirstConnection.vue'
 import twofa from '@/views/2fa.vue'
+import PublicProfile from '@/views/PublicProfile.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -65,9 +66,18 @@ const routes: Array<RouteRecordRaw> = [
     component: twofa
   },
   {
+    path: '/profile/:id',
+    component: PublicProfile,
+    props: route => {
+      const idParam = route.params.id;
+      const id = Array.isArray(idParam) ? idParam[0] : idParam;
+      return { id: parseInt(id) };
+    }
+  },
+  {
     path: '/',
     component: Home
-  },
+  }
 ]
 
 const router = createRouter({

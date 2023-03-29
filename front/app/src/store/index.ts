@@ -30,7 +30,13 @@ const store = createStore({
     },
     profileInfos: {
       profilePic: '',
-      username: ''
+      username: '',
+      id: '',
+      isFriend: false,
+      isBlock: false,
+      wins: 0,
+      losses: 0,
+      games: [{date: '10/01/2023', score: '11:6', winner: 'test', looser: 'qwerty', id: 1}, {date: '10/01/2023', score: '11:9', winner: 'qwerty', looser: 'neo', id: 2}]
     },
     chat: {
       joined_channels:  [] as IChannel[],
@@ -54,6 +60,10 @@ const store = createStore({
     },
     profileInfos(state, profileInfos) {
       state.profileInfos.username = profileInfos.username
+      state.profileInfos.id = profileInfos.id
+    },
+    setPic(state, url) {
+      state.profileInfos.profilePic = url
     },
     profilePic(state, avatar) {
       state.userInfos.profilePic = avatar
@@ -61,6 +71,16 @@ const store = createStore({
     userInfos(state, userInfos) {
       state.userInfos.username = userInfos.username
       state.twoFactorAuthenticated = userInfos.TwoFactorAuthenticated
+    },
+    setIsFriend(state, infos) {
+      state.profileInfos.isFriend = infos
+    },
+    setIsBlock(state, infos) {
+      state.profileInfos.isBlock = infos
+    },
+    setStats(state, stats) {
+      state.profileInfos.wins = stats.wins
+      state.profileInfos.losses = stats.losses
     },
     username(state, username) {
       state.userInfos.username = username
@@ -131,7 +151,7 @@ const store = createStore({
       if (!localStorage.getItem('id'))
         return ;
       return new Promise((resolve, reject) => {
-        instance.get("/user/id/" + localStorage.getItem('id'))
+        instance.get("/user/me")
         .then((response: any) => {
           commit('userInfos', response.data)
           resolve(response)
@@ -146,6 +166,7 @@ const store = createStore({
         instance.get("/user/id/" + id)
         .then((response: any) => {
           commit('profileInfos', response.data)
+          commit('setStats', response.data)
           resolve(response)
         })
         .catch((error: any) => {
@@ -162,6 +183,66 @@ const store = createStore({
         })
         .catch((error: any) => {
           resolve(error)
+        })
+      })
+    },
+    getPic({commit}, username) {
+      return new Promise((resolve, reject) => {
+        instance.get("/user/profilepic/" + username)
+        .then((response: any) => {
+          commit('setPic', response.data)
+          resolve(response)
+        })
+        .catch((error: any) => {
+          resolve(error)
+        })
+      })
+    },
+    addFriend({commit}, id) {
+      return new Promise((resolve, reject) => {
+        instance.patch("/user/friend", {id: id})
+        .then((res: any) => {
+          commit('setIsFriend', true)
+          resolve(res)
+        })
+        .catch((err: any) => {
+          resolve(err)
+        })
+      })
+    },
+    deleteFriend({commit}, id) {
+      return new Promise((resolve, reject) => {
+        instance.patch("/user/unfriend", {id: id})
+        .then((res: any) => {
+          commit('setIsFriend', false)
+          resolve(res)
+        })
+        .catch((err: any) => {
+          resolve(err)
+        })
+      })
+    },
+    block({commit}, id) {
+      return new Promise((resolve, reject) => {
+        instance.patch("/user/block", {id: id})
+        .then((res: any) => {
+          commit('setIsBlock', true)
+          resolve(res)
+        })
+        .catch((err: any) => {
+          resolve(err)
+        })
+      })
+    },
+    unblock({commit}, id) {
+      return new Promise((resolve, reject) => {
+        instance.patch("/user/unblock", {id: id})
+        .then((res: any) => {
+          commit('setIsBlock', false)
+          resolve(res)
+        })
+        .catch((err: any) => {
+          resolve(err)
         })
       })
     },
