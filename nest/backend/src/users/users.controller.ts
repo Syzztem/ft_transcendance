@@ -47,12 +47,14 @@ export class UsersController {
         res.status(HttpStatus.OK).send(path);
     }
 
-    @UseGuards(JwtAuthGuard)
-    @Post("/setpp/:username")
+    //@UseGuards(JwtAuthGuard)
+    @Get("/setpp/:username")
     @UseInterceptors(FileInterceptor('file'))
     async setProflePic(@Param('username') username: string,
                         @UploadedFile() file: Express.Multer.File,
                         @Response() res : any) {
+        if (!file)
+            return res.status(HttpStatus.FAILED_DEPENDENCY).send()
         const path = 'http://' + process.env.URL + ':3000/profilepics/' + username + '.jpg';
         fs.writeFile(UserService.PP_PATH + username + '.jpg', file.buffer, (err) => {
             if (err)
