@@ -20,12 +20,12 @@ import { onBeforeMount } from "vue";
 	hide joined channels in the getAllChannels panel
 	moderation front -> todo : basic request tests
 	channel history
+	private conversations
 
 	- clickable profile on user -> opens 	OPTIONS PANEL	:	dm, profile page, add to friends, remove from friend block user, unblock user
 											ADVANCED PANEL	:	promote/demote/ban/kick/unban
 	- v-if (blocked) -> display red block icon
 	- v-if display only available options (don t block if already blocked etc)
-
 */
 
 export default defineComponent({
@@ -92,21 +92,18 @@ export default defineComponent({
 		{
 			await this.stopReceiving();
 		},
-
-		// joinChannel()
-		// {
-		// 	const chan_id = 1;
-		// 	const join_dto = {chanId: chan_id, uid: this.id, password : ''};
-		// 	console.log('join DTO', join_dto);
-		// 	this.chatSocket.emit('join', join_dto);
-		// },
-		// leaveChannel()
-		// {
-		// 	const chan_id = 1;
-		// 	const join_dto = {chanId: chan_id, uid: this.id, password : ''};
-		// 	console.log('join DTO', join_dto);
-		// 	this.chatSocket.emit('leave', join_dto);
-		// },
+		joinChannel(id : any)
+		{
+			const join_dto = {chanId: id, uid: this.id, password : ''};
+			console.log('join DTO', join_dto);
+			this.chatSocket.emit('join', join_dto);
+		},
+		leaveChannel(id : any)
+		{
+			const leave_dto = {chanId: id, uid: this.id, password : ''};
+			console.log('leave DTO', leave_dto);
+			this.chatSocket.emit('leave', leave_dto);
+		},
 	},
     computed: {
 		user() {return this.$store.state.userInfos},
@@ -256,7 +253,6 @@ export default defineComponent({
 										Channels list
 									</v-card-title>
 									<v-divider></v-divider>
-										<v-list-item-group>
 											<v-list-item v-for="channel in available_channels" :key="channel.id">
 												<v-card
 												id="Channelcard"
@@ -286,7 +282,6 @@ export default defineComponent({
 												</div>
 												</v-card>
 											</v-list-item>
-										</v-list-item-group>
 									</v-card>
 								</v-dialog>
 							</v-card>

@@ -87,6 +87,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         chan.users.push(user);
         this.channelRepository.save(chan);
         this.logger.debug('call join');
+        console.log(chan);
         client.emit('joined_channel', chan);
     }
 
@@ -239,6 +240,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     @SubscribeMessage('leave')
     async leaveChannel( @MessageBody() dto: JoinChannelDTO,
                         @ConnectedSocket() client: Socket) {
+        console.log('LEAVE');
         this.verifyId(client, dto.uid);
         const chan = await this.channelRepository.findOneBy({id: dto.chanId});
         client.emit("/" + chan.id + ":You left this channel");

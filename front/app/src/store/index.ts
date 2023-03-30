@@ -160,20 +160,6 @@ const store = createStore({
         })
       })
     },
-    // getUserChannels({commit}) {
-    //   if (!localStorage.getItem('id'))
-    //     return ;
-    //   return new Promise((resolve, reject) => {
-    //     instance.get("/channel/getAll")
-    //     .then((response: any) => {
-    //       commit('getAllChannels', response.data)
-    //       resolve(response)
-    //     })
-    //     .catch((error: any) => {
-    //       reject(error)
-    //     }ter)
-    //   })
-    // },
     selectChannel({ commit }, channel) {
       commit("setCurrentChannel", channel);
     },
@@ -199,14 +185,11 @@ const store = createStore({
     getAllChannelsStore()
     {
       console.log('opening front socket.on ');
-      chatSocket.emit('getAll');
-
-      //chatSocket.off('sendAllChannels');
+      chatSocket.emit('getAll');;
     },
     stopReceiving()
     {
       chatSocket.off('displayMessage');
-      
     }
   },
   getters: {
