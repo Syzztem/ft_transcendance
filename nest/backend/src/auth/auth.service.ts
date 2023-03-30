@@ -70,10 +70,10 @@ export class AuthService {
 	  }	
 
 	  async isTwoFactorAuthenticationCodeValid(twoFactorAuthenticationCode: string, id: number) {
-		const user = await this.usersService.getUserById(id)
+		const secret = await this.usersService.get2FAsecret(id)
 		return authenticator.verify({
           token: twoFactorAuthenticationCode,
-          secret: user.twoFactorAuthenticationSecret,
+          secret: secret
         });
       }
 

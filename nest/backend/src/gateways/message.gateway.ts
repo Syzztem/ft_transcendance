@@ -275,12 +275,17 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
             },
             relations: {
                 sender:     true,
+                receiver:   true,
             },
-            where: {sender: {id: id}},
-            order: {receiver: {username: "DESC"}, timestamp: "DESC"},
-        })
+            where: {sender: {id: id}, receiver:{id: id}},
+            order: {
+                sender: {id: "DESC"},
+                receiver: {id: "DESC"},
+                timestamp: "DESC"
+            }
+        });
         this.logger.log('message sent');
-        client.emit('displayMessage', messages);
+        client.emit('getDM', this.prepareDMs(messages, id));
         
     }
 
@@ -395,4 +400,31 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         this.logger.log('Client disconnected from chat gateway');
     }
 
+    /*
+    ** Renvoie la liste de tous les messages prives d'un utilisateur classes par conversation, 
+    ** puis par date
+    */
+    private prepareDMs(messages: FriendMessage[], sender: number) : FriendMessage[]{
+        const sent = messages.filter(message => message.sender.id == sender);
+        const recv = messages.filter(message => message.sender.id != sender);
+        let out: FriendMessage[] = new FriendMessage[0]();
+        let j = 0;
+        let i = 0;
+        while (j < recv.length) {
+        let receiver = sent[i].receiver.id;
+            for (; i < sent.length; ++i) {
+                for (; recv[j].timestamp > sent[i].timestamp && j < sent.length; ++j) {
+                    if (recv[j].sender.id != receiver) break;
+                    out.push(recv[j]);
+                }
+                if (sent[i].receiver.id != receiver) break ;
+                out.push(sent[i]);
+            }
+            for (; j < sent.length; ++j) {
+                if (recv[j].sender.id != receiver) break;
+                out.push(recv[j]);
+            }
+            return out;
+        }
+    }
 }

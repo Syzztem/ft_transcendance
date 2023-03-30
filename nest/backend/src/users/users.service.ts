@@ -116,6 +116,14 @@ export class UserService {
         return HttpStatus.OK;
     }
 
+    async get2FAsecret(id: number) : Promise<string> {
+        const user = await this.userRepository.findOne({
+            select: {twoFactorAuthenticationSecret: true},
+            where: {id: id}
+        });
+        return user.twoFactorAuthenticationSecret;
+    }
+
     async sendDM(sendDMDTO: SendDMDTO) : Promise<number> {
         const user1 = await this.userRepository.findOneBy({id: sendDMDTO.id1});
         const user2 = await this.userRepository.findOneBy({id: sendDMDTO.id2});

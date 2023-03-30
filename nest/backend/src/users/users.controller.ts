@@ -6,17 +6,19 @@ import { UserService } from './users.service';
 import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import FindUserDTO from './dto/find-user.dto';
 
 @Controller('user')
 export class UsersController {
     constructor(private userService: UserService) {}
+
     @UseGuards(JwtAuthGuard)
-    @Get("id/:id")
-    async getUser(@Param('id') id: number,
+    @Get("id")
+    async getUser(@Body() dto: FindUserDTO,
                   @Response() res: any) : Promise<User> {
-        const user = await this.userService.getUserById(id);
+        const user = await this.userService.getUserById(dto);
         if (!user) return res.status(HttpStatus.NOT_FOUND).send();
-        return res.status(HttpStatus.OK).send({ rank: user.rank, wins: user.wins, losses: user.losses, level: user.level, id: user.id, username: user.username, games: user.games });
+        return res.status(HttpStatus.OK).send(user);
     }
 
     @UseGuards(JwtAuthGuard)
