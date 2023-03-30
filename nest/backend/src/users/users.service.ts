@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import CreateUserDTO from 'src/users/dto/create-user.dto';
 import FindUserDTO from 'src/users/dto/find-user.dto';
@@ -7,7 +7,6 @@ import SendDMDTO from 'src/dto/send-dm.dto';
 import { FriendMessage } from 'src/database/entities/FriendMessage';
 import { User } from 'src/database/entities/User';
 import { Repository } from 'typeorm';
-import { authenticator } from 'otplib';
 import * as fs from 'fs';
 
 @Injectable()
@@ -53,13 +52,26 @@ export class UserService {
         });
       }
 
-    async getUserById(id: number): Promise<User> {
+    async getUserById(dto: FindUserDTO): Promise<User> {
         return this.userRepository.findOne({
-            relations: {
-                games: true,
-                games2: true
+            select : {
+                username: dto.username,
+                login42: dto.login42,
+                email: dto.email,
+                profilePic: dto.profilePic,
+                rank: dto.rank,
+                wins: dto.winslosses,
+                losses: dto.winslosses,
+                level: dto.level,
+                friends: dto.friends
             },
-            where: {id: id}
+            relations: {
+                channels: dto.channels,
+                games: dto.games,
+                games2: dto.games,
+                friends: dto.friends
+            },
+            where: {id: dto.id}
         });
     }
 
@@ -81,20 +93,17 @@ export class UserService {
     }
 
     async changeUsername(dto: ChangeUserDTO): Promise<number> {
-        const user = await this.getUserById(dto.id)
+        const user = await this.userRepository.findOneBy({id: dto.id});
         if (!user)
             return HttpStatus.NOT_FOUND;
-        console.log('dto: ', dto)
-        if (await this.userRepository.count({ where: { username: dto.username } }) != 0)
+        if (await this.userRepository.count({ where: { username: dto.username } }) != 0
+        || dto.username.length > 8)
             return HttpStatus.CONFLICT;
         const oldUsername = user.username
         user.username = dto.username;
-        if (dto.username.length <= 8) {
-            const oldPath = UserService.PP_PATH + oldUsername + '.jpg';
-            const newPath = UserService.PP_PATH + dto.username + '.jpg';
-            fs.rename(oldPath, newPath, (err) => {
-            })
-        }
+        const oldPath = UserService.PP_PATH + oldUsername + '.jpg';
+        const newPath = UserService.PP_PATH + dto.username + '.jpg';
+        fs.rename(oldPath, newPath, (err) => {console.log(err); return 404});
         await this.userRepository.save(user)
         return HttpStatus.OK;
     }
@@ -105,6 +114,14 @@ export class UserService {
             return HttpStatus.NOT_FOUND;
         this.userRepository.delete(id);
         return HttpStatus.OK;
+    }
+
+    async get2FAsecret(id: number) : Promise<string> {
+        const user = await this.userRepository.findOne({
+            select: {twoFactorAuthenticationSecret: true},
+            where: {id: id}
+        });
+        return user.twoFactorAuthenticationSecret;
     }
 
     async sendDM(sendDMDTO: SendDMDTO) : Promise<number> {
