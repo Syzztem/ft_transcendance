@@ -158,7 +158,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     @SubscribeMessage('getmsg')
     async getMessagePage(   @MessageBody() dto: GetMessageDTO,
                             @ConnectedSocket() client: Socket) {
-        if (!client.in(dto.channelId.toString()))
+        if (!client.in(dto.id.toString()))
             throw new WsException("Nice try");
         const messages = await this.messageRepository.find({
             select: {
@@ -169,7 +169,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
             relations: {
                 sender:     true,
             },
-            where: {channel: {id: dto.channelId}},
+            where: {channel: {id: dto.id}},
             order: {id: "DESC"},
             take: 50,
             skip: 50 * dto.page
@@ -261,6 +261,27 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         this.server.to(message.channel.id.toString()).emit("!" + id);
         this.messageRepository.delete(id)
         return HttpStatus.NO_CONTENT;
+    }
+
+    @SubscribeMessage('getDM')
+    async getDM(@MessageBody() id: number,
+                @ConnectedSocket() client: Socket) {
+        this.verifyId(client, id);
+        const messages = await this.usrmessageRepository.find({
+            select: {
+                id:         true,
+                content:    true,
+                timestamp:  true
+            },
+            relations: {
+                sender:     true,
+            },
+            where: {sender: {id: id}},
+            order: {receiver: {username: "DESC"}, timestamp: "DESC"},
+        })
+        this.logger.log('message sent');
+        client.emit('displayMessage', messages);
+        
     }
 
     @SubscribeMessage('sendDM')
