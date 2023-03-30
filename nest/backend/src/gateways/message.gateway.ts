@@ -424,7 +424,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
                 if (recv[j].sender.id != receiver) break;
                 out.push(recv[j]);
             }
-            return out;
         }
+        return out;
     }
 }
