@@ -33,6 +33,9 @@ export class User {
   @Column("int")
   level: number = 0;
 
+  @Column("int")
+  status: number = 0;
+
   @Column({nullable: true, type:'varchar'})
   profilePic: string;
 
