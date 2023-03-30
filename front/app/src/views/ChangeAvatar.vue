@@ -3,7 +3,7 @@
     <v-row justify="center">
       <v-card id="card" class="mt-6" color="transparent" height="700" width="300" flat>
         <div class="screen">
-          <v-card height="270" color="rgb(0, 0, 0, 0.5)">
+          <v-card id="profilepic">
             <v-row justify="center" class="mt-2">
               <div class="avatar">
                 <NiceAvatar v-if="ifRd" ref="niceAvatar" :size="size" :face-color="faceColor" :eye="eye" :eye-brow="eyeBrow" :ear="ear" :earring="earring" :mouth="mouth" :hair="hair" :hair-color="hairColor" :nose="nose" :glasses="glasses" :beard="beard" :beard-color="beardColor" :shirt="shirt" :shirt-color="shirtColor" :bg-color="bgColor" />
@@ -15,17 +15,17 @@
             <div class="options">
               <div class="buttons">
                 <v-row justify="center">
-                  <v-btn type="button" id="btn" class="mt-6" @click="random" height="120" width="300" color="rgb(0, 75, 255)">
+                  <v-btn type="button" id="btn" class="mt-6 btn" rounded @click="random" height="120" width="300">
                     Random
                   </v-btn>
                 </v-row>
                 <v-row justify="center">
-                  <v-btn type="button" id="btn" class="mt-6" onclick="document.getElementById('inpt').click()" height="120" width="300" color="rgb(0, 75, 255)">
+                  <v-btn type="button" id="btn" class="mt-6 btn" rounded onclick="document.getElementById('inpt').click()" height="120" width="300">
                     Upload
                   </v-btn>
                 </v-row>
                 <v-row justify="center">
-                  <v-btn type="button" id="btn" class="mt-6" @click="sendPic" height="120" width="300" color="rgb(0, 75, 255)">
+                  <v-btn type="button" id="btn" class="mt-6 btn" rounded @click="sendPic" height="120" width="300" >
                     Ok
                   </v-btn>
                 </v-row>
@@ -40,7 +40,7 @@
     </v-row>
 </v-container>
 </template>
-  
+
 <script lang="ts">
 import {
   EYES,
@@ -210,14 +210,15 @@ export default defineComponent({
   }
 })
 </script>
-  
-<style>
-#btn {
-  font-family: "pokemon";
-  font-size: 50px;
-  color: rgb(255, 200, 0);
-  text-shadow: 2px 2px 4px rgb(0, 4, 255), 0 0 0.5em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
+
+<style scoped>
+#profilepic {
+	border-radius: 600px;
+	background:			linear-gradient(180deg, rgba(13, 8, 110, 0) 0%, rgba(42, 42, 172, 0.596) 35%, rgb(173, 120, 243) 100%);
 }
+</style>
+
+<style>
 
 #btn:hover {
   color: rgb(255, 233, 0);
@@ -226,6 +227,6 @@ export default defineComponent({
 .cropper {
   height: 250px;
   width: 250px;
-  background: #DDD;
+  background: #ffffff;
 }
 </style>

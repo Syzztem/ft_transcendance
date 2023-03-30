@@ -11,51 +11,73 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-container>
-    <v-row class="mt-2">
-      <v-col class="d-flex justify-center" cols="12" id="col">
-        <v-btn router :to="'/hub'" class="btn" style="color: #FFC800; font-size: 300%;" rounded color="rgb(0, 15, 255, 0.5)" flat width="50vw" max-width="500" height="15vh" max-height="200" min-height="100">
-          <p class="p">
-            GAME
-          </p>
-        </v-btn>
-      </v-col>
-      <v-col class="d-flex justify-center mt-16" cols="12" id="col">
-        <v-btn router :to="'/chat'" class="btn" style="color: #FFC800; font-size: 300%;" rounded color="rgb(0, 15, 255, 0.5)" flat width="50vw" max-width="500" height="15vh" max-height="200" min-height="100">
-          <p class="p">
-            CHAT
-          </p>
-        </v-btn>
-      </v-col>
-      <v-col class="d-flex justify-center mt-16" cols="12" id="col">
-        <v-btn router :to="'/hall'" class="btn" style="color: #FFC800; font-size: 300%;" rounded color="rgb(0, 15, 255, 0.5)" flat width="50vw" max-width="500" height="15vh" max-height="200" min-height="100">
-          <p class="p">
-            HALL OF FAME
-          </p>
-        </v-btn>
-      </v-col>
-    </v-row>
-  </v-container>
-</template>
+	<v-container id="menu" class="justify-center">
+	  <v-row class="colmenu">
+		  <div class="btnSpacer"></div>
+		  <div class="btnContainer">
+			  <v-btn router :to="'/hub'" class="btn" rounded flat>
+			  <p class="p">
+				  GAME
+			  </p>
+			  </v-btn>
+			  <v-btn router :to="'/chat'" class="btn" rounded flat>
+					  <p class="p">
+					  CHAT
+					  </p>
+			  </v-btn>
+			  <v-btn router :to="'/hall'" class="btn" rounded flat>
+			  <p class="p">
+				  HALL OF FAME
+			  </p>
+			  </v-btn>
+		  </div>
+		  <div class="btnSpacer"></div>
+	  </v-row>
+	</v-container>
+  </template>
+
+<style scoped>
+
+.mainClass {
+	width: 50vw!important;
+}
+
+</style>
 
 <style>
 @import '~@/assets/fonts/stylesheet.css';
 
-html, body {
-  overflow: hidden !important;
+.btnSpacer {
+	flex-grow:			1;
 }
 
-.btn {
-  font-family: "pokemon";
-  text-shadow: 2px 2px 4px rgb(0, 4, 255), 0 0 1em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
+.btnContainer {
+	display: 			flex;
+	flex-direction:		column;
+	justify-content:	space-between;
+	align-items: 		stretch;
+	gap: 				20px;
+	flex-grow:			1;
 }
 
-.btn:hover .p {
-  color: rgb(255, 233, 0);
+.colmenu {
+	display:			flex;
+	flex-direction:		column;
+	justify-content:	center;
+	align-items: 		stretch;
+	flex-basis: 		1!important;
+	flex-grow: 			1!important;
+	gap: 				10px;
+	margin: 			0px!important;
 }
 
-.p:hover {
-  color: rgb(255, 233, 0);
+#menu {
+	display:			flex;
+	flex-direction:		row;
+	justify-content:	center;
+	align-items:		stretch;
+	width:				36vw!important;
+	padding:			0px;
+	margin:				0px;
 }
-
 </style>

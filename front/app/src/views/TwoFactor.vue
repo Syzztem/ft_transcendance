@@ -1,13 +1,14 @@
 <template>
-  <v-container v-if="!isotp">
-    <v-card>
+  <v-container class="qrcontainer" v-if="!isotp">
+    <v-card class="qrcard justify-center" id="LighterCard">
       <img :src="qrcode">
       <h3>
         Code :
       </h3>
       <div style="display: flex; flex-direction: row;">
-        <input type="text" ref="otpInput" v-model="otp" required minlength="6" maxlength="6" size="10" placeholder="2FA token" @keydown.enter="validate">
-      </div>
+        <v-text-field v-model="otp" hide-details density="compact" required minlength="6" maxlength="6" size="10" placeholder="2FA token" @keydown.enter="validate">
+		</v-text-field>
+		</div>
     </v-card>
   </v-container>
   <v-container v-else>
@@ -34,14 +35,14 @@ export default defineComponent({
     }
   },
   async mounted() {
-    await this.$store.dispatch('get2fa') 
-    this.isotp = this.$store.state.userInfos.isotp 
-    if (!this.isotp) { 
-       await this.$store.dispatch('qrcode') 
-       QRCode.toDataURL(this.$store.state.userInfos.qrcode, (err, imageUrl) => { 
-         this.qrcode = imageUrl 
-       }) 
-     } 
+    await this.$store.dispatch('get2fa')
+    this.isotp = this.$store.state.userInfos.isotp
+    if (!this.isotp) {
+       await this.$store.dispatch('qrcode')
+       QRCode.toDataURL(this.$store.state.userInfos.qrcode, (err, imageUrl) => {
+         this.qrcode = imageUrl
+       })
+     }
   },
   methods: {
     async validate() {
@@ -61,4 +62,24 @@ export default defineComponent({
 </script>
 
 <style scoped>
+
+#LighterCard {
+	background:	linear-gradient(0deg,rgba(53, 45, 161, 0.747) 0%, rgba(15, 0, 83, 0.89) 30%);
+	border-radius: 10px;
+	color:aliceblue;
+	display: flex;
+	flex-direction: column;
+	backdrop-filter: blur(3px);
+	align-items: center;
+
+}
+.qrcontainer {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.qrcard {
+	width: 196px;
+}
+
 </style>

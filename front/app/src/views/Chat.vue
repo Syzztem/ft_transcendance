@@ -32,7 +32,7 @@ export default defineComponent({
 	data() {
 		return {
 			id: Number(localStorage.getItem('id')),
-			options: 
+			options:
 			[
 				{ title: 'Send DM' },
 				{ title: 'profile page' },
@@ -76,7 +76,7 @@ export default defineComponent({
 			this.allchans_dialog = true;
 		},
 		sendMessage(newMessage : string)
-		{		
+		{
 			const message_dto = {
 				message : newMessage,
 				channelId : this.current_channel.id,
@@ -130,266 +130,337 @@ export default defineComponent({
 </script>
 
 <template>
-	<v-layout>
-		<v-container fluid>
-			<v-main>
-				<!-- Users -->
-				<v-row class="mt-2 mb-2">
-					<v-col>
-						<v-card id="Users" align="center" height="80vh" width="17vw" class="rounded-xl">
-							<v-card-title class="Userstitle">
-								Users
-							</v-card-title>
-							<v-card height="75vh" id="Userscontent">
-							<ul v-if="current_channel">
-								<li>
-									<v-list-item v-for="user in current_channel.users">
-										<v-card id="Usercard" class="d-flex align-center justify-center mt-4">
-											<v-badge class="mt-2" dot location="top right" color="green"> 
-											<v-badge location="bottom end" class="mb-2">
-												<template v-slot:badge>
-													<img src="@/assets/sens_interdit.webp"/>
-												</template>
-												<v-avatar size="60">
-													<img
-													src="https://cdn.vuetifyjs.com/images/john.jpg"
-													alt="John"
-													height="60"
-													>
-												</v-avatar>
-											</v-badge>
-											</v-badge>
-											<v-card-text>
-												{{user.username}}
-												<v-menu activator="parent">
-													<v-list>
-														<v-list-item v-for="(item, index) in options" :key="index" :value="index">
-															<v-list-item-title>
-																{{ item.title }}
-															</v-list-item-title>
-														</v-list-item>
-													</v-list>
-												</v-menu>
-											</v-card-text>
-										</v-card>
-									</v-list-item>
-								</li>
-							</ul>
-							</v-card>
-						</v-card>
-					</v-col>
-					<v-spacer></v-spacer>
-
-					<!-- Messages -->
-					<v-col>
-						<v-card :overflow-hidden="false" height="89vh" width="58vw" class="d-flex" align="center" color="transparent" bordered="0" flat>
-							<v-row id = "RowMessagebox">
-								<v-card id="Messagebox" class="rounded-xl mb-4" color="rgb(0, 0, 51, 0.87)" height="75vh" width="58vw">
-									<v-card-title id="Messageboxtitle" class="align-item-center " v-if="current_channel">
-										{{current_channel.name}}
-									</v-card-title>
-									<v-card-text class="Messagesscroller" align="left">
-										<ul v-if="current_channel">
-											<div v-for="message in current_channel.messages">
-												<li v-if="message.content != ''">
-													{{message.sender.username}}: {{message.content}}
-												</li>
-											</div>
-										</ul>
-									</v-card-text>
-								</v-card>
-								<v-row justify="center">
-									<v-card id="Inputbox" class="d-flex justify-center align-center rounded-xl" height="10vh" width="50vw" elevation="8">
-										<v-text-field v-model="newMessage" hide-details variant="plain" id="Inputfield" class = "ml-5" autofocus >
-										</v-text-field>
-										<v-card-actions>
-											<v-btn id="Btnsend" height="5vh" width="7vw"
-											@click="sendMessage(newMessage)"	
+	<v-container>
+	<!-- Users -->
+		<v-row id="MainRow">
+			<v-col class="Column" align="center" width="100%">
+				<v-card id="CardContent">
+					<v-card-title class="CardTitle">
+						Users
+					</v-card-title>
+					<ul v-if="current_channel">
+						<li>
+							<v-list-item v-for="user in current_channel.users">
+								<v-card id="Usercard" class="d-flex align-center justify-center mt-4">
+									<v-badge class="mt-2" dot location="top right" color="green">
+									<v-badge location="bottom end" class="mb-2">
+										<template v-slot:badge>
+											<img src="@/assets/sens_interdit.webp"/>
+										</template>
+										<v-avatar size="60">
+											<img
+											src="https://cdn.vuetifyjs.com/images/john.jpg"
+											alt="John"
+											height="60"
 											>
-												Send
-											</v-btn>
-										</v-card-actions>
-									</v-card>
-								</v-row>
-							</v-row>
-						</v-card>
-					</v-col>
-					<v-spacer></v-spacer>
-
-					<!-- Channels -->
-					<v-col>
-						<v-card id="Channels" class=" rounded-xl" align="center" height="80vh" width="17vw" >
-							<v-card-title class ="Channelstitle">
-								channels
-							</v-card-title>
-							<v-card id="Channelcreate" class="justify-center">
-								<v-btn id="Btnchannel" class="mt-2 mr-4 mb-2" @click="dialog = true">
-									+
-								</v-btn>
-								<v-dialog v-model="dialog" max-width="500px">
-								<v-card>
-									<v-card-title>
-										Create a New Channel
-									</v-card-title>
+										</v-avatar>
+									</v-badge>
+									</v-badge>
 									<v-card-text>
-										<v-text-field label="Channel Name" v-model="newChannel.name"></v-text-field>
-										<v-text-field label="Password" v-model="newChannel.password"></v-text-field>
+										{{user.username}}
+										<v-menu activator="parent">
+											<v-list id="LighterCard">
+												<v-list-item v-for="(item, index) in options" :key="index" :value="index">
+													<v-list-item-title>
+														{{ item.title }}
+													</v-list-item-title>
+												</v-list-item>
+											</v-list>
+										</v-menu>
 									</v-card-text>
-									<v-card-actions>
-									<v-spacer/>
-										<v-btn color="error" text @click="dialog = false">Cancel</v-btn>
-										<v-btn color="primary" @click="createChannel(newChannel)">Create</v-btn>
-									</v-card-actions>
 								</v-card>
-								</v-dialog>
-								<v-btn id="Btnchannel" class="mt-2 mb-2"
-									@click="getAllChannels"
-								>
-									🔎
-								</v-btn>
-								<v-dialog v-model="allchans_dialog" max-width="500">
-								<v-card>
-									<v-card-title class="text-h4 font-weight-bold text-center">
-										Channels list
-									</v-card-title>
-									<v-divider></v-divider>
-											<v-list-item v-for="channel in available_channels" :key="channel.id">
-												<v-card
-												id="Channelcard"
-												class="d-flex flex-column align-center justify-center mt-4 mx-4 pa-4"
-												height="auto"
-												elevation="2"
-												>
-												<div class="d-flex align-center justify-center mb-2">
-													<span class="font-weight-bold">{{channel.name}}</span>
-												</div>
-												<div class="d-flex align-center justify-center mb-2">
-													<v-btn color="primary" class="mr-2" @click="joinChannel(channel.id)">
-														Join
-													</v-btn>
-												</div>
-												<div class="d-flex align-center justify-center">
-													<v-text-field
-													class="mx-2"
-													label="Password"
-													type="password"
-													single-line
-													dense
-													hide-details
-													outlined
-													style="width: 150px;"
-													></v-text-field>
-												</div>
-												</v-card>
-											</v-list-item>
-									</v-card>
-								</v-dialog>
-							</v-card>
-							<v-card id="Channelscontent" height="65vh" v-if="joined_channels">
-								<v-list-item v-for="channel in joined_channels" :key="channel.id">
-									<v-card 
-										id="Channelcard" 
-										class="d-flex align-center justify-center mt-4" 
-										height="5vh"
-										@click="selectChannel(channel)"
-										v-bind:class="{ 'highlight': current_channel && current_channel.id == channel.id}"
-									>
-										{{channel.name}}
-									</v-card>
-								</v-list-item>
-							</v-card>
-							<v-card id="Channelactions">
-								<v-card-actions class="justify-center">
-									<v-btn
-										id="Btnchannel"
-										@click="rmChannel(current_channel.id)"
-									>
-										leave channel
-									</v-btn>
-								</v-card-actions>
-							</v-card>
-						</v-card>
-					</v-col>
+							</v-list-item>
+						</li>
+					</ul>
+				</v-card>
+			</v-col>
+
+			<!-- Messages -->
+			<v-col id="ChatColumn">
+				<v-card id="Messagebox" width="100%">
+					<v-card-title class="CardTitle" id="ChanTitle" v-if="current_channel">
+						{{current_channel.name}}
+					</v-card-title>
+					<v-card-text class="Messagesscroller" height="100%" align="left">
+						<ul v-if="current_channel">
+							<div v-for="message in current_channel.messages">
+								<li id="messContent" v-if="message.content != ''">
+									<span id="username">{{message.sender.username}}</span>: {{message.content}}
+								</li>
+							</div>
+						</ul>
+					</v-card-text>
+				</v-card>
+				<v-row justify="center">
+					<v-card id="Inputbox" class="d-flex" elevation="8">
+						<v-text-field v-model="newMessage" hide-details density="compact" id="Inputfield" autofocus>
+						</v-text-field>
+						<v-card-actions>
+							<v-btn id="Btnsend"
+							@click="sendMessage(newMessage)"
+							>
+								Send
+							</v-btn>
+						</v-card-actions>
+					</v-card>
 				</v-row>
-			</v-main>
-		</v-container>
-	</v-layout>
+			</v-col>
+
+			<!-- Channels -->
+			<v-col class="Column" align="center" width="100%">
+				<v-card id="CardContent" v-if="joined_channels">
+					<v-card-title class ="CardTitle">
+						channels
+					</v-card-title>
+					<v-card id="Channelcreate" class="justify-center">
+						<v-btn id="Btnchannel" class="mt-2 mr-4 mb-2" @click="dialog = true">
+							<p class="alttxt">
+								Add
+							</p>
+							<img class="alticon" src="@/assets/add.png" />
+						</v-btn>
+						<v-dialog v-model="dialog" max-width="500px">
+						<v-card id="Dialogbox">
+							<v-card-title>
+								Create a New Channel
+							</v-card-title>
+							<v-card-text>
+								<v-text-field label="Channel Name" v-model="newChannel.name"></v-text-field>
+								<v-text-field label="Password" v-model="newChannel.password"></v-text-field>
+							</v-card-text>
+							<v-card-actions>
+							<v-spacer/>
+								<v-btn color="error" text @click="dialog = false">Cancel</v-btn>
+								<v-btn color="primary" @click="createChannel(newChannel)">Create</v-btn>
+							</v-card-actions>
+						</v-card>
+						</v-dialog>
+						<v-btn id="Btnchannel" class="mt-2 mb-2"
+							@click="getAllChannels"
+						>
+							<p class="alttxt">
+								Search
+							</p>
+							<img class="alticon" src="@/assets/magnifying-glass.png" />
+						</v-btn>
+						<v-dialog v-model="allchans_dialog" max-width="500">
+						<v-card id="Dialogbox">
+							<v-card-title class="ChanlistTitle text-center">
+								Channels list
+							</v-card-title>
+							<v-list-item v-for="channel in available_channels" :key="channel.id">
+								<v-card
+								id="LighterCard"
+								class="d-flex flex-column align-center justify-center mt-4 mx-4 pa-4"
+								height="auto"
+								elevation="2"
+								>
+								<div class="d-flex align-center justify-center mb-2">
+									<span class="font-weight-bold">{{channel.name}}</span>
+								</div>
+								<div class="d-flex align-center justify-center mb-2">
+									<v-btn color="primary" class="mr-2" @click="joinChannel(channel.id)">
+										Join
+									</v-btn>
+								</div>
+								<div class="d-flex align-center justify-center">
+									<v-text-field
+									class="mx-2"
+									label="Password"
+									type="password"
+									single-line
+									dense
+									hide-details
+									outlined
+									style="width: 150px;"
+									></v-text-field>
+								</div>
+								</v-card>
+							</v-list-item>
+							</v-card>
+						</v-dialog>
+					</v-card>
+					<v-card id="ChanContent" v-if="joined_channels">
+						<v-list-item v-for="channel in joined_channels" :key="channel.id">
+							<v-card
+								id="Channelcard"
+								class="d-flex align-center justify-center mt-4"
+								height="5vh"
+								@click="selectChannel(channel)"
+								v-bind:class="{ 'highlight': current_channel && current_channel.id == channel.id}"
+							>
+								{{channel.name}}
+							</v-card>
+						</v-list-item>
+					</v-card>
+					<v-card id="Channelactions">
+						<v-card-actions class="justify-center">
+							<v-btn
+								class="altbtn"
+								id="Btnchannel"
+								@click="rmChannel(current_channel.id)"
+							>
+								<p class="alttxt">
+								leave channel
+								</p>
+								<img class="alticon" src="@/assets/fleche-droite.png" />
+							</v-btn>
+						</v-card-actions>
+					</v-card>
+				</v-card>
+			</v-col>
+		</v-row>
+	</v-container>
 </template>
 
+<style scoped>
+.v-container {
+	max-width: 			none;
+	padding:			0px;
+	display:			flex;
+}
 
+.ChanlistTitle {
+	font-family: 		"pokemon"!important;
+	color:				rgb(255, 200, 0);
+	text-shadow:		0px 0px 3px rgb(5, 6, 105);
+	font-size:			2em;
+	letter-spacing: 	2px;
+	padding-top: 20px;
+	padding-bottom: 0px;
+}
+
+</style>
 
 <style>
 
-#Users {
-	background-color:	rgb(0, 0, 128);
-	font-family:		"Pokemon";
-	overflow:			hidden!important;
-	color:				rgb(255, 200, 0);
-	text-shadow:		2px 2px 4px rgb(0, 4, 255), 0 0 1em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
-	scrollbar-color:	gold;
-	scrollbar-width :	auto;
+#MainRow {
+	margin-top:			3%!important;
+	margin-left:		5%!important;
+	margin-bottom:		3%;
+	margin-right:		5%;
+	display:			flex;
+	flex-direction:		row;
+	gap: 				3%;
+	flex-grow:			1;
+	flex-basis:			0;
 }
 
-#Userscontent
+.Column {
+	flex-grow:			1;
+	overflow: 			hidden!important;
+}
+
+#ChatColumn {
+	display:			flex;
+	flex-direction:		column;
+	gap:				20px;
+	flex-grow:			5;
+	overflow: 			hidden!important;
+}
+
+#ChanContent {
+	background-color:	transparent;
+	box-shadow:			none;
+}
+
+#CardContent
 {
-	background-color:	rgb(0, 0, 128);
+	background:			linear-gradient(0deg, rgba(140, 0, 255, 0.479) 0%, rgb(32, 32, 134) 7%, rgb(29 25 94) 13%, rgb(26 26 122 / 93%) 35%, rgb(55 53 155 / 71%) 100%);
 	overflow:			auto;
+	display:			flex;
+	flex-direction:		column;
+	backdrop-filter: 	blur(4px);
+	height:				100%;
+	border-bottom:		solid 6px rgba(218, 154, 255, 0.74);
+	border-radius:		22px 22px 10px 10px;
 }
 
 #Usercard
 {
-	background-color:	#4f60c1;
+	background-color:	rgb(55 53 155 / 71%);
 	color:				rgb(255, 200, 0);
 }
 
-.Userstitle
+.CardTitle
 {
-	background-color:	#4f60c1;
 	font-family:		"Pokemon";
-	color:				rgb(255, 200, 0);
-	text-shadow:		2px 2px 4px rgb(0, 4, 255), 0 0 1em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
+	height:				35px!important;
+	min-height:			35px!important;
+	flex-shrink: 0;
+	flex-grow: 1;
+	flex-basis: 0;
+	letter-spacing:		1.5px!important;
+	color:				#ffae00;
+	text-shadow:		0px 0px 3px rgb(5, 6, 105);
+	background:			linear-gradient(180deg, rgb(29 25 94) 0%, rgb(30, 30, 126) 30%, rgba(55, 53, 155, 0) 100%);
 }
 
-#RowMessagebox
+#ChanTitle {
+	text-align:			center;
+	height:				35px!important;
+	min-height:			35px!important;
+}
+
+#Dialogbox
 {
-	margin: 0;
+	background:			linear-gradient(0deg, rgb(33, 0, 87) 0%, rgba(55, 26, 122, 0.93) 35%, rgba(55, 43, 170, 0.555) 100%);
+	backdrop-filter: 	blur(6px);
+	border-radius:		10px 10px 10px 10px;
+	border-bottom:		solid 6px rgba(151, 88, 187, 0.74);
+	overflow:			auto!important;
+	font-family:		"pixel";
+	color:				rgb(212, 211, 221);
+}
+
+.Messagesscroller {
+	flex-direction:		column-reverse!important;
+	flex-grow:			1;
+	flex-basis:			0!important;
+	padding-left:		20px!important;
+	display:			flex;
+	overflow-x:			auto;
 }
 
 #Messagebox
 {
-	background-color:	moccasin;
+	background:			linear-gradient(0deg, rgb(29 25 94) 0%, rgb(26 26 122 / 93%) 35%, rgb(55 53 155 / 71%) 100%);
+	backdrop-filter: 	blur(4px);
+	border-radius:		22px 22px 10px 10px;
+	height:				100%;
+	flex-grow:			2;
+	display:			flex;
+	flex-direction: 	column;
+	justify-content:	stretch;
+	border-bottom: 		solid 6px white;
 	overflow:			hidden!important;
 	font-family:		"Pokemon";
 	color:				rgb(255, 200, 0);
 	text-shadow:		2px 2px 4px rgb(0, 4, 255), 0 0 1em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
 }
 
-#Messageboxtitle
-{
-	height:				5vh;
-	background-color:	rgb(0, 0, 128);
-	text-align:			inherit;
-	font-family:		"Pokemon";
-	color:				rgb(255, 200, 0);
-	text-shadow:		2px 2px 4px rgb(0, 4, 255), 0 0 1em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
-}
-
-.Messagesscroller {
-	height:				70vh;
-	display:			flex;
-	overflow:			auto;
-	flex-direction:		column-reverse;
-}
-
 #Inputbox
 {
-	background-color:	#4f60c1;
+	background:			linear-gradient(180deg, rgb(45, 40, 138) 0%, rgba(70, 68, 167, 0.788) 100%);
+	flex-grow: 			1;
+	display: 			flex;
+	backdrop-filter:	blur(4px);
+	border-radius:		10px;
+	flex-direction:		row;
+	align-items:		center;
+	gap : 				5px;
+	margin: 12px;
 }
 
 #Inputfield
 {
 	background-color:	rgb(255, 255, 255);
-	font-family: 		"monospace";
+	font-family: 		"pixel";
+	letter-spacing: 	0.7px;
+	border-radius:		5px;
+	flex-grow:			1;
+	font-size:			0.7em;
+	margin: 12px;
 	color:  			black;
 }
 
@@ -397,63 +468,80 @@ export default defineComponent({
 {
 	background-color:	rgb(0, 0, 128);
 	font-family:		"Pokemon";
+	width:				60px;
+	height:				40px;
+	flex-grow:			0;
+	flex-basis:			0;
 	color:				rgb(255, 200, 0);
 	text-shadow:		2px 2px 4px rgb(0, 4, 255), 0 0 1em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
 }
 
 #Btnchannel
 {
-	background-color:	rgb(255, 200, 0);
+	background:			linear-gradient(180deg, rgb(255, 189, 89) 0%, rgb(221, 151, 0) 100%);
 	font-family:		"Pokemon";
-	color:				black
-}
-
-#Channels
-{
-	background-color:	#4f60c1;
-	font-family:		"Pokemon";
-	overflow: 			hidden!important;
-	color:				rgb(255, 200, 0);
-	text-shadow:		2px 2px 4px rgb(0, 4, 255), 0 0 1em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
-}
-
-.Channelstitle
-{
-	background-color: #4f60c1;
-	font-family: 		"Pokemon";
-	color:				 rgb(255, 200, 0);
-	text-shadow: 		2px 2px 4px rgb(0, 4, 255), 0 0 1em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
+	color:				rgb(11, 45, 95);
 }
 
 #Channelcard
 {
-    background-color: #4f60c1;
-    color: #ffd483;
-}
-
-#Channelscontent
-{
-	background-color:	rgb(0, 0, 128);
+    background-color:	rgb(76, 75, 177);
 	font-family:		"Pokemon";
-	color:				rgb(255, 200, 0);
-	text-shadow:		2px 2px 4px rgb(0, 4, 255), 0 0 1em rgb(0, 0, 0), 0 0 0.2em rgb(2, 175, 255);
-	overflow:			auto;
+    color:				#ffce74;
 }
 
 #Channelcreate
 {
-	background-color: #283aa3;
+	background-color: 	transparent;
 }
 
 #Channelactions
 {
-	background-color: #283aa3;
+	width: 100%;
+	background-color:	#16268000;
+	position: fixed;
+	bottom: 0;
+	left: 0;
 }
 
 .highlight {
-    color:				#f1c23b!important;
-    background-color:	#283aa3!important;
+    color:				#ffae00!important;
+    background-color:	#162680!important;
 }
 
+.alticon {
+	display: 			none;
+}
+
+#messContent {
+	font-family: 		"pixel";
+	font-size: 			10px;
+	text-shadow: 		none;
+	color: 				rgb(255, 255, 255);
+}
+
+#username {
+	color: 				rgb(149, 151, 245);
+}
+
+@media(max-width: 1477px) {
+
+#Btnchannel {
+	padding: 			0px;
+	min-width: 			0px!important;
+}
+
+.alticon {
+	display: 			block;
+	width: 				35px!important;
+	height: 			35px!important;
+	filter: 			invert(7%) sepia(33%) saturate(7480%) hue-rotate(242deg) brightness(95%) contrast(101%);
+}
+
+.alttxt {
+	display: 			none;
+}
+
+}
 
 </style>
