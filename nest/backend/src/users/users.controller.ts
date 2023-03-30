@@ -6,6 +6,7 @@ import { UserService } from './users.service';
 import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Jwt2faAuthGuard } from 'src/auth/guards/jwt-2fa-auth.guard';
 
 @Controller('user')
 export class UsersController {
@@ -34,7 +35,7 @@ export class UsersController {
         const user = await this.userService.getUserById(req.user.sub)
         if (!user)
             return res.status(HttpStatus.NOT_FOUND).send();
-        return res.status(HttpStatus.OK).send({ rank: user.rank, wins: user.wins, losses: user.losses, level: user.level, id: user.id, username: user.username, games: user.games })
+        return res.send({ wins: user.wins, losses: user.losses, game: await this.userService.getUserGameHistory(req.user.sub)})
     }
 
     @UseGuards(JwtAuthGuard)

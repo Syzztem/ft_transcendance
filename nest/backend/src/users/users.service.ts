@@ -9,6 +9,8 @@ import { User } from 'src/database/entities/User';
 import { Repository } from 'typeorm';
 import { authenticator } from 'otplib';
 import * as fs from 'fs';
+import { Game } from 'src/database/entities/Game';
+import { Equal } from 'typeorm';
 
 @Injectable()
 export class UserService {
@@ -19,7 +21,8 @@ export class UserService {
 	}
 
     constructor(@InjectRepository(User) private userRepository: Repository<User>,
-                @InjectRepository(FriendMessage) private messageRepository: Repository<FriendMessage>) {}
+                @InjectRepository(FriendMessage) private messageRepository: Repository<FriendMessage>,
+                @InjectRepository(Game) private gameRepository: Repository<Game>) {}
 
     async getUserByName(username: string): Promise<User> {
         return this.userRepository.findOne({
@@ -286,5 +289,15 @@ export class UserService {
 
     async incrementLosses(userId: number) {
         this.userRepository.increment({id: userId}, 'losses', 1)
+    }
+
+    async getUserGameHistory(user: User){
+        let game: Game[] = await this.gameRepository.find({
+            where: [
+                { player1: Equal(user)},
+                { player2: Equal(user) },
+            ]
+        })
+        return game
     }
 }
