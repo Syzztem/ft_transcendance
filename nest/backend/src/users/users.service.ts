@@ -304,4 +304,12 @@ export class UserService {
     async incrementLosses(userId: number) {
         this.userRepository.increment({id: userId}, 'losses', 1)
     }
+
+    async getFriendList(userId: number){
+        return await this.userRepository.find({
+            select:{
+                friends:true,
+            }
+    })
+    }
 }

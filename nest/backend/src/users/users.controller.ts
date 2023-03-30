@@ -150,4 +150,10 @@ export class UsersController {
                      @Response() res: any) {
         res.status(await this.userService.delete(id)).send();
     }
+
+    @UseGuards(JwtAuthGuard)
+    @Get("friend/list")
+    async getFriendList(@Req() req, @Response() res){
+        await res.send(this.userService.getFriendList(req.user.sub))
+    }
 }
