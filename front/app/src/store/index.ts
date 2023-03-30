@@ -3,6 +3,9 @@ import { createStore } from 'vuex'
 import { AxiosInstance } from 'axios'
 import axios from 'axios'
 import { chatSocket } from '@/websocket'
+import { statusSocket } from '@/websocket'
+import IDmList from '@/models/IDmList'
+import IUser from '@/models/IUser'
 
 const instance : AxiosInstance = axios.create({
   baseURL: 'http://' +  process.env.VUE_APP_URL + ':3000'
@@ -19,41 +22,56 @@ let id: any = localStorage.getItem('id')
 
 const store = createStore({
   state: {
-    status: '',
     twoFactorAuthenticated: false,
     isLogin: true,
     userInfos: {
       profilePic: '',
       username: '',
       isotp: false,
-      qrcode: ''
+      qrcode: '',
+      friends: []
     },
     profileInfos: {
       profilePic: '',
-      username: ''
+      username: '',
+      id: '',
+      isFriend: false,
+      isBlock: false,
+      wins: 0,
+      losses: 0,
+      games: []
     },
     chat: {
       joined_channels:  [] as IChannel[],
-      current_channel:  null as IChannel | null,
-      blocked_users:    [],
+      current_channel:  null as IChannel | IDmList | null,
+      blocked_users: [],
       current_message:  "",
+      available_channels: [] as IChannel [],
+      dms_list: [{
+        name: "tata",
+        list: [{ content: 'test', receiver: [{username: 'tata', login42: 'toto', email: '', rank: 0, token: '', wins: 0, losses: 0, level: 0, profilePic: '', friends: [], blocked: [], channels: []}], sender: {username: 'tata', login42: 'tata', email: '', rank: 0, token: '', wins: 0, losses: 0, level: 0, profilePic: '', friends: [], blocked: [], channels: []}, id: 1, timestamp: '' }] }] as IDmList[],
+      avatars_list: new Map<string, string>()
     },
     game: {
       colorBackground: 'blue'
-    }
+    },
   },
   mutations: {
-    setStatus(state, status) {
-      state.status = status
-    },
     setisotp(state, infos) {
       state.userInfos.isotp = infos
+    },
+    setChatAvatars(state, userInfos) {
+      state.chat.avatars_list.set(userInfos.username, userInfos.avatar)
     },
     setqrcode(state, code) {
       state.userInfos.qrcode = code
     },
     profileInfos(state, profileInfos) {
       state.profileInfos.username = profileInfos.username
+      state.profileInfos.id = profileInfos.id
+    },
+    setPic(state, url) {
+      state.profileInfos.profilePic = url
     },
     profilePic(state, avatar) {
       state.userInfos.profilePic = avatar
@@ -62,6 +80,18 @@ const store = createStore({
       state.userInfos.username = userInfos.username
       state.twoFactorAuthenticated = userInfos.TwoFactorAuthenticated
     },
+    setIsFriend(state, infos) {
+      state.profileInfos.isFriend = infos
+    },
+    setIsBlock(state, infos) {
+      state.profileInfos.isBlock = infos
+    },
+    setStats(state, stats) {
+      state.profileInfos.wins = stats.wins
+      state.profileInfos.losses = stats.losses
+      state.profileInfos.games = stats.games
+    },
+    setStatus() {},
     username(state, username) {
       state.userInfos.username = username
     },
@@ -77,11 +107,15 @@ const store = createStore({
     },
     addChannel(state, newchan) {
       if (newchan) {
-        const { name, password, isPrivate, users } = newchan;
-        const newfront = { name, password, isPrivate, users, id: newchan.id, messages: [] };
-        console.log('new channel in front : ', newfront);
+
+        const { name, password, isPrivate, users, id, messages } = newchan;
+        console.log('messages in channel creation :', messages);
+        const newfront = { name, password, isPrivate, users, id: id, messages: [] };
         state.chat.joined_channels.push(newfront);
       }
+    },
+    addDM(state, dm) {
+
     },
     setCurrentChannel(state, channel) {
       state.chat.current_channel = channel;
@@ -95,19 +129,33 @@ const store = createStore({
     },
     joinChannel(state, id)
     {
-      chatSocket.emit('join', {chanId : 3, uid : 33, password : ''});
+      // chatSocket.emit('join', {chanId : 3, uid : 33, password : ''});
     },
     broadcast(state, message)
     {
       const {channel, sender, content} = message;
       const newMessage = {channel, sender, content};
       console.log(newMessage);
-      state.chat.current_channel?.messages.push(newMessage);
+      const targetChannel = state.chat.joined_channels.find(ch => ch.id === channel.id);
+      // Check if the target channel exists
+      if (targetChannel) {
+        // Push the new message to the target channel's messages array
+        targetChannel.messages.push(newMessage);
+      } else {
+        console.error(`Channel not found: ${channel}`);
+      }
+    },
+    getAllChannels(state, channels)
+    {
+      console.log("getallchannels in front :", channels)
+      state.chat.available_channels = channels;
+      console.log('' , channels);
     },
     setColorBackground(state, color) {
       state.game.colorBackground = color
     }
   },
+
   actions: {
     isLogin({ commit }) {
       console.log('isLogin: début');
@@ -131,7 +179,7 @@ const store = createStore({
       if (!localStorage.getItem('id'))
         return ;
       return new Promise((resolve, reject) => {
-        instance.get("/user/id/" + localStorage.getItem('id'))
+        instance.get("/user/me")
         .then((response: any) => {
           commit('userInfos', response.data)
           resolve(response)
@@ -146,6 +194,7 @@ const store = createStore({
         instance.get("/user/id/" + id)
         .then((response: any) => {
           commit('profileInfos', response.data)
+          commit('setStats', response.data)
           resolve(response)
         })
         .catch((error: any) => {
@@ -162,6 +211,78 @@ const store = createStore({
         })
         .catch((error: any) => {
           resolve(error)
+        })
+      })
+    },
+    getPic({commit}, username) {
+      return new Promise((resolve, reject) => {
+        instance.get("/user/profilepic/" + username)
+        .then((response: any) => {
+          commit('setPic', response.data)
+          resolve(response)
+        })
+        .catch((error: any) => {
+          resolve(error)
+        })
+      })
+    },
+    getStats({commit}) {
+      return new Promise((resolve, reject) => {
+        instance.get("/user/stats")
+        .then((response: any) => {
+          commit('setStats', response.data)
+          resolve(response)
+        })
+        .catch((error: any) => {
+          resolve(error)
+        })
+      })
+    },
+    addFriend({commit}, id) {
+      return new Promise((resolve, reject) => {
+        instance.patch("/user/friend", {id: id})
+        .then((res: any) => {
+          commit('setIsFriend', true)
+          resolve(res)
+        })
+        .catch((err: any) => {
+          resolve(err)
+        })
+      })
+    },
+    deleteFriend({commit}, id) {
+      return new Promise((resolve, reject) => {
+        instance.patch("/user/unfriend", {id: id})
+        .then((res: any) => {
+          commit('setIsFriend', false)
+          resolve(res)
+        })
+        .catch((err: any) => {
+          resolve(err)
+        })
+      })
+    },
+    block({commit}, id) {
+      return new Promise((resolve, reject) => {
+        instance.patch("/user/block", {id: id})
+        .then((res: any) => {
+          commit('setIsBlock', true)
+          resolve(res)
+        })
+        .catch((err: any) => {
+          resolve(err)
+        })
+      })
+    },
+    unblock({commit}, id) {
+      return new Promise((resolve, reject) => {
+        instance.patch("/user/unblock", {id: id})
+        .then((res: any) => {
+          commit('setIsBlock', false)
+          resolve(res)
+        })
+        .catch((err: any) => {
+          resolve(err)
         })
       })
     },
@@ -262,7 +383,19 @@ const store = createStore({
         })
       })
     },
-    selectChannel({ commit }, channel) {
+    async selectChannel({ commit }, channel) {
+      for (const user of channel.users ? channel.users : channel.list[0].receiver) {
+        const res: any = await new Promise((resolve, reject) => {
+          instance.get("/user/profilepic/" + user.username)
+          .then((response: any) => {
+            resolve(response)
+          })
+          .catch((error: any) => {
+            resolve(error)
+          })
+        })
+        commit('setChatAvatars', { username: user.username, avatar: res.data })
+      }
       commit("setCurrentChannel", channel);
     },
     rmChannel({ commit }, id) {
@@ -275,9 +408,8 @@ const store = createStore({
     {
       commit("joinChannel", id);
     },
-    sendMessage()
-    {
-
+    sendDM({commit}, message: any) {
+      commit("")
     },
     receiveMessage({commit})
 		{
@@ -288,6 +420,20 @@ const store = createStore({
         commit("broadcast", message);
 			})
 		},
+    getAllChannelsStore()
+    {
+      console.log('opening front socket.on ');
+      chatSocket.emit('getAll');;
+    },
+    stopReceiving()
+    {
+      chatSocket.off('displayMessage');
+    },
+    receiveStatus({commit}) {
+      statusSocket.on('displayStatus', (status: any) => {
+        commit('', status)
+      })
+    }
   },
   getters: {
     getUsername(state) {

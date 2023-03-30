@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import CreateUserDTO from 'src/users/dto/create-user.dto';
 import FindUserDTO from 'src/users/dto/find-user.dto';
@@ -7,7 +7,6 @@ import SendDMDTO from 'src/dto/send-dm.dto';
 import { FriendMessage } from 'src/database/entities/FriendMessage';
 import { User } from 'src/database/entities/User';
 import { Repository } from 'typeorm';
-import { authenticator } from 'otplib';
 import * as fs from 'fs';
 
 @Injectable()
@@ -53,21 +52,26 @@ export class UserService {
         });
       }
 
-    async getUserById(id: number): Promise<User> {
+    async getUserById(dto: FindUserDTO): Promise<User> {
         return this.userRepository.findOne({
-            select: {
-                username:                           true,
-                rank:                               true,
-                wins:                               false,
-                losses:                             false,
-                level:                              true,
-                twoFactorAuthenticationSecret:      true,
-                isTwoFactorAuthenticationEnabled:   true,
-                TwoFactorAuthenticated:             true,
-                lastSuccessfulAuth:                 true,
-                id:                                 true
+            select : {
+                username: dto.username,
+                login42: dto.login42,
+                email: dto.email,
+                profilePic: dto.profilePic,
+                rank: dto.rank,
+                wins: dto.winslosses,
+                losses: dto.winslosses,
+                level: dto.level,
+                friends: dto.friends
             },
-            where: {id: id}
+            relations: {
+                channels: dto.channels,
+                games: dto.games,
+                games2: dto.games,
+                friends: dto.friends
+            },
+            where: {id: dto.id}
         });
     }
 
@@ -89,20 +93,17 @@ export class UserService {
     }
 
     async changeUsername(dto: ChangeUserDTO): Promise<number> {
-        const user = await this.getUserById(dto.id)
+        const user = await this.userRepository.findOneBy({id: dto.id});
         if (!user)
             return HttpStatus.NOT_FOUND;
-        console.log('dto: ', dto)
-        if (await this.userRepository.count({ where: { username: dto.username } }) != 0)
+        if (await this.userRepository.count({ where: { username: dto.username } }) != 0
+        || dto.username.length > 8)
             return HttpStatus.CONFLICT;
         const oldUsername = user.username
         user.username = dto.username;
-        if (dto.username.length <= 8) {
-            const oldPath = UserService.PP_PATH + oldUsername + '.jpg';
-            const newPath = UserService.PP_PATH + dto.username + '.jpg';
-            fs.rename(oldPath, newPath, (err) => {
-            })
-        }
+        const oldPath = UserService.PP_PATH + oldUsername + '.jpg';
+        const newPath = UserService.PP_PATH + dto.username + '.jpg';
+        fs.rename(oldPath, newPath, (err) => {console.log(err); return 404});
         await this.userRepository.save(user)
         return HttpStatus.OK;
     }
@@ -115,12 +116,20 @@ export class UserService {
         return HttpStatus.OK;
     }
 
+    async get2FAsecret(id: number) : Promise<string> {
+        const user = await this.userRepository.findOne({
+            select: {twoFactorAuthenticationSecret: true},
+            where: {id: id}
+        });
+        return user.twoFactorAuthenticationSecret;
+    }
+
     async sendDM(sendDMDTO: SendDMDTO) : Promise<number> {
         const user1 = await this.userRepository.findOneBy({id: sendDMDTO.id1});
         const user2 = await this.userRepository.findOneBy({id: sendDMDTO.id2});
 
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
-        if (user1.blocked.includes(user2) || user2.blocked.includes(user1))
+        if (user1.isBlocked(user2) || user2.isBlocked(user1))
             return HttpStatus.FORBIDDEN;
         const message = this.messageRepository.create({
             content: sendDMDTO.message,
@@ -139,22 +148,41 @@ export class UserService {
     }
 
     async blockUser(id1: number, id2: number) : Promise<number> {
-        const user1 = await this.userRepository.findOneBy({id: id1});
+        const user1 = await this.userRepository.findOne({
+            select: {
+                id: true
+            },
+            relations: {
+                blocked: true,
+                friends: true
+            },
+            where: {id: id1}
+        });
         const user2 = await this.userRepository.findOneBy({id: id2});
-
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
-        if (user1.blocked.includes(user2))
+        if (user1.isBlocked(user2))
             return HttpStatus.NO_CONTENT;
         user1.blocked.push(user2);
+        user1.friends.filter(usr => usr.id !== user2.id);
+        user2.friends.filter(usr => usr.id !== user1.id);
         this.userRepository.save(user1);
+        this.userRepository.save(user2);
     }
 
     async unBlockUser(id1: number, id2: number) {
-        const user1 = await this.userRepository.findOneBy({id: id1});
+        const user1 = await this.userRepository.findOne({
+            select: {
+                id: true
+            },
+            relations: {
+                blocked: true
+            },
+            where: {id: id1}
+        });
         const user2 = await this.userRepository.findOneBy({id: id2});
 
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
-        if (!user1.blocked.includes(user2))
+        if (!user1.isBlocked(user2))
             return HttpStatus.NO_CONTENT;
         user1.blocked.filter(usr => usr.id !== id2);
         this.userRepository.save(user1);
@@ -162,25 +190,60 @@ export class UserService {
     }
 
     async addFriend(id1: number, id2: number) {
-        const user1 = await this.userRepository.findOneBy({id: id1});
-        const user2 = await this.userRepository.findOneBy({id: id2});
+        const user1 = await this.userRepository.findOne({
+            select: {
+                id: true
+            },
+            relations: {
+                blocked: true,
+                friends: true
+            },
+            where: {id: id1}
+        });
+        const user2 = await this.userRepository.findOne({
+            select: {
+                id: true
+            },
+            relations: {
+                blocked: true,
+                friends: true,
+            },
+            where: {id: id2}
+        });
 
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
-        if (user1.friends.includes(user2))
+        if (user1.isFriend(user2))
             return HttpStatus.NO_CONTENT;
-        if(user1.blocked.includes(user2) || user2.blocked.includes(user1))
+        if(user1.isBlocked(user2) || user2.isBlocked(user1))
             return HttpStatus.FORBIDDEN
         user1.friends.push(user2);
         this.userRepository.save(user2);
+        console.log(this.userRepository.findOneBy({id: id1}))
         return HttpStatus.OK;
     }
 
     async removeFriend(id1: number, id2: number) {
-        const user1 = await this.userRepository.findOneBy({id: id1});
-        const user2 = await this.userRepository.findOneBy({id: id2});
+        const user1 = await this.userRepository.findOne({
+            select: {
+                id: true
+            },
+            relations: {
+                friends: true
+            },
+            where: {id: id1}
+        });
+        const user2 = await this.userRepository.findOne({
+            select: {
+                id: true
+            },
+            relations: {
+                friends: true
+            },
+            where: {id: id2}
+        });
 
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
-        if (!user1.friends.includes(user2))
+        if (!user1.isFriend(user2))
             return HttpStatus.NO_CONTENT;
         user1.friends.filter(usr => usr.id !== user2.id);
         user2.friends.filter(usr => usr.id !== user1.id);

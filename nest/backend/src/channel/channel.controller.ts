@@ -35,11 +35,11 @@ export class ChannelController {
                       @Param('uid') uid:number,
                       @Response() res: any) {
         const dto: GetMessageDTO = {
-            channelId: chanId,
+            id: chanId,
             page: 0
         }
         res.status(await this.channelService.joinChannel(chanId, uid))
-           .send(this.channelService.getMessagePage({channelId: chanId, page: 0}));
+           .send(this.channelService.getMessagePage({id: chanId, page: 0}));
     }
 
     @Post("joinwithpassword/:chanId:/uid")
@@ -48,7 +48,7 @@ export class ChannelController {
                             @Body() password: string,
                             @Response() res:any) {
         res.status(await this.channelService.joinChannelWithPassword(chanId, uid, password))
-           .send(this.channelService.getMessagePage({channelId: chanId, page: 0}));
+           .send(this.channelService.getMessagePage({id: chanId, page: 0}));
     }
 
     @Patch("leave/:chanId:/uid")
@@ -100,5 +100,12 @@ export class ChannelController {
         const channel = await this.channelService.createChannel(createChannelDTO);
         if (!channel) return res.status(HttpStatus.NOT_FOUND).send();
         res.status(HttpStatus.OK).send(channel);
+    }
+
+    @Get("getAll")
+    @HttpCode(HttpStatus.OK)
+    async getAllChannels( @Response() res: any) {
+        console.log("getting inside getAll");
+        res.send( await this.channelService.getAll())
     }
 }

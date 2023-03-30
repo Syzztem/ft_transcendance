@@ -20,14 +20,21 @@ export default defineComponent({
           </p>
         </v-btn>
       </v-col>
-      <v-col class="d-flex justify-center mt-16" cols="12" id="col">
+      <v-col class="d-flex justify-center mt-10" cols="12" id="col">
         <v-btn router :to="'/chat'" class="btn" style="color: #FFC800; font-size: 300%;" rounded color="rgb(0, 15, 255, 0.5)" flat width="50vw" max-width="500" height="15vh" max-height="200" min-height="100">
           <p class="p">
             CHAT
           </p>
         </v-btn>
       </v-col>
-      <v-col class="d-flex justify-center mt-16" cols="12" id="col">
+      <v-col class="d-flex justify-center mt-10" cols="12" id="col">
+        <v-btn router :to="'/friends'" class="btn" style="color: #FFC800; font-size: 300%;" rounded color="rgb(0, 15, 255, 0.5)" flat width="50vw" max-width="500" height="15vh" max-height="200" min-height="100">
+          <p class="p">
+            FRIENDS
+          </p>
+        </v-btn>
+      </v-col>
+      <v-col class="d-flex justify-center mt-10" cols="12" id="col">
         <v-btn router :to="'/hall'" class="btn" style="color: #FFC800; font-size: 300%;" rounded color="rgb(0, 15, 255, 0.5)" flat width="50vw" max-width="500" height="15vh" max-height="200" min-height="100">
           <p class="p">
             HALL OF FAME

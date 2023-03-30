@@ -41,11 +41,18 @@ export class ChannelService {
             relations: {
                 sender:     true,
             },
-            where: {channel: {id: dto.channelId}},
+            where: {channel: {id: dto.id}},
             order: {id: "DESC"},
             take: 50,
             skip: 50 * dto.page
         })
+    }
+
+    async getAll() : Promise<Channel[]>
+    {
+        const channels = await this.channelRepository.find();
+        console.log('channel list in back', channels);
+        return channels;
     }
 
     async postMessage(dto: PostMessageDTO) : Promise<number> {

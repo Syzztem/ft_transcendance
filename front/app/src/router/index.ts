@@ -10,9 +10,11 @@ import ChangeAvatar from '@/views/ChangeAvatar.vue'
 import TwoFactor from '@/views/TwoFactor.vue'
 import Hall from '@/views/Hall.vue'
 import Login from '@/views/Login.vue'
-import Profil from '@/views/Profil.vue'
 import FirstConnection from '@/views/FirstConnection.vue'
 import twofa from '@/views/2fa.vue'
+import PublicProfile from '@/views/PublicProfile.vue'
+import PrivateProfile from '@/views/PrivateProfile.vue'
+import Friends from '@/views/Friends.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -22,10 +24,6 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/login',
     component: Login
-  },
-  {
-    path: '/profil/:id',
-    component: Profil
   },
   {
     name: 'game',
@@ -65,9 +63,26 @@ const routes: Array<RouteRecordRaw> = [
     component: twofa
   },
   {
+    path: '/profile/:id',
+    component: PublicProfile,
+    props: route => {
+      const idParam = route.params.id;
+      const id = Array.isArray(idParam) ? idParam[0] : idParam;
+      return { id: parseInt(id) };
+    }
+  },
+  {
+    path: '/me',
+    component: PrivateProfile
+  },
+  {
+    path: '/friends',
+    component: Friends
+  },
+  {
     path: '/',
     component: Home
-  },
+  }
 ]
 
 const router = createRouter({

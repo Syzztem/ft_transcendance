@@ -1,4 +1,4 @@
-"<template>
+<template>
     <v-app-bar elevation="5" color="#000FFF">
       <v-toolbar-title id="logo" style="cursor: pointer" @click="$router.push('/')"
         dark
@@ -8,7 +8,7 @@
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <img id="profilePic" :src="profilePicURL" />
-      <v-btn class="btn" router :to="'/profil/' + id">
+      <v-btn class="btn" router :to="'/me'">
         {{ username }}
       </v-btn>
       <v-btn
@@ -21,9 +21,9 @@
         <img id="optionsImg" src="@/assets/optionsButton.png" />
       </v-btn>
     </v-app-bar>
-  </template>
+</template>
   
-  <script lang="ts">
+<script lang="ts">
   import { defineComponent, ref, computed, watch } from 'vue';
   import { mapState, useStore } from 'vuex';
   
@@ -48,7 +48,7 @@
   
       setInterval(() => {
         updateProfilePicURL()
-      }, 5000) // Update the image every 5 seconds
+      }, 5000)
   
       watch(() => store.state.userInfos.profilePic, (newVal, oldVal) => {
         if (newVal !== oldVal)
@@ -71,9 +71,9 @@
       }
     }
   })
-  </script>
+</script>
   
-  <style scoped>
+<style scoped>
   #logo {
     font-family: "pokemon";
     color: rgb(255, 200, 0);
@@ -96,4 +96,4 @@
   #profilePic {
     width: 3vh;
   }
-  </style>"
+</style>

@@ -5,7 +5,7 @@
                 <v-row justify="center">
                     <v-dialog v-model="usernameTakenDialog" max-width="300">
                         <v-card>
-                            <v-card-title class="text-h5">Erreur</v-card-title>
+                            <v-card-title class="text-h5">Error</v-card-title>
                             <v-card-text>
                                 The username is already taken. Please choose another.
                             </v-card-text>
@@ -17,9 +17,9 @@
                     </v-dialog>
                     <v-dialog v-model="changeProfilePicDialog" max-width="300">
                         <v-card>
-                            <v-card-title class="text-h5">Changer la photo de profil ?</v-card-title>
+                            <v-card-title class="text-h5">Change profile picture ?</v-card-title>
                             <v-card-text>
-                                Souhaitez-vous changer votre photo de profil maintenant ?
+                                Would you like to change your profile picture now ?
                             </v-card-text>
                             <v-card-actions>
                                 <v-btn color="primary" text @click="redirectToChangeProfilePic">Oui</v-btn>
@@ -76,13 +76,12 @@ export default defineComponent({
         async ok() {
             await this.$store.dispatch('changeUsername', { username: this.newUsername })
             .then((res: any) => {
-                this.changeProfilePicDialog = true;
+                if (res.response && res.response.status === 409)
+                    this.usernameTakenDialog = true;
+                else
+                    this.changeProfilePicDialog = true;
             }
             , (error: any) => {
-                console.log(error)
-                if (error.response && error.response.status === 409) {
-                    this.usernameTakenDialog = true;
-                }
             })
         },
         redirectToChangeProfilePic() {
