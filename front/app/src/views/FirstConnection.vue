@@ -3,6 +3,30 @@
         <v-row>
             <v-col class="d-flex justify-center mt-10" cols="12" id="col">
                 <v-row justify="center">
+                    <v-dialog v-model="usernameTakenDialog" max-width="300">
+                        <v-card>
+                            <v-card-title class="text-h5">Error</v-card-title>
+                            <v-card-text>
+                                The username is already taken. Please choose another.
+                            </v-card-text>
+                            <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn color="primary" text @click="usernameTakenDialog = false">Fermer</v-btn>
+                            </v-card-actions>
+                        </v-card>
+                    </v-dialog>
+                    <v-dialog v-model="changeProfilePicDialog" max-width="300">
+                        <v-card>
+                            <v-card-title class="text-h5">Change profile picture ?</v-card-title>
+                            <v-card-text>
+                                Would you like to change your profile picture now ?
+                            </v-card-text>
+                            <v-card-actions>
+                                <v-btn color="primary" text @click="redirectToChangeProfilePic">Oui</v-btn>
+                                <v-btn color="secondary" text @click="redirectToHome">Non</v-btn>
+                            </v-card-actions>
+                        </v-card>
+                    </v-dialog>
                     <v-card color="rgb(2, 105, 255, 0.5)">
                         <v-col>
                             <p>
@@ -10,21 +34,11 @@
                             </p>
                         </v-col>
                         <v-col>
-                            <input type="text" v-model="username" v-on:keyup.enter="ok" spellcheck="false">
+                            <input type="text" v-model="newUsername" v-on:keyup.enter="ok" spellcheck="false">
                         </v-col>
                     </v-card>
                 </v-row>
             </v-col>
-            <!-- <v-col class="d-flex justify-center mt-10" cols="12" id="col">
-                AVATAR
-            </v-col>
-            <v-col class="d-flex justify-center mt-10" cols="12" id="col">
-                <v-row justify="center">
-                    <v-btn class="btn" color="rgb(2, 105, 255)">
-                        CHANGE AVATAR
-                    </v-btn>
-                </v-row>
-            </v-col> -->
             <v-col class="d-flex justify-center mt-10" cols="12" id="col">
                 <v-row justify="center">
                     <v-btn class="btn" @click="ok" color="rgb(2, 105, 255)">
@@ -38,11 +52,16 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import store from '@/store';
+import { computed } from '@vue/reactivity';
 
 export default defineComponent({
     data() {
         return {
-            username: ''
+            newUsername: '',
+            usernameTakenDialog: false,
+            profilePicURL: '',
+            changeProfilePicDialog: false
         }
     },
     mounted() {
@@ -54,13 +73,24 @@ export default defineComponent({
         (error: any) => {})
     },
     methods: {
-        ok() {
-            this.$store.dispatch('changeUsername', {username: this.username})
-            .then((res) => {
-                this.$router.push('/')
+        async ok() {
+            await this.$store.dispatch('changeUsername', { username: this.newUsername })
+            .then((res: any) => {
+                if (res.response && res.response.status === 409)
+                    this.usernameTakenDialog = true;
+                else
+                    this.changeProfilePicDialog = true;
             }
-            , (error) => {
+            , (error: any) => {
             })
+        },
+        redirectToChangeProfilePic() {
+            this.changeProfilePicDialog = false;
+            this.$router.push('/avatar');
+        },
+        redirectToHome() {
+            this.changeProfilePicDialog = false;
+            this.$router.push('/');
         }
     }
 })

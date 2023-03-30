@@ -15,6 +15,8 @@ import { ChannelMessage } from './database/entities/ChannelMessage';
 import { FriendMessage } from './database/entities/FriendMessage';
 import { BanAndMute } from './database/entities/BanAndMute';
 import { Channel } from './database/entities/Channel';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [PassportModule, AuthModule, UsersModule, ConfigModule.forRoot({
@@ -32,6 +34,10 @@ import { Channel } from './database/entities/Channel';
       database: process.env.POSTGRES_DB,
       autoLoadEntities: true,
       synchronize: true
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'profilepics'),
+      serveRoot: '/profilepics'
     })
   ],
   controllers: [AppController],

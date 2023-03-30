@@ -40,8 +40,14 @@ export class User {
   twoFactorAuthenticationSecret: string;
 
   @Column({type:'boolean'})
-  twofaActivated : boolean = false;
-  
+  TwoFactorAuthenticated: boolean = false;
+
+  @Column({type:'boolean'})
+  isTwoFactorAuthenticationEnabled: boolean = false;
+
+  @Column({type: 'timestamp', nullable: true})
+  lastSuccessfulAuth: Date;
+
   @ManyToMany(() => User)
   @JoinTable()
   friends: User[];
@@ -72,5 +78,13 @@ export class User {
 
   async verifyToken(token: string) {
       return bcrypt.compare(token, this.token);
+  }
+
+  public isFriend(user: User) {
+    return (this.friends.filter(u => u.id == user.id) != null)
+  }
+
+  public isBlocked(user: User) {
+    return (this.blocked.filter(u => u.id == user.id) != null)
   }
 }

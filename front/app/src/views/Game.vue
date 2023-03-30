@@ -40,7 +40,7 @@ export default defineComponent({
  
     this.canvas = <HTMLCanvasElement> document.getElementById('gameCanvas')
     this.game = new Game(this.canvas)
-    this.canvas.style.background = 'black'
+    this.canvas.style.background = this.$store.state.game.colorBackground
     document.addEventListener('keyup', this.handleKeyUp)
     document.addEventListener('keydown', this.handleKeyDown)
     this.game.startLoop()

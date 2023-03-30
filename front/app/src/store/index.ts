@@ -1,9 +1,9 @@
 import IChannel from '@/models/IChannel'
 import { createStore } from 'vuex'
 import { AxiosInstance } from 'axios'
+import axios from 'axios'
 import { chatSocket } from '@/websocket'
-
-const axios = require('axios')
+import { statusSocket } from '@/websocket'
 
 const instance : AxiosInstance = axios.create({
   baseURL: 'http://' +  process.env.VUE_APP_URL + ':3000'
@@ -20,14 +20,24 @@ let id: any = localStorage.getItem('id')
 
 const store = createStore({
   state: {
-    status: '',
+    twoFactorAuthenticated: false,
+    isLogin: true,
     userInfos: {
       profilePic: '',
-      username: ''
+      username: '',
+      isotp: false,
+      qrcode: '',
+      friends: []
     },
     profileInfos: {
       profilePic: '',
-      username: ''
+      username: '',
+      id: '',
+      isFriend: false,
+      isBlock: false,
+      wins: 0,
+      losses: 0,
+      games: []
     },
     chat: {
       joined_channels:  [] as IChannel[],
@@ -35,23 +45,54 @@ const store = createStore({
       blocked_users:    [],
       current_message:  "",
       available_channels: [] as IChannel []
+    },
+    game: {
+      colorBackground: 'blue'
     }
   },
   mutations: {
-    setStatus(state, status) {
-      state.status = status
+    setisotp(state, infos) {
+      state.userInfos.isotp = infos
+    },
+    setqrcode(state, code) {
+      state.userInfos.qrcode = code
     },
     profileInfos(state, profileInfos) {
       state.profileInfos.username = profileInfos.username
-      state.profileInfos.profilePic = 'http://' +  process.env.VUE_APP_URL + ':3000/user/profilepic/' + profileInfos.username
+      state.profileInfos.id = profileInfos.id
+    },
+    setPic(state, url) {
+      state.profileInfos.profilePic = url
+    },
+    profilePic(state, avatar) {
+      state.userInfos.profilePic = avatar
     },
     userInfos(state, userInfos) {
       state.userInfos.username = userInfos.username
-      state.userInfos.profilePic = 'http://' +  process.env.VUE_APP_URL + ':3000/user/profilepic/' + userInfos.username
+      state.twoFactorAuthenticated = userInfos.TwoFactorAuthenticated
+    },
+    setIsFriend(state, infos) {
+      state.profileInfos.isFriend = infos
+    },
+    setIsBlock(state, infos) {
+      state.profileInfos.isBlock = infos
+    },
+    setStats(state, stats) {
+      state.profileInfos.wins = stats.wins
+      state.profileInfos.losses = stats.losses
+      state.profileInfos.games = stats.games
+    },
+    setStatus() {},
+    username(state, username) {
+      state.userInfos.username = username
+    },
+    isLogin(state, infos) {
+      state.isLogin = infos
     },
     logout(state) {
       id = -1
       token = ''
+      state.twoFactorAuthenticated = false
       localStorage.removeItem('id')
       localStorage.removeItem('token')
     },
@@ -70,6 +111,9 @@ const store = createStore({
     removeChannel(state, id) {
       state.chat.joined_channels = state.chat.joined_channels.filter(c => c.id !== id);
       state.chat.current_channel = null;
+    },
+    setTwoFA(state, infos) {
+      state.twoFactorAuthenticated = infos
     },
     joinChannel(state, id)
     {
@@ -94,21 +138,42 @@ const store = createStore({
       console.log("getallchannels in front :", channels)
       this.available_channels = channels;
       console.log('' , channels);
+    },
+    setColorBackground(state, color) {
+      state.game.colorBackground = color
     }
   },
 
   actions: {
+    isLogin({ commit }) {
+      console.log('isLogin: début');
+      if (!localStorage.getItem('token')) {
+        commit('isLogin', false)
+        return
+      }
+      return new Promise((resolve, reject) => {
+        instance.post('/auth/islogin', { 'token': localStorage.getItem('token') })
+        .then((response: any) => {
+          commit('isLogin', true)
+          resolve(response)
+        })
+        .catch((error: any) => {
+          commit('isLogin', false)
+          resolve(error)
+        })
+      })
+    },
     getUserInfos({commit}) {
       if (!localStorage.getItem('id'))
         return ;
       return new Promise((resolve, reject) => {
-        instance.get("/user/id/" + localStorage.getItem('id'))
+        instance.get("/user/me")
         .then((response: any) => {
           commit('userInfos', response.data)
           resolve(response)
         })
         .catch((error: any) => {
-          reject(error)
+          resolve(error)
         })
       })
     },
@@ -117,10 +182,95 @@ const store = createStore({
         instance.get("/user/id/" + id)
         .then((response: any) => {
           commit('profileInfos', response.data)
+          commit('setStats', response.data)
           resolve(response)
         })
         .catch((error: any) => {
-          reject(error)
+          resolve(error)
+        })
+      })
+    },
+    getProfilePic({commit}, username) {
+      return new Promise((resolve, reject) => {
+        instance.get("/user/profilepic/" + username)
+        .then((response: any) => {
+          commit('profilePic', response.data)
+          resolve(response)
+        })
+        .catch((error: any) => {
+          resolve(error)
+        })
+      })
+    },
+    getPic({commit}, username) {
+      return new Promise((resolve, reject) => {
+        instance.get("/user/profilepic/" + username)
+        .then((response: any) => {
+          commit('setPic', response.data)
+          resolve(response)
+        })
+        .catch((error: any) => {
+          resolve(error)
+        })
+      })
+    },
+    getStats({commit}) {
+      return new Promise((resolve, reject) => {
+        instance.get("/user/stats")
+        .then((response: any) => {
+          commit('setStats', response.data)
+          resolve(response)
+        })
+        .catch((error: any) => {
+          resolve(error)
+        })
+      })
+    },
+    addFriend({commit}, id) {
+      return new Promise((resolve, reject) => {
+        instance.patch("/user/friend", {id: id})
+        .then((res: any) => {
+          commit('setIsFriend', true)
+          resolve(res)
+        })
+        .catch((err: any) => {
+          resolve(err)
+        })
+      })
+    },
+    deleteFriend({commit}, id) {
+      return new Promise((resolve, reject) => {
+        instance.patch("/user/unfriend", {id: id})
+        .then((res: any) => {
+          commit('setIsFriend', false)
+          resolve(res)
+        })
+        .catch((err: any) => {
+          resolve(err)
+        })
+      })
+    },
+    block({commit}, id) {
+      return new Promise((resolve, reject) => {
+        instance.patch("/user/block", {id: id})
+        .then((res: any) => {
+          commit('setIsBlock', true)
+          resolve(res)
+        })
+        .catch((err: any) => {
+          resolve(err)
+        })
+      })
+    },
+    unblock({commit}, id) {
+      return new Promise((resolve, reject) => {
+        instance.patch("/user/unblock", {id: id})
+        .then((res: any) => {
+          commit('setIsBlock', false)
+          resolve(res)
+        })
+        .catch((err: any) => {
+          resolve(err)
         })
       })
     },
@@ -128,11 +278,12 @@ const store = createStore({
       return new Promise((resolve, reject) => {
         instance.patch("/user/username", userInfos)
         .then((response: any) => {
-          commit('userInfos', response.data)
+          commit('username', userInfos.username)
+          commit('profilePic', 'http://' + process.env.VUE_APP_URL + ':3000/profilepics/' + userInfos.username + '.jpg')
           resolve(response)
         })
         .catch((error: any) => {
-          reject(error)
+          resolve(error)
         })
       })
     },
@@ -140,11 +291,70 @@ const store = createStore({
       return new Promise((resolve, reject) => {
         instance.post("/user/setpp/" + this.state.userInfos.username, data.formData)
         .then((response: any) => {
+          console.log('New profile pic URL:', response.data)
+          commit('profilePic', response.data)
           resolve(response)
         })
         .catch((error: any) => {
           console.log(error)
-          reject(error)
+          resolve(error)
+        })
+      })
+    },
+    get2fa({commit}) {
+      return new Promise((resolve, reject) => {
+        instance.get('/auth/2fa/actived')
+        .then((response: any) => {
+          commit("setisotp", response.data)
+          resolve(response)
+        })
+        .catch((error: any) => {
+          resolve(error)
+        })
+      })
+    },
+    turnOn2fa({commit}, code) {
+      return new Promise((resolve, reject) => {
+        instance.post('/auth/2fa/turn-on', { "code": code })
+        .then((response: any) => {
+          resolve(response)
+        })
+        .catch((error: any) => {
+          resolve(error)
+        })
+      })
+    },
+    turnOff2fa({commit}) {
+      return new Promise((resolve, reject) => {
+        instance.post('/auth/2fa/turn-off')
+        .then((response: any) => {
+          resolve(response)
+        })
+        .catch((error: any) => {
+          resolve(error)
+        })
+      })
+    },
+    auth2fa({commit}, code) {
+      return new Promise((resolve, reject) => {
+        instance.post('/auth/2fa/authenticate', { "code": code })
+        .then((response: any) => {
+          resolve(response)
+        })
+        .catch((error: any) => {
+          resolve(error)
+        })
+      })
+    },
+    qrcode({commit}) {
+      return new Promise((resolve, reject) => {
+        instance.post('/auth/2fa/generate')
+        .then((response: any) => {
+          commit("setqrcode", response.data)
+          resolve(response)
+        })
+        .catch((error: any) => {
+          resolve(error)
         })
       })
     },
@@ -152,11 +362,12 @@ const store = createStore({
       return new Promise((resolve, reject) => {
         instance.post("/auth/logout")
         .then((response: any) => {
+          commit('logout')
           resolve(response)
         })
         .catch((error: any) => {
-          console.log(error)
-          reject(error)
+          commit('logout')
+          resolve(error)
         })
       })
     },
@@ -190,6 +401,11 @@ const store = createStore({
     stopReceiving()
     {
       chatSocket.off('displayMessage');
+    },
+    receiveStatus({commit}) {
+      statusSocket.on('displayStatus', (status: any) => {
+        commit('', status)
+      })
     }
   },
   getters: {

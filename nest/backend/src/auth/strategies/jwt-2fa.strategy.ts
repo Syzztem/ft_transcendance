@@ -15,7 +15,7 @@ export class Jwt2faStrategy extends PassportStrategy(Strategy, 'jwt-2fa') {
   async validate(payload: any) {
     const user = await this.userService.findByLogin(payload.email);
 
-    if (!user.twofaActivated) {
+    if (!user.isTwoFactorAuthenticationEnabled) {
       return user;
     }
     if (payload.twofaActivated) {

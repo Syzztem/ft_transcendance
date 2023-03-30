@@ -10,22 +10,41 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 @Controller('user')
 export class UsersController {
     constructor(private userService: UserService) {}
-
     @UseGuards(JwtAuthGuard)
     @Get("id/:id")
     async getUser(@Param('id') id: number,
                   @Response() res: any) : Promise<User> {
         const user = await this.userService.getUserById(id);
         if (!user) return res.status(HttpStatus.NOT_FOUND).send();
+        return res.status(HttpStatus.OK).send({ rank: user.rank, wins: user.wins, losses: user.losses, level: user.level, id: user.id, username: user.username, games: user.games });
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get("/me")
+    async getMe(@Req() req: any, @Response() res: any) : Promise<User> {
+        const user = await this.userService.getUserById(req.user.sub);
+        if (!user)
+            return res.status(HttpStatus.NOT_FOUND).send();
         return res.status(HttpStatus.OK).send(user);
     }
+
+    @UseGuards(JwtAuthGuard)
+    @Get("/stats")
+    async getStats(@Req() req: any, @Response() res: any) {
+        const user = await this.userService.getUserById(req.user.sub)
+        if (!user)
+            return res.status(HttpStatus.NOT_FOUND).send();
+        return res.status(HttpStatus.OK).send({ rank: user.rank, wins: user.wins, losses: user.losses, level: user.level, id: user.id, username: user.username, games: user.games })
+    }
+
     @UseGuards(JwtAuthGuard)
     @Get("profilepic/:username")
     async getProfilePic(@Param('username') username : string,
                         @Response() res : any) {
-        const path = UserService.PP_PATH + username + '.jpg';
-        if (!fs.existsSync(path)) return res.status(HttpStatus.OK).sendFile('/usr/app/profilepics/defaultpp.jpg');
-        res.status(HttpStatus.OK).sendFile(path);
+        const path = 'http://' + process.env.URL + ':3000/profilepics/' + username + '.jpg';
+        if (!fs.existsSync(UserService.PP_PATH + username + '.jpg'))
+            return res.status(HttpStatus.OK).send('http://' + process.env.URL + ':3000/profilepics/defaultpp.jpg');
+        res.status(HttpStatus.OK).send(path);
     }
 
     @UseGuards(JwtAuthGuard)
@@ -34,10 +53,12 @@ export class UsersController {
     async setProflePic(@Param('username') username: string,
                         @UploadedFile() file: Express.Multer.File,
                         @Response() res : any) {
-        const path = UserService.PP_PATH + username + '.jpg';
-        fs.writeFile(path, file.buffer, (err) => {
-            if (err) res.status(HttpStatus.INTERNAL_SERVER_ERROR).send();
-            else res.status(HttpStatus.OK).send(username);
+        const path = 'http://' + process.env.URL + ':3000/profilepics/' + username + '.jpg';
+        fs.writeFile(UserService.PP_PATH + username + '.jpg', file.buffer, (err) => {
+            if (err)
+                res.status(HttpStatus.NOT_FOUND).send();
+            else
+                res.status(HttpStatus.OK).send(path);
         })
     }
 
@@ -76,36 +97,31 @@ export class UsersController {
     }
 
     @UseGuards(JwtAuthGuard)
-    @Patch("friend/:id1/:id2")
+    @Patch("friend")
     @HttpCode(HttpStatus.CREATED)
-    async addFriend(@Param('id1') id1:number,
-                    @Param('id2') id2:number,
-                    @Response() res: any) {
-        res.status(await this.userService.addFriend(id1, id2)).send(id2);
+    async addFriend(@Req() req: any, @Body() data: any, @Response() res: any) {
+        return res.status(await this.userService.addFriend(req.user.sub, data.id)).send();
     }
 
     @UseGuards(JwtAuthGuard)
-    @Patch("unfriend/:id1/:id2")
+    @Patch("unfriend")
     @HttpCode(HttpStatus.NO_CONTENT)
-    async removeFriend(@Param('id1') id1:number, @Param('id2') id2:number,
-                       @Response() res: any) {
-        res.status(await this.userService.removeFriend(id1, id2)).send(id2);
+    async removeFriend(@Req() req: any, @Body() data: any, @Response() res: any) {
+        res.status(await this.userService.removeFriend(req.user.sub, data.id)).send();
     }
 
     @UseGuards(JwtAuthGuard)
-    @Patch("block/:id1/:id2")
+    @Patch("block")
     @HttpCode(HttpStatus.CREATED)
-    async blockUser(@Param('id1') id1:number, @Param('id2') id2:number,
-                    @Response() res: any) {
-        res.status(await this.userService.blockUser(id1, id2)).send(id2);
+    async blockUser(@Req() req: any, @Body() data: any, @Response() res: any) {
+        res.status(await this.userService.blockUser(req.user.sub, data.id)).send();
     }
 
     @UseGuards(JwtAuthGuard)
-    @Patch("unblock/:id1/:id2")
+    @Patch("unblock")
     @HttpCode(HttpStatus.CREATED)
-    async unBlockUser(@Param('id1') id1:number, @Param('id2') id2:number,
-                      @Response() res: any) {
-        res.status(await this.userService.unBlockUser(id1, id2)).send(id2);
+    async unBlockUser(@Req() req: any, @Body() data: any, @Response() res: any) {
+        res.status(await this.userService.unBlockUser(req.user.sub, data.id)).send();
     }
 
     @UseGuards(JwtAuthGuard)

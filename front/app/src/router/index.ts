@@ -10,11 +10,11 @@ import ChangeAvatar from '@/views/ChangeAvatar.vue'
 import TwoFactor from '@/views/TwoFactor.vue'
 import Hall from '@/views/Hall.vue'
 import Login from '@/views/Login.vue'
-import Profil from '@/views/Profil.vue'
 import FirstConnection from '@/views/FirstConnection.vue'
-
-import TestWebsocket from '@/views/TestWebsocket.vue'
-
+import twofa from '@/views/2fa.vue'
+import PublicProfile from '@/views/PublicProfile.vue'
+import PrivateProfile from '@/views/PrivateProfile.vue'
+import Friends from '@/views/Friends.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -24,10 +24,6 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/login',
     component: Login
-  },
-  {
-    path: '/profil/:id',
-    component: Profil
   },
   {
     name: 'game',
@@ -63,9 +59,30 @@ const routes: Array<RouteRecordRaw> = [
     component: TwoFactor
   },
   {
+    path: '/2fa',
+    component: twofa
+  },
+  {
+    path: '/profile/:id',
+    component: PublicProfile,
+    props: route => {
+      const idParam = route.params.id;
+      const id = Array.isArray(idParam) ? idParam[0] : idParam;
+      return { id: parseInt(id) };
+    }
+  },
+  {
+    path: '/me',
+    component: PrivateProfile
+  },
+  {
+    path: '/friends',
+    component: Friends
+  },
+  {
     path: '/',
     component: Home
-  },
+  }
 ]
 
 const router = createRouter({
@@ -73,16 +90,31 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, from, next) => {
-  const publicPages = ['/login'];
-  const authRequired = !publicPages.includes(to.path);
-  const loggedIn = localStorage.getItem('token');
-
-  if (authRequired && !loggedIn) {
+router.beforeEach(async (to, from, next) => {
+  try {
+    await store.dispatch('isLogin');
+  } catch (error) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('id');
     return next('/login');
   }
+  await store.dispatch('getUserInfos');
+  if (!store.state.isLogin) {
+    return to.path === '/login' ? next() : next('/login');
+  }
+  if (store.state.userInfos.isotp && !store.state.twoFactorAuthenticated) {
+    return to.path === '/2fa' ? next() : next('/2fa');
+  }
 
-  next();
-})
+  if (!store.state.userInfos.username) {
+    return to.path === '/userInfos' ? next() : next('/userInfos');
+  }
+
+  if (to.path === '/login' || to.path === '/2fa' || to.path === '/userInfos') {
+    return next('/');
+  } else {
+    return next();
+  }
+});
 
 export default router
