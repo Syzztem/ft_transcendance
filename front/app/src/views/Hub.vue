@@ -20,7 +20,7 @@ export default defineComponent({
   mounted() {
     this.gameSocket.on('redirectGame', (response: number) => {
       router.push({name: 'game', params: {id: response}})
-    })  
+    })
   },
   unmounted() {
     if (this.isMatchmaking)
@@ -54,11 +54,11 @@ export default defineComponent({
   }
 })
 </script>
-  
+
 <template>
   <v-container>
     <v-row class="mt-5" justify="center">
-      <v-card id="card" black color="rgb(0, 75, 255, 0.5)" rounded flat width="550" height="120" class="pb-3 mb-16">
+      <v-card id="GameTitle" flat width="550" height="120" class="pb-3 mb-16">
         <v-row justify="center" class="mt-1">
           <p >
             Choose Game :
@@ -67,7 +67,7 @@ export default defineComponent({
       </v-card>
     </v-row>
     <v-row justify="center">
-      <v-card id="card" color="rgb(0, 75, 255, 0.5)" height="auto" width="650" rounded flat black class="mx-16 pb-2">
+      <v-card id="CardContent" height="auto" width="650" rounded flat black class="mx-16 pb-2">
           <v-row justify="center" class="mt-4 ml-16 mr-16 mb-2">
 
             <button id="ball-btn" @click="originalModeToggle" :class="[showOriginal ? 'active' : 'default-btn']">
@@ -79,7 +79,7 @@ export default defineComponent({
             <button id="ball-btn" @click="powerUpsModeToggle" :class="[showPowerUps ? 'active' : 'default-btn']">
                 Poké Pong
             </button> -->
-            <v-card class="px-3 py-5" width="200">
+            <v-card class="px-3 py-5" id="LighterCard" width="200">
               <v-radio-group
                 @update:model-value="HandleColorBackground($event)"
                 label="Board color"
@@ -93,7 +93,7 @@ export default defineComponent({
 
           </v-row>
           <v-row justify="center" class=" mt-10 mb-1">
-            <v-btn rounded color="rgb(0, 0, 0, 0.6)" id="startGameButton" height="90" @click="$router.push(route)">
+            <v-btn id="Yellow" height="90" @click="$router.push(route)">
               START
             </v-btn>
           </v-row>
@@ -101,8 +101,30 @@ export default defineComponent({
       </v-row>
   </v-container>
 </template>
-  
+
+<style>
+
+#LighterCard {
+	background:	linear-gradient(0deg,rgba(54, 54, 172, 0.603) 0%, rgba(124, 110, 187, 0.61) 100%);
+	border-radius: 10px;
+	color:aliceblue;
+}
+</style>
 <style scoped>
+
+#CardContent {
+	overflow: hidden;
+}
+
+#Yellow {
+	color: rgb(255, 200, 0)!important;
+	background:	linear-gradient(0deg,rgba(54, 54, 172, 0.603) 0%, rgba(124, 110, 187, 0.61) 100%);
+	border-radius: 10px;
+}
+
+#GameTitle {
+	background-color: transparent;
+}
 
 p {
   font-family: "pokemon";
