@@ -47,8 +47,8 @@ export class UsersController {
         res.status(HttpStatus.OK).send(path);
     }
 
-    //@UseGuards(JwtAuthGuard)
-    @Get("/setpp/:username")
+    @UseGuards(JwtAuthGuard)
+    @Post("/setpp/:username")
     @UseInterceptors(FileInterceptor('file'))
     async setProflePic(@Param('username') username: string,
                         @UploadedFile() file: Express.Multer.File,
