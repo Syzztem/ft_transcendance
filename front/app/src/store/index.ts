@@ -98,11 +98,14 @@ const store = createStore({
     },
     addChannel(state, newchan) {
       if (newchan) {
-
         const { name, password, isPrivate, users, id, messages } = newchan;
+        console.log('newchan', newchan);
         console.log('messages in channel creation :', messages);
-        const newfront = { name, password, isPrivate, users, id: id, messages: [] };
-        state.chat.joined_channels.push(newfront);
+        const channelIndex = state.chat.joined_channels.findIndex(channel => channel.id === id);
+        if (channelIndex === -1) {
+          const newfront = { name, password, isPrivate, users, id: id, messages: [] };
+          state.chat.joined_channels.push(newfront);
+        }
       }
     },
     setCurrentChannel(state, channel) {
@@ -114,10 +117,6 @@ const store = createStore({
     },
     setTwoFA(state, infos) {
       state.twoFactorAuthenticated = infos
-    },
-    joinChannel(state, id)
-    {
-      // chatSocket.emit('join', {chanId : 3, uid : 33, password : ''});
     },
     broadcast(state, message)
     {
@@ -135,14 +134,17 @@ const store = createStore({
     },
     getAllChannels(state, channels)
     {
-      console.log("getallchannels in front :", channels)
       this.available_channels = channels;
-      console.log('' , channels);
     },
     setColorBackground(state, color) {
       state.game.colorBackground = color
     }
   },
+
+
+
+
+
 
   actions: {
     isLogin({ commit }) {
@@ -384,6 +386,11 @@ const store = createStore({
     {
       commit("joinChannel", id);
     },
+    updateChannelsStore({commit}, channel)
+    {
+      console.log('channel in store', channel);
+      commit("addChannel", channel);
+    },
     receiveMessage({commit})
 		{
 			chatSocket.
@@ -395,7 +402,6 @@ const store = createStore({
 		},
     getAllChannelsStore()
     {
-      console.log('opening front socket.on ');
       chatSocket.emit('getAll');;
     },
     stopReceiving()
@@ -406,7 +412,7 @@ const store = createStore({
       statusSocket.on('displayStatus', (status: any) => {
         commit('', status)
       })
-    }
+    },
   },
   getters: {
     getUsername(state) {

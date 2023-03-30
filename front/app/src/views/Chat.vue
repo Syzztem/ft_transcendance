@@ -14,14 +14,18 @@ import { onBeforeMount } from "vue";
 /*
 	TODO :
 
-	current : join
-
+	ne pas afficher le channel dans lequel on est deja present dans le channel panel
+	gestion de channel prive
+	fix send message crashing the website when no channel is created
+	protect crash if !currentchannel
+	
+	
 	leave
-	hide joined channels in the getAllChannels panel
 	moderation front -> todo : basic request tests
-	channel history
-	private conversations
-
+	persistance des messages
+	no creation of channels with empty name
+	hide joined channels in the getAllChannels panel
+	
 	- clickable profile on user -> opens 	OPTIONS PANEL	:	dm, profile page, add to friends, remove from friend block user, unblock user
 											ADVANCED PANEL	:	promote/demote/ban/kick/unban
 	- v-if (blocked) -> display red block icon
@@ -54,7 +58,9 @@ export default defineComponent({
 		}
 	},
 	methods: {
-		...mapActions(["selectChannel", "rmChannel", "sendMessage", "receiveMessage", "joinChannel","stopReceiving", "getUserChannels", "getAllChannelsStore"],),
+		...mapActions(
+			["selectChannel", "rmChannel", "sendMessage", "receiveMessage", "joinChannel",
+			"stopReceiving", "getUserChannels", "getAllChannelsStore", "updateChannelsStore"],),
 		createChannel(newChan : any)
 		{
 			const channel_dto = {
@@ -76,7 +82,7 @@ export default defineComponent({
 			this.allchans_dialog = true;
 		},
 		sendMessage(newMessage : string)
-		{		
+		{
 			const message_dto = {
 				message : newMessage,
 				channelId : this.current_channel.id,
@@ -84,7 +90,6 @@ export default defineComponent({
 			};
 			this.chatSocket.emit('newmsg' , message_dto);
 		},
-
 		async startReceivingMessages() {
 			await this.receiveMessage();
 		},
@@ -92,17 +97,20 @@ export default defineComponent({
 		{
 			await this.stopReceiving();
 		},
+		async updateChannels(channel : any)
+		{
+			await this.updateChannelsStore(channel);
+		},
 		joinChannel(id : any)
 		{
 			const join_dto = {chanId: id, uid: this.id, password : ''};
-			console.log('join DTO', join_dto);
 			this.chatSocket.emit('join', join_dto);
 		},
 		leaveChannel(id : any)
 		{
-			const leave_dto = {chanId: id, uid: this.id, password : ''};
-			console.log('leave DTO', leave_dto);
-			this.chatSocket.emit('leave', leave_dto);
+			// const leave_dto = {chanId: id, uid: this.id, password : ''};
+			// console.log('leave DTO', leave_dto);
+			// this.chatSocket.emit('leave', leave_dto);
 		},
 	},
     computed: {
@@ -117,13 +125,21 @@ export default defineComponent({
 	mounted() {
 		console.log('start receiving messages');
 		this.startReceivingMessages();
-		chatSocket.on('sendAllChannels', (channels : any) =>
-		{this.$store.state.chat.available_channels = channels;})
-	},
+		chatSocket.on('sendAllChannels', (channels : IChannel[]) =>
+		{
+			
+			console.log('mounted channels :', channels);
+			this.$store.state.chat.available_channels = channels;})
+			chatSocket.on('joined_channel', (channel : any ) => {
+				this.updateChannels(channel);
+				console.log('updateChannels')
+			})
+		},
 	unmounted() {
 		console.log('hey we stop receiving ===> unmount');
   		this.stopReceivingMessages();
 		chatSocket.off('sendAllChannels');
+		chatSocket.off('joined_channel');
 	},
 })
 
@@ -200,7 +216,7 @@ export default defineComponent({
 								</v-card>
 								<v-row justify="center">
 									<v-card id="Inputbox" class="d-flex justify-center align-center rounded-xl" height="10vh" width="50vw" elevation="8">
-										<v-text-field v-model="newMessage" hide-details variant="plain" id="Inputfield" class = "ml-5" autofocus >
+										<v-text-field v-model="newMessage" v-on:keydown.enter="sendMessage(newMessage)" hide-details variant="plain" id="Inputfield" class = "ml-5" autofocus >
 										</v-text-field>
 										<v-card-actions>
 											<v-btn id="Btnsend" height="5vh" width="7vw"

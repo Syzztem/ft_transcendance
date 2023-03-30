@@ -55,15 +55,15 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         const user = chan.users.find(user => user.id === dto.senderId);
         if (!user || chan.isMuted(dto.senderId))
             throw new WsException("User doesn't exist, is not on this channel or is muted");
-        this.server.to(chan.id.toString()).emit("msg", user.username + "@" + chan.id + ":" + dto.message);
+        //this.server.to(chan.id.toString()).emit('displayMessage', message)//"msg", user.username + "@" + chan.id + ":" + dto.message);
         const message = this.messageRepository.create({
             content: dto.message,
             sender: user,
             channel: chan
         })
         this.messageRepository.save(message);
-
-        client.emit('displayMessage', message);
+        this.server.to(chan.id.toString()).emit('displayMessage', message)
+        // client.emit('displayMessage', message);
     }
 
     @SubscribeMessage('join')
@@ -71,7 +71,6 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
                         @ConnectedSocket() client: Socket) {
         this.verifyId(client, dto.uid);
         const chan = await this.channelRepository.findOne({
-            select: {id: true},
             relations: {
                 users: true,
                 bannedOrMuted: true
@@ -345,7 +344,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
     async handleConnection(client: Socket) {
         const uid: number = this.jwtService.decode(client.handshake.auth.token).sub;
-        const user = await this.userRepository.findOne({
+        const user: User = await this.userRepository.findOne({
             select: {
                 id: true,
                 channels: true,

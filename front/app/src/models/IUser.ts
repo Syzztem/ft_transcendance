@@ -1,6 +1,7 @@
 import IChannel from "./IChannel"
 
 interface IUser {
+    id: number,
     username: string,
     login42: string,
     email: string,

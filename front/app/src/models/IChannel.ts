@@ -5,7 +5,7 @@ interface IChannel {
     name:     string,
     password: string,
     isPrivate: boolean,
-    users:    Array<IUser>
+    users:    Array<IUser>,
     messages: Array<IMessage>,
     id:       number,
   }
