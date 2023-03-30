@@ -14,19 +14,12 @@ import { onBeforeMount } from "vue";
 /*
 	TODO :
 
+	current : join
 
-	current : broadcast, dialog pop
-
-	current :  add panel
-
-	broadcast in correct channel id when receiving a message
-	list channels -> front
-	join , leave
-	search channel
+	leave
+	hide joined channels in the getAllChannels panel
 	moderation front -> todo : basic request tests
 	channel history
-
-
 
 	- clickable profile on user -> opens 	OPTIONS PANEL	:	dm, profile page, add to friends, remove from friend block user, unblock user
 											ADVANCED PANEL	:	promote/demote/ban/kick/unban
@@ -78,12 +71,9 @@ export default defineComponent({
 		},
 		getAllChannels()
 		{
-			console.log('getallchannels chat.vue')
 			this.getAllChannelsStore();
 			chatSocket.emit('getAll');
 			this.allchans_dialog = true;
-
-			
 		},
 		sendMessage(newMessage : string)
 		{		
@@ -139,12 +129,6 @@ export default defineComponent({
 		chatSocket.off('sendAllChannels');
 	},
 })
-
-// function UpdateMessages(e: KeyboardEvent)
-// {
-//   if (e.key === 'Enter')
-// 	  UpdateMessagesButton();
-// }
 
 </script>
 
@@ -267,45 +251,44 @@ export default defineComponent({
 									🔎
 								</v-btn>
 								<v-dialog v-model="allchans_dialog" max-width="500">
-  <v-card>
-    <v-card-title class="text-h4 font-weight-bold text-center">
-      Channels list
-    </v-card-title>
-    <v-divider></v-divider>
-    <v-list-item-group>
-      <v-list-item v-for="channel in available_channels" :key="channel.id">
-        <v-card
-          id="Channelcard"
-          class="d-flex flex-column align-center justify-center mt-4 mx-4 pa-4"
-          height="auto"
-          elevation="2"
-        >
-          <div class="d-flex align-center justify-center mb-2">
-            <span class="font-weight-bold">{{channel.name}}</span>
-          </div>
-          <div class="d-flex align-center justify-center mb-2">
-            <v-btn color="primary" class="mr-2" @click="joinChannel(channel.id)">
-              Join
-            </v-btn>
-          </div>
-          <div class="d-flex align-center justify-center">
-            <v-text-field
-              class="mx-2"
-              label="Password"
-              type="password"
-              single-line
-              dense
-              hide-details
-              outlined
-              style="width: 150px;"
-            ></v-text-field>
-          </div>
-        </v-card>
-      </v-list-item>
-    </v-list-item-group>
-  </v-card>
-</v-dialog>
-
+								<v-card>
+									<v-card-title class="text-h4 font-weight-bold text-center">
+										Channels list
+									</v-card-title>
+									<v-divider></v-divider>
+										<v-list-item-group>
+											<v-list-item v-for="channel in available_channels" :key="channel.id">
+												<v-card
+												id="Channelcard"
+												class="d-flex flex-column align-center justify-center mt-4 mx-4 pa-4"
+												height="auto"
+												elevation="2"
+												>
+												<div class="d-flex align-center justify-center mb-2">
+													<span class="font-weight-bold">{{channel.name}}</span>
+												</div>
+												<div class="d-flex align-center justify-center mb-2">
+													<v-btn color="primary" class="mr-2" @click="joinChannel(channel.id)">
+														Join
+													</v-btn>
+												</div>
+												<div class="d-flex align-center justify-center">
+													<v-text-field
+													class="mx-2"
+													label="Password"
+													type="password"
+													single-line
+													dense
+													hide-details
+													outlined
+													style="width: 150px;"
+													></v-text-field>
+												</div>
+												</v-card>
+											</v-list-item>
+										</v-list-item-group>
+									</v-card>
+								</v-dialog>
 							</v-card>
 							<v-card id="Channelscontent" height="65vh" v-if="joined_channels">
 								<v-list-item v-for="channel in joined_channels" :key="channel.id">
