@@ -6,7 +6,6 @@ import { UserService } from './users.service';
 import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { Jwt2faAuthGuard } from 'src/auth/guards/jwt-2fa-auth.guard';
 import FindUserDTO from './dto/find-user.dto';
 
 @Controller('user')
@@ -25,19 +24,10 @@ export class UsersController {
     @UseGuards(JwtAuthGuard)
     @Get("/me")
     async getMe(@Req() req: any, @Response() res: any) : Promise<User> {
-        const user = await this.userService.getUserById(req.user.sub);
+        const user = await this.userService.getMe(req.user.sub);
         if (!user)
             return res.status(HttpStatus.NOT_FOUND).send();
         return res.status(HttpStatus.OK).send(user);
-    }
-
-    @UseGuards(JwtAuthGuard)
-    @Get("/stats")
-    async getStats(@Req() req: any, @Response() res: any) {
-        const user = await this.userService.getUserById({id: req.user.sub, friends: true})
-        if (!user)
-            return res.status(HttpStatus.NOT_FOUND).send();
-        return res.send({ friends: user.friends, wins: user.wins, losses: user.losses, game: await this.userService.getUserGameHistory(req.user.sub)})
     }
 
     @UseGuards(JwtAuthGuard)
