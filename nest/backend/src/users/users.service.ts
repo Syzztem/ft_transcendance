@@ -73,7 +73,7 @@ export class UserService {
     }
 
     async getMe(id: number) : Promise<User>{
-        return this.userRepository.findOne({
+        const user = await this.userRepository.findOne({
             relations : {
                 channels: true,
                 games: true,
@@ -82,6 +82,8 @@ export class UserService {
             },
             where: {id}
         });
+        console.log(user);
+        return user;
     }
 
     async getUserById(dto: FindUserDTO): Promise<User> {
