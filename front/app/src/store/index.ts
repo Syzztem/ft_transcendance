@@ -295,7 +295,7 @@ const store = createStore({
         instance.patch("/user/username", userInfos)
         .then((response: any) => {
           commit('username', userInfos.username)
-          commit('profilePic', 'http://' + process.env.VUE_APP_URL + ':3000/profilepics/' + userInfos.username + '.jpg')
+          this.dispatch('getProfilePic', userInfos.username)
           resolve(response)
         })
         .catch((error: any) => {

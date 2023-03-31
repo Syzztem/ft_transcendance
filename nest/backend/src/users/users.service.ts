@@ -96,15 +96,18 @@ export class UserService {
         return this.userRepository.save(user);
     }
 
+    verifUsername(username: string) {
+        const alphanumericRegex = /^[a-zA-Z0-9]+$/;
+        const firstCharRegex = /^[a-zA-Z]/;
+        return alphanumericRegex.test(username) && firstCharRegex.test(username.charAt(0));
+    }
+
     async changeUsername(dto: ChangeUserDTO): Promise<number> {
         const user = await this.userRepository.findOneBy({ id: dto.id });
-        if (!user) {
+        if (!user)
           return HttpStatus.NOT_FOUND;
-        }
         if (
-          (await this.userRepository.count({ where: { username: dto.username } })) !=
-            0 ||
-          dto.username.length > 8
+          (await this.userRepository.count({ where: { username: dto.username } })) != 0 || dto.username.length > 8 || !this.verifUsername(dto.username)
         ) {
           return HttpStatus.CONFLICT;
         }
@@ -128,7 +131,6 @@ export class UserService {
               });
             } catch (err) {
               Logger.error(`Failed to rename file: ${err.message}`, err.stack, 'changeUsername');
-              return HttpStatus.INTERNAL_SERVER_ERROR;
             }
           } else {
             Logger.warn(`Source file does not exist: ${oldPath}`, 'changeUsername');
