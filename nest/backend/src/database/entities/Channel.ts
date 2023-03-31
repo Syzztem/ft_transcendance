@@ -24,7 +24,7 @@ export class Channel {
     @JoinTable()
     users: User[];
 
-    @OneToMany(() => ChannelMessage, message => message.channel)
+    @OneToMany(() => ChannelMessage, message => message.channel, {onDelete: 'CASCADE'})
     @JoinColumn()
     messages: ChannelMessage[]
 
@@ -34,7 +34,7 @@ export class Channel {
     @Column({type: "varchar", nullable: true, default: null})
     password?: string;
 
-    @OneToMany(() => BanAndMute, ban => ban.channel)
+    @OneToMany(() => BanAndMute, ban => ban.channel, {onDelete: 'CASCADE'})
     @JoinColumn()
     bannedOrMuted: BanAndMute[];
 
