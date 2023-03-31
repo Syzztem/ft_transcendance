@@ -313,7 +313,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         client.leave(chan.id.toString());
         if (!chan || !chan.removeUser(dto.uid))
             throw new WsException("Channel doesn't exist or user doesn't exist or is not on this channel");
-        this.server.to(chan.id.toString()).emit("left_channel", dto.uid, chan);
+        //this.server.to(chan.id.toString()).emit("left_channel", dto.uid, chan);
+        client.emit("left_channel", chan);
         client.leave(chan.id.toString());
         this.channelRepository.save(chan);
     }

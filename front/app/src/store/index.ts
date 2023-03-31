@@ -422,7 +422,7 @@ const store = createStore({
 		},
     getAllChannelsStore()
     {
-      chatSocket.emit('getAll');;
+      chatSocket.emit('getAll');
     },
     stopReceiving()
     {

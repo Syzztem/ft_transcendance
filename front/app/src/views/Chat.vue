@@ -190,8 +190,13 @@ export default defineComponent({
 			this.updateChannels(channel);
 			console.log('updateChannels')
 		})
-		chatSocket.on('left_channel' , (channel : any) => {
+		chatSocket.on('left_channel' , (uid : number, channel : IChannel) => {
+			console.log('leave channel uid dto :' , uid);
+			console.log(`User ${uid} left channel ${channel}`);
 			this.rmChannel(channel.id);
+			
+
+
 		})
 	},
 	unmounted() {
