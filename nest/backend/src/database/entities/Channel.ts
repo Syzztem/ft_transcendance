@@ -18,7 +18,11 @@ export class Channel {
 
     @ManyToMany(() => User)
     @JoinTable()
-    users: User[]
+    mods: User[];
+
+    @ManyToMany(() => User)
+    @JoinTable()
+    users: User[];
 
     @OneToMany(() => ChannelMessage, message => message.channel)
     @JoinColumn()
@@ -44,31 +48,30 @@ export class Channel {
         this.password = await bcrypt.hash(this.password, 15);
     }
 
+    public isMod(id: number) : boolean {
+        return (this.mods.filter(mod => mod.id == id) != null)
+    }
+
     async verifyPassword(password: string) {
         return bcrypt.compare(password, this.password);
     }
 
     public isBanned(userId: number) : boolean {
-        if (this.bannedOrMuted.find(ban => ban.user.id === userId && ban.isBanned))
-            return true;
-        return false;
+        return (this.bannedOrMuted.find(ban => ban.user.id === userId && ban.isBanned) != null)
     }
 
     public isMuted(userId: number) : boolean {
-        if (this.bannedOrMuted.find(ban => ban.user.id === userId && !ban.isBanned))
-            return true;
-        return false;
+        return (this.bannedOrMuted.find(ban => ban.user.id === userId && !ban.isBanned) != null)
     }
 
     public isOn(userId: number) : boolean {
-        if (this.users.find(user => user.id === userId))
-            return true;
-        return false;
+        return (this.users.find(user => user.id === userId) != null)
     }
 
     public removeUser(userId: number) : boolean {
         if (!this.isOn(userId)) return false;
         this.users.filter(user => user.id !== userId)
+        this.mods.filter(user => user.id !== userId)
         return true;
     }
 }
