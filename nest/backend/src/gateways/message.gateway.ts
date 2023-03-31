@@ -72,6 +72,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         const chan = await this.channelRepository.findOne({
             relations: {
                 users: true,
+                mods: true,
                 bannedOrMuted: true
             },
             where: {id: dto.chanId}
@@ -106,6 +107,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
             select: {id: true},
             relations: {
                 users: true,
+                mods: true,
                 bannedOrMuted: true
             },
             where: {id: dto.chanId}
