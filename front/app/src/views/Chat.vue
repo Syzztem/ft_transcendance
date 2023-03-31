@@ -186,17 +186,36 @@ export default defineComponent({
 			}
 			this.$store.state.chat.available_channels = res
 		})
-		chatSocket.on('joined_channel', (channel : any ) => {
-			this.updateChannels(channel);
-			console.log('updateChannels')
+		chatSocket.on('joined_channel', (res : any ) => {
+			if (res.user.id == this.id)
+			{
+				this.updateChannels(res.channel);
+				console.log("updateChannels");
+			}
+			else
+				console.log(res.user.username + " joined " + res.channel.name)
 		})
-		chatSocket.on('left_channel' , (uid : number, channel : IChannel) => {
-			console.log('leave channel uid dto :' , uid);
-			console.log(`User ${uid} left channel ${channel}`);
-			this.rmChannel(channel.id);
-			
-
-
+		chatSocket.on('left_channel' , (res: any) => {
+			console.log("wubba lubba dub dub");
+			console.log('leave channel uid dto :' , res.uid);
+			console.log(`User ${res.uid} left channel ${res.channel}`);
+			if (res.uid == this.id)
+				this.rmChannel(res.channel.id);
+			else
+				console.log(res.uid + " left channel " + res.channel.name)
+		})
+		chatSocket.on('banned', (res:any) => {
+			if (res.uid == this.id)
+				this.rmChannel(res.channel.id);
+			else
+				console.log(res.uid + " was banned");
+		})
+		chatSocket.on('mod', (res: IChannel) => {
+			console.log("promote/demote on " + res.name);
+		})
+		chatSocket.on('deleteChannel', (res: IChannel) => {
+			console.log(res.name, " was deleted");
+			this.rmChannel(res.id);
 		})
 	},
 	unmounted() {

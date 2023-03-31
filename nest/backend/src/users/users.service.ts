@@ -266,7 +266,7 @@ export class UserService {
         if(user1.isBlocked(user2) || user2.isBlocked(user1))
             return HttpStatus.FORBIDDEN
         user1.friends.push(user2);
-        this.userRepository.save(user2);
+        this.userRepository.save(user1);
         return HttpStatus.OK;
     }
 
