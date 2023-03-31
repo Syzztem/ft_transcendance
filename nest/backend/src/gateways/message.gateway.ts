@@ -52,6 +52,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
             },
             where: {id: dto.channelId}
         })
+        if (chan.updateBans())
+            this.channelRepository.save(chan);
         if (!chan) throw new WsException("Channel Doesn't exist")
         const user = chan.users.find(user => user.id === dto.senderId);
         if (!user || chan.isMuted(dto.senderId))
@@ -80,6 +82,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         if (!chan) throw new WsException("Channel Doesn't exist")
         const user = await this.userRepository.findOneBy({id: dto.uid});
         if (!user) throw new WsException("User doesn't exist");
+        chan.updateBans();
         if (chan.isBanned(dto.uid)) throw new WsException("User is banned from this channel");
         if (chan.isOn(dto.uid)) throw new WsException("User is already on this channel")
         if (chan.password != null) throw new WsException("This channel requires a password");
@@ -114,6 +117,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
             where: {id: dto.chanId}
         });
         if (!chan) throw new WsException("Channel Doesn't exist")
+        chan.updateBans();
         const user = await this.userRepository.findOneBy({id: dto.uid});
         if (!user) throw new WsException("User doesn't exist");
         if(chan.isBanned(dto.uid)) throw new WsException("User is banned from this channel");
@@ -138,6 +142,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
             where: {id: dto.chanId}
         });
         if (!chan) throw new WsException("Channel Doesn't exist");
+        if (chan.updateBans() && !dto.isBan)
+            this.channelRepository.save(chan);
         if (!chan.isMod(this.sockets.get(client))) throw new WsException("Nice try");
         const user = chan.users.find(user => user.id === dto.uid);
         if (!user) throw new WsException("User doesn't exist or is not on this channel");

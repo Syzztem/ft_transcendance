@@ -49,7 +49,7 @@ export class Channel {
     }
 
     public isMod(id: number) : boolean {
-        return (this.mods.filter(mod => mod.id == id) != null)
+        return (this.mods.find(mod => mod.id == id) != null)
     }
 
     async verifyPassword(password: string) {
@@ -72,6 +72,12 @@ export class Channel {
         if (!this.isOn(userId)) return false;
         this.users.filter(user => user.id !== userId)
         this.mods.filter(user => user.id !== userId)
+        return true;
+    }
+
+    public updateBans() {
+        if (this.bannedOrMuted.filter(ban => (ban.expires <= new Date())))
+            return false;
         return true;
     }
 }
