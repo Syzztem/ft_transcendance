@@ -3,8 +3,9 @@ import IUser from "./IUser"
 interface	IDmMessage
 {
 	content:string,
-	receiver: Array<IUser>,
+	receiver: IUser,
     sender: IUser,
+	users: Array<IUser>,
 	id: number,
     timestamp: string
 }

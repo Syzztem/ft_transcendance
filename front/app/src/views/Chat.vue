@@ -97,6 +97,9 @@ export default defineComponent({
 			chatSocket.emit('getAll');
 			this.allchans_dialog = true;
 		},
+
+
+
 		sendMessage(newMessage : string)
 		{
 			if (!this.current_channel)
@@ -109,6 +112,11 @@ export default defineComponent({
 			this.newMessage = '';
 			this.chatSocket.emit('newmsg' , message_dto);
 		},
+
+
+
+
+
 		async startReceivingMessages() {
 			await this.receiveMessage();
 		},
@@ -196,10 +204,8 @@ export default defineComponent({
 					</v-card-title>
 					<ul v-if="current_channel">
 						<li>
-							<v-list-item v-for="user in current_channel.users ? current_channel.users : current_channel.list[0].receiver">
+							<v-list-item v-for="user in current_channel.users ? current_channel.users : current_channel.list[0].users">
 								<v-card id="Usercard" class="d-flex align-center justify-center mt-4">
-									<v-badge class="mt-2" dot location="top right" color="green">
-									<v-badge location="bottom end" class="mb-2">
 										<template v-slot:badge>
 											<img src="@/assets/sens_interdit.webp"/>
 										</template>
@@ -210,8 +216,6 @@ export default defineComponent({
 											height="60"
 											>
 										</v-avatar>
-									</v-badge>
-									</v-badge>
 									<v-card-text>
 										{{user.username}}
 										<v-menu activator="parent">

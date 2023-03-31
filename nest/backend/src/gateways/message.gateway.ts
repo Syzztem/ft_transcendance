@@ -210,10 +210,20 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         this.server.socketsLeave(chan.id.toString());
         this.channelRepository.delete(id);
     }
-                                                      
+                   
+    verifChannelName(name: string) {
+        if (name.length === 0)
+            return false
+        const alphanumericRegex = /^[a-zA-Z0-9]+$/;
+        const firstCharRegex = /^[a-zA-Z]/;
+        return alphanumericRegex.test(name) && firstCharRegex.test(name.charAt(0));
+    }
+
     @SubscribeMessage('create')
     async createChannel(@MessageBody() dto: CreateChannelDTO,
                         @ConnectedSocket() client: Socket) {
+        if (!this.verifChannelName(dto.name))
+            return
         this.verifyId(client, dto.adminId);
         let channel = this.channelRepository.create();
         const user = await this.userRepository.findOneBy({id: dto.adminId});

@@ -101,6 +101,8 @@ export class UserService {
     }
 
     verifUsername(username: string) {
+        if (username.length === 0)
+            return false
         const alphanumericRegex = /^[a-zA-Z0-9]+$/;
         const firstCharRegex = /^[a-zA-Z]/;
         return alphanumericRegex.test(username) && firstCharRegex.test(username.charAt(0));

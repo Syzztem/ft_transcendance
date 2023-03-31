@@ -51,22 +51,7 @@ const store = createStore({
         name: "tata",
         list: [{
           content: 'test',
-          receiver: [{
-            username: 'tata',
-            login42: 'toto',
-            email: '',
-            rank: 0,
-            token: '',
-            wins: 0,
-            losses: 0,
-            level: 0,
-            profilePic: '',
-            friends: [],
-            blocked: [],
-            channels: [],
-            id: 1 // Add the missing 'id' propertyessage
-          }],
-          sender: {
+          receiver: {
             username: 'tata',
             login42: 'tata',
             email: '',
@@ -79,8 +64,53 @@ const store = createStore({
             friends: [],
             blocked: [],
             channels: [],
-            id: 2 // Add the missing 'id' property
+            id: 1 // Add the missing 'id' propertyessage
           },
+          sender: {
+            username: 'toto',
+            login42: 'toto',
+            email: '',
+            rank: 0,
+            token: '',
+            wins: 0,
+            losses: 0,
+            level: 0,
+            profilePic: '',
+            friends: [],
+            blocked: [],
+            channels: [],
+            id: 2, // Add the missing 'id' property
+          },
+          users: [{
+            username: 'tata',
+            login42: 'tata',
+            email: '',
+            rank: 0,
+            token: '',
+            wins: 0,
+            losses: 0,
+            level: 0,
+            profilePic: '',
+            friends: [],
+            blocked: [],
+            channels: [],
+            id: 1 // Add the missing 'id' property
+          },
+          {
+              username: 'toto',
+              login42: 'toto',
+              email: '',
+              rank: 0,
+              token: '',
+              wins: 0,
+              losses: 0,
+              level: 0,
+              profilePic: '',
+              friends: [],
+              blocked: [],
+              channels: [],
+              id: 1 // Add the missing 'id' propertyessage
+            }],
           id: 1,
           timestamp: ''
         }]
