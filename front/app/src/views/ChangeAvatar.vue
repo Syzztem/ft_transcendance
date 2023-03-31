@@ -138,7 +138,8 @@ export default defineComponent({
   methods: {
     onFileChange(e: any) {
       const file = e.target.files[0]
-      this.url = URL.createObjectURL(file)
+      if (file)
+        this.url = URL.createObjectURL(file)
     },
     random() {
       this.ifRd = true

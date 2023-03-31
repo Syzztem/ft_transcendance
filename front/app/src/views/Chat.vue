@@ -10,17 +10,24 @@ import { defineComponent } from 'vue';
 import { mapActions ,mapState} from "vuex";
 import { chatSocket } from "@/websocket";
 import { onBeforeMount } from "vue";
+import router from "@/router";
 
 /*
+
+	BUGS :
+
+	CRITICAL :
+		auth with same nickame than previous user -> super urgent
+		can join 'twice?', not more -> check after the auth bug
+
 	TODO :
 
-	ne pas afficher le channel dans lequel on est deja present dans le channel panel
-	gestion de channel prive
-	fix send message crashing the website when no channel is created
-	protect crash if !currentchannel
-	
-	
-	leave
+	gestion de channel prive (send DTO OK)
+	ne pas creer de channel sans nom
+	ne pas creer de chan avec le meme nom
+	leave : debug
+
+	add friend
 	moderation front -> todo : basic request tests
 	persistance des messages
 	no creation of channels with empty name
@@ -38,13 +45,13 @@ export default defineComponent({
 			id: Number(localStorage.getItem('id')),
 			options:
 			[
-				{ title: 'Send DM' },
-				{ title: 'profile page' },
-				{ title: 'add friend' },
-				{ title: 'remove friend' },
-				{ title: 'block user' },
-				{ title: 'unblock user' },
-				{ title: 'invite to game' },
+				{ id: 1, title: 'Send DM' },
+				{ id: 2, title: 'profile page' },
+				{ id: 3, title: 'add friend' },
+				{ id: 4, title: 'remove friend' },
+				{ id: 5, title: 'block user' },
+				{ id: 6, title: 'unblock user' },
+				{ id: 7, title: 'invite to game' },
 			],
 			dialog: false,
 			allchans_dialog: false,
@@ -53,20 +60,26 @@ export default defineComponent({
 				password: '',
 				id: 0,
 			},
+			newJoinRequest:
+			{
+				channelName : '',
+				password : '',
+			},
 			newMessage: '',
 			chatSocket: chatSocket,
+			avatar: this.$store.state.chat.avatars_list
 		}
 	},
 	methods: {
 		...mapActions(
-			["selectChannel", "rmChannel", "sendMessage", "receiveMessage", "joinChannel",
+			["selectChannel", "rmChannel", "receiveMessage", "joinChannel",
 			"stopReceiving", "getUserChannels", "getAllChannelsStore", "updateChannelsStore"],),
-		createChannel(newChan : any)
+		createPublicChannel(newChan : any)
 		{
 			const channel_dto = {
 				name: newChan.name,
 				adminId: this.id,
-				password: newChan.password,
+				password: newChan.password
 			};
 			this.chatSocket.emit('create', channel_dto);
 			chatSocket.
@@ -74,6 +87,9 @@ export default defineComponent({
 				this.$store.dispatch('createChannel', response);
 			})
 			this.dialog = false;
+		},
+		async selectChannel(channel: IChannel) {
+			await this.$store.dispatch('selectChannel', channel)
 		},
 		getAllChannels()
 		{
@@ -83,12 +99,14 @@ export default defineComponent({
 		},
 		sendMessage(newMessage : string)
 		{
-			//this.$store.state.chat.current_message = "";
+			if (!this.current_channel)
+				return
 			const message_dto = {
 				message : newMessage,
 				channelId : this.current_channel.id,
 				senderId : this.id,
 			};
+			this.newMessage = '';
 			this.chatSocket.emit('newmsg' , message_dto);
 		},
 		async startReceivingMessages() {
@@ -102,45 +120,66 @@ export default defineComponent({
 		{
 			await this.updateChannelsStore(channel);
 		},
-		joinChannel(id : any)
+		joinChannel(channel : any, password : string)
 		{
-			const join_dto = {chanId: id, uid: this.id, password : ''};
+			const join_dto = {chanId: channel.id, uid: this.id, password : password};
+			console.log('join dto :', join_dto);
 			this.chatSocket.emit('join', join_dto);
 		},
 		leaveChannel(id : any)
 		{
-			// const leave_dto = {chanId: id, uid: this.id, password : ''};
-			// console.log('leave DTO', leave_dto);
-			// this.chatSocket.emit('leave', leave_dto);
+			const leave_dto = {chanId: id, uid: this.id, password : ''};
+			console.log('leave DTO', leave_dto);
+			this.chatSocket.emit('leave', leave_dto);
 		},
+		handleChatUsers(item: any, user: any) {
+			switch(item.id) {
+				case 1: {}
+				case 2: {
+					this.$router.push('/profile/' + user.id)
+				}
+				case 3: {}
+				case 4: {}
+				case 5: {}
+				case 6: {}
+				case 7: {}
+			}
+		}
 	},
     computed: {
 		user() {return this.$store.state.userInfos},
 		username() {return this.$store.state.userInfos.username},
 		channels() {return this.$store.state.chat.channels},
 		joined_channels() {return this.$store.state.chat.joined_channels},
+		dms_list() {return this.$store.state.chat.dms_list},
 		current_channel() {return this.$store.state.chat.current_channel},
 		blocked_users() {return this.$store.state.chat.blocked_users},
-		available_channels() {return this.$store.state.chat.available_channels}
+		available_channels() {return this.$store.state.chat.available_channels},
 	},
 	mounted() {
-		console.log('start receiving messages');
 		this.startReceivingMessages();
-		chatSocket.on('sendAllChannels', (channels : IChannel[]) =>
-		{
-			
-			console.log('mounted channels :', channels);
-			this.$store.state.chat.available_channels = channels;})
-			chatSocket.on('joined_channel', (channel : any ) => {
-				this.updateChannels(channel);
-				console.log('updateChannels')
-			})
-		},
+		chatSocket.on('sendAllChannels', (channels : any) => {
+			const res: any = []
+			for (const chan of channels) {
+				const index = this.$store.state.chat.joined_channels.findIndex((element: any) => element.id === chan.id)
+				if (index === -1)
+					res.push(chan)
+			}
+			this.$store.state.chat.available_channels = res
+		})
+		chatSocket.on('joined_channel', (channel : any ) => {
+			this.updateChannels(channel);
+			console.log('updateChannels')
+		})
+		chatSocket.on('left_channel' , (channel : any) => {
+			this.rmChannel(channel.id);
+		})
+	},
 	unmounted() {
-		console.log('hey we stop receiving ===> unmount');
   		this.stopReceivingMessages();
 		chatSocket.off('sendAllChannels');
 		chatSocket.off('joined_channel');
+		chatSocket.off('left_channel');
 	},
 })
 
@@ -157,7 +196,7 @@ export default defineComponent({
 					</v-card-title>
 					<ul v-if="current_channel">
 						<li>
-							<v-list-item v-for="user in current_channel.users">
+							<v-list-item v-for="user in current_channel.users ? current_channel.users : current_channel.list[0].receiver">
 								<v-card id="Usercard" class="d-flex align-center justify-center mt-4">
 									<v-badge class="mt-2" dot location="top right" color="green">
 									<v-badge location="bottom end" class="mb-2">
@@ -166,7 +205,7 @@ export default defineComponent({
 										</template>
 										<v-avatar size="60">
 											<img
-											src="https://cdn.vuetifyjs.com/images/john.jpg"
+											:src="avatar.get(user.username)"
 											alt="John"
 											height="60"
 											>
@@ -177,7 +216,7 @@ export default defineComponent({
 										{{user.username}}
 										<v-menu activator="parent">
 											<v-list id="LighterCard">
-												<v-list-item v-for="(item, index) in options" :key="index" :value="index">
+												<v-list-item v-for="(item, index) in options" :key="index" :value="index" @click="handleChatUsers(item, user)">
 													<v-list-item-title>
 														{{ item.title }}
 													</v-list-item-title>
@@ -248,7 +287,7 @@ export default defineComponent({
 							<v-card-actions>
 							<v-spacer/>
 								<v-btn color="error" text @click="dialog = false">Cancel</v-btn>
-								<v-btn color="primary" @click="createChannel(newChannel)">Create</v-btn>
+								<v-btn color="primary" @click="createPublicChannel(newChannel)">Create</v-btn>
 							</v-card-actions>
 						</v-card>
 						</v-dialog>
@@ -276,28 +315,33 @@ export default defineComponent({
 									<span class="font-weight-bold">{{channel.name}}</span>
 								</div>
 								<div class="d-flex align-center justify-center mb-2">
-									<v-btn color="primary" class="mr-2" @click="joinChannel(channel.id)">
+									<div class="d-flex align-center justify-center">
+										<v-text-field v-model="newJoinRequest.password"
+										class="mx-2"
+										label="Password"
+										type="password"
+										single-line
+										dense
+										hide-details
+										outlined
+										style="width: 150px;"
+										></v-text-field>
+									</div>
+									<v-btn color="primary" class="mr-2" @click="joinChannel(channel , newJoinRequest.password)">
 										Join
 									</v-btn>
-								</div>
-								<div class="d-flex align-center justify-center">
-									<v-text-field
-									class="mx-2"
-									label="Password"
-									type="password"
-									single-line
-									dense
-									hide-details
-									outlined
-									style="width: 150px;"
-									></v-text-field>
-								</div>
+									</div>
 								</v-card>
 							</v-list-item>
 							</v-card>
 						</v-dialog>
 					</v-card>
 					<v-card id="ChanContent" v-if="joined_channels">
+								<v-list-item v-for="dm in dms_list">
+									<v-card id="DMcard" class="d-flex align-center justify-center mt-4" height="5vh" @click="selectChannel(dm)">
+										{{ dm.name }}
+									</v-card>
+								</v-list-item>
 						<v-list-item v-for="channel in joined_channels" :key="channel.id">
 							<v-card
 								id="Channelcard"
@@ -315,7 +359,8 @@ export default defineComponent({
 							<v-btn
 								class="altbtn"
 								id="Btnchannel"
-								@click="rmChannel(current_channel.id)"
+								@click="leaveChannel(current_channel ? current_channel.id : -1)"
+								
 							>
 								<p class="alttxt">
 								leave channel
@@ -503,6 +548,17 @@ export default defineComponent({
 #Channelcard
 {
     background-color:	rgb(76, 75, 177);
+}
+
+#DMcard
+{
+    background-color: #c73232;
+    color: #ffd483;
+}
+
+#Channelscontent
+{
+	background-color:	rgb(0, 0, 128);
 	font-family:		"Pokemon";
     color:				#ffce74;
 }

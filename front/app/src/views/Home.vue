@@ -25,6 +25,11 @@ export default defineComponent({
 					  CHAT
 					  </p>
 			  </v-btn>
+			<v-btn router :to="'/friends'" class="btn" rounded flat>
+				<p class="p">
+					FRIENDS
+				</p>
+			</v-btn>
 			  <v-btn router :to="'/hall'" class="btn" rounded flat>
 			  <p class="p">
 				  HALL OF FAME

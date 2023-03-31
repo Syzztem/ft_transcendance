@@ -20,40 +20,6 @@ export class AuthService {
 		return this.jwtService.verify(token, {secret: jwtConstants.secret})
 	}
 
-	// async generateTwoFactorAuthenticationSecret(id: number) {
-	// 	const secret = speakeasy.generateSecret()
-	// 	console.log('secret generate: ', secret.base32)
-	// 	await this.usersService.setTwoFactorAuthenticationSecret(secret.base32, id);
-	// 	return secret.otpauth_url
-	// }
-
-	// async generateQrCodeDataURL(otpAuthUrl: string) {
-	// 	return toDataURL(otpAuthUrl);
-	// }
-
-	// async isTwoFactorAuthenticationCodeValid(twoFactorAuthenticationCode: string, id: number) {
-	// 	const user = await this.usersService.getUserById(id)
-	// 	console.log('secret validation: ', user.twoFactorAuthenticationSecret)
-	// 	const isValid = speakeasy.totp.verify({
-    //     	token: twoFactorAuthenticationCode,
-    //     	secret: user.twoFactorAuthenticationSecret,
-	// 		encoding: 'base32'
-    //   	});
-	// 	return isValid
-    // }
-
-	// async loginWith2fa(userWithoutPsw: Partial<User>) {
-	// 	const payload = {
-	// 		email: userWithoutPsw.email,
-	// 		isTwoFactorAuthenticationEnabled: !!userWithoutPsw.isTwoFactorAuthenticationEnabled,
-	// 		isTwoFactorAuthenticated: true,
-	// 	};
-	// 	return {
-	// 		email: payload.email,
-	// 		access_token: this.jwtService.sign(payload)
-	// 	};
-	// }
-
 	async generateTwoFactorAuthenticationSecret(user: any) {
 		const secret = authenticator.generateSecret()
 		const User = await this.usersService.getUserById(user.sub)
@@ -70,10 +36,10 @@ export class AuthService {
 	  }	
 
 	  async isTwoFactorAuthenticationCodeValid(twoFactorAuthenticationCode: string, id: number) {
-		const user = await this.usersService.getUserById(id)
+		const secret = await this.usersService.get2FAsecret(id)
 		return authenticator.verify({
           token: twoFactorAuthenticationCode,
-          secret: user.twoFactorAuthenticationSecret,
+          secret: secret
         });
       }
 

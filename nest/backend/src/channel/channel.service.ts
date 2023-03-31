@@ -41,7 +41,7 @@ export class ChannelService {
             relations: {
                 sender:     true,
             },
-            where: {channel: {id: dto.channelId}},
+            where: {channel: {id: dto.id}},
             order: {id: "DESC"},
             take: 50,
             skip: 50 * dto.page

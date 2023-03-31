@@ -55,7 +55,6 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         const user = chan.users.find(user => user.id === dto.senderId);
         if (!user || chan.isMuted(dto.senderId))
             throw new WsException("User doesn't exist, is not on this channel or is muted");
-        //this.server.to(chan.id.toString()).emit('displayMessage', message)//"msg", user.username + "@" + chan.id + ":" + dto.message);
         const message = this.messageRepository.create({
             content: dto.message,
             sender: user,
@@ -63,7 +62,6 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         })
         this.messageRepository.save(message);
         this.server.to(chan.id.toString()).emit('displayMessage', message)
-        // client.emit('displayMessage', message);
     }
 
     @SubscribeMessage('join')
@@ -80,7 +78,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         if (!chan) throw new WsException("Channel Doesn't exist")
         const user = await this.userRepository.findOneBy({id: dto.uid});
         if (!user) throw new WsException("User doesn't exist");
-        if(chan.isBanned(dto.uid)) throw new WsException("User is banned from this channel");
+        if (chan.isBanned(dto.uid)) throw new WsException("User is banned from this channel");
+//        if (chan.isOn(dto.uid)) throw new WsException("User is already on this channel")
         if (chan.password != null) throw new WsException("This channel requires a password");
         client.join(chan.id.toString());
         chan.users.push(user);
@@ -157,7 +156,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     @SubscribeMessage('getmsg')
     async getMessagePage(   @MessageBody() dto: GetMessageDTO,
                             @ConnectedSocket() client: Socket) {
-        if (!client.in(dto.channelId.toString()))
+        if (!client.in(dto.id.toString()))
             throw new WsException("Nice try");
         const messages = await this.messageRepository.find({
             select: {
@@ -168,7 +167,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
             relations: {
                 sender:     true,
             },
-            where: {channel: {id: dto.channelId}},
+            where: {channel: {id: dto.id}},
             order: {id: "DESC"},
             take: 50,
             skip: 50 * dto.page
@@ -232,17 +231,21 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
     @SubscribeMessage("getAll")
     async getAllChannels(@ConnectedSocket() client: Socket) {
-        const channels = await this.channelRepository.find();
+        const channels = await this.channelRepository.find({relations: {users: true}});
+        channels.filter(chan => chan.isOn(this.sockets.get(client)));
         client.emit("sendAllChannels", channels);
     }
 
     @SubscribeMessage('leave')
     async leaveChannel( @MessageBody() dto: JoinChannelDTO,
                         @ConnectedSocket() client: Socket) {
-        console.log('LEAVE');
         this.verifyId(client, dto.uid);
-        const chan = await this.channelRepository.findOneBy({id: dto.chanId});
-        client.emit("/" + chan.id + ":You left this channel");
+        const chan = await this.channelRepository.findOne(
+        {
+            relations: {users: true},
+            where: {id: dto.chanId}
+        });
+        client.emit("left_channel" , chan);
         client.leave(chan.id.toString());
         if (!chan || !chan.removeUser(dto.uid))
             throw new WsException("Channel doesn't exist or user doesn't exist or is not on this channel");
@@ -358,6 +361,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
             client.disconnect();
             return ;
         }
+        user.channels.filter(chan => chan.isPrivate == false)
         client.emit("login", user);
         this.clients.set(user.id, client);
         this.sockets.set(client, user.id);

@@ -36,7 +36,8 @@
       };
     },
     async mounted() {
-      await this.$store.dispatch('getFriends');
+      await this.$store.dispatch('getStats');
+      console.log(this.friends)
       this.friends = this.$store.state.userInfos.friends;
     },
     methods: {

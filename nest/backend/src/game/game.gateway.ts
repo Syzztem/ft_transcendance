@@ -59,7 +59,7 @@ export class GameGateway implements OnGatewayDisconnect, OnGatewayConnection{
 	async handleConnection(@ConnectedSocket() clientSocket: Socket) {
 
 		const payload = clientSocket.handshake.auth
-		  const user = await this.userService.findOneById(this.jwtService.decode(clientSocket.handshake.auth.token).sub);  
+		  const user = await this.userService.userExists(this.jwtService.decode(clientSocket.handshake.auth.token).sub);  
 		  if (!user)
 		  	clientSocket.disconnect();
 		else
