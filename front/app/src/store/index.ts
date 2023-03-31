@@ -150,7 +150,7 @@ const store = createStore({
         console.log('messages in channel creation :', messages);
         const channelIndex = state.chat.joined_channels.findIndex(channel => channel.id === id);
         if (channelIndex === -1) {
-          const newfront = { name, password, isPrivate, users, id: id, messages: [] };
+          const newfront = { name, password, isPrivate, users, id: id, messages: [] , mods : newchan.mods};
           state.chat.joined_channels.push(newfront);
         }
       }

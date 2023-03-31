@@ -8,6 +8,7 @@ interface IChannel {
     users:    Array<IUser>,
     messages: Array<IMessage>,
     id:       number,
+    mods:     Array<IUser>
   }
 
 export default IChannel
