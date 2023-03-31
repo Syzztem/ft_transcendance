@@ -1,5 +1,3 @@
-import { ChannelService } from './channel.service';
-import { ChannelController } from './channel.controller';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MessageGateway } from 'src/gateways/message.gateway';
@@ -12,7 +10,7 @@ import { User } from 'src/database/entities/User';
 
 @Module({
     imports: [TypeOrmModule.forFeature([Channel, ChannelMessage, BanAndMute, User, FriendMessage])],
-    controllers: [ChannelController,],
-    providers: [ChannelService, MessageGateway, JwtService],
+    controllers: [],
+    providers: [MessageGateway, JwtService],
 })
 export class ChannelModule { }
