@@ -88,6 +88,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         this.channelRepository.save(chan);
         this.logger.debug('call join');
         console.log(chan);
+        chan.bannedOrMuted = null;
         client.emit('joined_channel', chan);
     }
 
@@ -274,7 +275,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         if (!this.verifChannelName(dto.name))
             return
         this.verifyId(client, dto.adminId);
-        if (await this.channelRepository.count({where: {name: dto.name}}) != null)
+        if (await this.channelRepository.count({where: {name: dto.name}}) != 0)
             throw new WsException("Channel with this name already exists");
         let channel = this.channelRepository.create();
         const user = await this.userRepository.findOneBy({id: dto.adminId});
@@ -285,6 +286,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         channel.users = [user];
         channel.password = dto.password;
         channel.isPrivate = dto.password == null ? false : true;
+        channel.mods = [];
         channel = await this.channelRepository.save(channel);
         client.join(channel.id.toString());
         client.emit('newChannel', (channel));
