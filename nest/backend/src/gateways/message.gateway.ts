@@ -88,6 +88,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         this.channelRepository.save(chan);
         this.logger.debug('call join');
         console.log(chan);
+        chan.bannedOrMuted = null;
         client.emit('joined_channel', chan);
     }
 

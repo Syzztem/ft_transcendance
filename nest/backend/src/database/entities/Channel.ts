@@ -65,7 +65,7 @@ export class Channel {
     }
 
     public isOn(userId: number) : boolean {
-        return (this.users.find(user => user.id === userId) != null)
+        return (this.users.find(user => user.id == userId) != null)
     }
 
     public removeUser(userId: number) : boolean {
