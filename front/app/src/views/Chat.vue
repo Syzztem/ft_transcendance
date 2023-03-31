@@ -14,13 +14,11 @@ import router from "@/router";
 
 /*
 
-	BUGS :
-	aedouard: join ne fonctionne pas deux fois
-	aedouard: lorsqu on est sur un channel, on ne recoit pas l user qui arrive dans la liste des users
-	
 	TODO :
 
-	leave : debug
+	current : leave : debug
+	getmessages inside leave , ban , join
+
 	gestion de channel prive (send DTO OK)
 	add friend
 	moderation front -> todo : basic request tests
