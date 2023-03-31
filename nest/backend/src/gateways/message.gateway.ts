@@ -154,7 +154,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         if (!user) throw new WsException("User doesn't exist or is not on this channel");
         if (dto.isBan) {
             const bndclient = this.clients.get(dto.uid);
-            this.server.to(chan.id.toString()).emit("banned", {
+            this.server.to(chan.id.toString()).emit("banned",   {
                 channel: chan,
                 uid: dto.uid
             });
