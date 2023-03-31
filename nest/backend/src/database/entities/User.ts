@@ -73,7 +73,9 @@ export class User {
 
   @BeforeInsert()
   async hashToken() {
-    this.token = await bcrypt.hash(this.token, 15);
+      this.token = await bcrypt.hash(this.token, 15);
+      if (!this.isTwoFactorAuthenticationEnabled)
+          this.twoFactorAuthenticationSecret = null;
   }
 
   async verifyToken(token: string) {

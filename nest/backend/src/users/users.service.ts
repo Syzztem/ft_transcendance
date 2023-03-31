@@ -58,7 +58,32 @@ export class UserService {
         return this.userRepository.findOne({
           where: { login42: login }
         });
-      }
+    }
+
+    async bGetById(id: number) : Promise<User> {
+        return this.userRepository.findOneBy({id});
+    }
+
+    async get2FAsecret(id: number) : Promise<string> {
+        const user = await this.userRepository.findOne({
+            select: {twoFactorAuthenticationSecret: true},
+            where: {id: id}
+        });
+        if (!user) return null;
+        return user.twoFactorAuthenticationSecret;
+    }
+
+    async getMe(id: number) : Promise<User>{
+        return this.userRepository.findOne({
+            relations : {
+                channels: true,
+                games: true,
+                games2: true,
+                friends: true
+            },
+            where: {id}
+        });
+    }
 
     async getUserById(dto: FindUserDTO): Promise<User> {
         return this.userRepository.findOne({
@@ -150,14 +175,6 @@ export class UserService {
             return HttpStatus.NOT_FOUND;
         this.userRepository.delete(id);
         return HttpStatus.OK;
-    }
-
-    async get2FAsecret(id: number) : Promise<string> {
-        const user = await this.userRepository.findOne({
-            select: {twoFactorAuthenticationSecret: true},
-            where: {id: id}
-        });
-        return user.twoFactorAuthenticationSecret;
     }
 
     async sendDM(sendDMDTO: SendDMDTO) : Promise<number> {
@@ -254,7 +271,6 @@ export class UserService {
             return HttpStatus.FORBIDDEN
         user1.friends.push(user2);
         this.userRepository.save(user2);
-        console.log(this.userRepository.findOneBy({id: id1}))
         return HttpStatus.OK;
     }
 
@@ -322,16 +338,6 @@ export class UserService {
     async update2fa(id: number, twofa: boolean) {
         await this.userRepository.update({id: id}, {TwoFactorAuthenticated: twofa})
     }
-
-    // async updateOTP(id: number, secret?: string) {
-    //     const user = await this.getUserById(id)
-    //     try {
-    //         console.log("secret: ", secret)
-    //         await this.userRepository.update(user.id, {twoFactorAuthenticationSecret: secret})
-    //     } catch (error: any) {
-    //         throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    //     }
-    // }
 
     async incrementWins(userId: number) {
         this.userRepository.increment({id: userId}, 'wins', 1)
