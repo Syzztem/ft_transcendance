@@ -15,18 +15,13 @@ import router from "@/router";
 /*
 
 	BUGS :
-
-	CRITICAL :
-		auth with same nickame than previous user -> super urgent
-		can join 'twice?', not more -> check after the auth bug
-
+	aedouard: join ne fonctionne pas deux fois
+	aedouard: lorsqu on est sur un channel, on ne recoit pas l user qui arrive dans la liste des users
+	
 	TODO :
 
-	gestion de channel prive (send DTO OK)
-	ne pas creer de channel sans nom
-	ne pas creer de chan avec le meme nom
 	leave : debug
-
+	gestion de channel prive (send DTO OK)
 	add friend
 	moderation front -> todo : basic request tests
 	persistance des messages
@@ -37,6 +32,7 @@ import router from "@/router";
 											ADVANCED PANEL	:	promote/demote/ban/kick/unban
 	- v-if (blocked) -> display red block icon
 	- v-if display only available options (don t block if already blocked etc)
+
 */
 
 export default defineComponent({
@@ -148,15 +144,26 @@ export default defineComponent({
 		},
 		handleChatUsers(item: any, user: any) {
 			switch(item.id) {
-				case 1: {}
+				case 1: {
+					// this.chatSocket.emit('sendDM', dmDTO);
+				}
 				case 2: {
 					this.$router.push('/profile/' + user.id)
 				}
-				case 3: {}
-				case 4: {}
-				case 5: {}
-				case 6: {}
-				case 7: {}
+				// case 3: {
+				// 	this.chatSocket.emit('addfriend', addfriendDTO)
+				// }
+				// case 4: {
+				// 	this.chatSocket.emit('rmfriend', rmfriendDto)
+				// }
+				// case 5: {
+				// 	this.chatSocket.emit('block user', )
+
+				// }
+				// case 6: {
+				// 	this.chatSocket.emit('unblock user')
+				// }
+				// case 7: {}
 			}
 		}
 	},
