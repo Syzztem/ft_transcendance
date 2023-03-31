@@ -70,14 +70,16 @@ export class Channel {
 
     public removeUser(userId: number) : boolean {
         if (!this.isOn(userId)) return false;
-        this.users.filter(user => user.id !== userId)
-        this.mods.filter(user => user.id !== userId)
+        this.users = this.users.filter(user => user.id !== userId);
+        this.mods = this.mods.filter(user => user.id !== userId);
         return true;
     }
 
     public updateBans() {
-        if (this.bannedOrMuted.filter(ban => (ban.expires <= new Date())))
+        const bmcpy = this.bannedOrMuted.filter(ban => (ban.expires <= new Date()))
+        if (bmcpy.length == this.bannedOrMuted.length)
             return false;
+        this.bannedOrMuted = bmcpy;
         return true;
     }
 }

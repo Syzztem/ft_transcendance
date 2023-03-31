@@ -261,7 +261,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         if (!chan.isMod(this.sockets.get(client))) throw new WsException("Nice try");
         const user = chan.users.find(user => user.id === dto.uid);
         if (!user) throw new WsException("User doesn't exist or is not on this channel");
-        chan.mods.filter(mod => mod.id != user.id);
+        chan.mods = chan.mods.filter(mod => mod.id != user.id);
         this.server.to(chan.id.toString()).emit("mod", channel);
         this.channelRepository.save(chan);
     }
@@ -269,7 +269,10 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     @SubscribeMessage('delete')
     async deleteChannel(@MessageBody() id: number,
                         @ConnectedSocket() client: Socket) {
-        const chan = await this.channelRepository.findOneBy({id})
+        const chan = await this.channelRepository.findOne({
+            relations: {admin: true},
+            where: {id}
+        });
         if (!chan) throw new WsException("Channel doesn't exist");
         if (chan.admin.id != this.sockets.get(client)) throw new WsException("Nice try");
         this.server.to(chan.id.toString()).emit("deleteChannel", chan);
@@ -310,8 +313,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
     @SubscribeMessage("getAll")
     async getAllChannels(@ConnectedSocket() client: Socket) {
-        const channels = await this.channelRepository.find({relations: {users: true}});
-        channels.filter(chan => chan.isOn(this.sockets.get(client)));
+        let channels = await this.channelRepository.find({relations: {users: true}});
         client.emit("sendAllChannels", channels);
     }
 
@@ -330,6 +332,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         });
         if (!chan || !chan.removeUser(dto.uid))
             throw new WsException("Channel doesn't exist or user doesn't exist or is not on this channel");
+        console.log(chan);
         if (chan.admin.id == dto.uid) return this.deleteChannel(dto.chanId, client);
         console.log(chan);
         this.server.to(chan.id.toString()).emit('left_channel', {
@@ -460,8 +463,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         this.clients.get(user1.id).emit("block", user2)
         this.clients.get(user2.id).emit("blocked", user1)
         user1.blocked.push(user2);
-        user1.friends.filter(usr => usr.id !== user2.id);
-        user2.friends.filter(usr => usr.id !== user1.id);
+        user1.friends = user1.friends.filter(usr => usr.id !== user2.id);
+        user2.friends = user2.friends.filter(usr => usr.id !== user1.id);
         this.userRepository.save(user1);
         this.userRepository.save(user2);
     }
@@ -482,7 +485,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
         if (!user1.blocked.includes(user2)) throw new WsException("User is already blocked")
         client.emit("unblocked", user2);
-        user1.blocked.filter(usr => usr.id !== ids[2]);
+        user1.blocked = user1.blocked.filter(usr => usr.id !== ids[2]);
         this.userRepository.save(user1);
     }
 
@@ -509,8 +512,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
         if (!user1.friends.includes(user2)) throw new WsException("Not friends")
-        user1.friends.filter(usr => usr.id !== user2.id);
-        user2.friends.filter(usr => usr.id !== user1.id);
+        user1.friends = user1.friends.filter(usr => usr.id !== user2.id);
+        user2.friends = user2.friends.filter(usr => usr.id !== user1.id);
         this.userRepository.save(user1);
         this.userRepository.save(user2);
         this.clients.get(user1.id).emit("unfriend", user2)
@@ -533,7 +536,6 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
             client.disconnect();
             return ;
         }
-        user.channels.filter(chan => chan.isPrivate == false)
         client.emit("login", user);
         this.clients.set(user.id, client);
         this.sockets.set(client, user.id);

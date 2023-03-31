@@ -212,8 +212,8 @@ export class UserService {
         if (user1.isBlocked(user2))
             return HttpStatus.NO_CONTENT;
         user1.blocked.push(user2);
-        user1.friends.filter(usr => usr.id !== user2.id);
-        user2.friends.filter(usr => usr.id !== user1.id);
+        user1.friends = user1.friends.filter(usr => usr.id !== user2.id);
+        user2.friends = user2.friends.filter(usr => usr.id !== user1.id);
         this.userRepository.save(user1);
         this.userRepository.save(user2);
     }
@@ -233,7 +233,7 @@ export class UserService {
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
         if (!user1.isBlocked(user2))
             return HttpStatus.NO_CONTENT;
-        user1.blocked.filter(usr => usr.id !== id2);
+        user1.blocked = user1.blocked.filter(usr => usr.id !== id2);
         this.userRepository.save(user1);
         return HttpStatus.OK;
     }
@@ -293,8 +293,8 @@ export class UserService {
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
         if (!user1.isFriend(user2))
             return HttpStatus.NO_CONTENT;
-        user1.friends.filter(usr => usr.id !== user2.id);
-        user2.friends.filter(usr => usr.id !== user1.id);
+        user1.friends = user1.friends.filter(usr => usr.id !== user2.id);
+        user2.friends = user2.friends.filter(usr => usr.id !== user1.id);
         this.userRepository.save(user1);
         this.userRepository.save(user2);
         return HttpStatus.OK;

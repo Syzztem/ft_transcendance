@@ -83,10 +83,10 @@ export class User {
   }
 
   public isFriend(user: User) {
-    return (this.friends.filter(u => u.id == user.id) != null)
+    return (this.friends.find(u => u.id == user.id) != null)
   }
 
   public isBlocked(user: User) {
-    return (this.blocked.filter(u => u.id == user.id) != null)
+    return (this.blocked.find(u => u.id == user.id) != null)
   }
 }
