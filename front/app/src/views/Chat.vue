@@ -13,24 +13,28 @@ import { onBeforeMount } from "vue";
 import router from "@/router";
 
 /*
-
 	TODO :
 
-	current : leave : debug
-	getmessages inside leave , ban , join
+	invite to game(lina)
 
-	gestion de channel prive (send DTO OK)
-	add friend
-	moderation front -> todo : basic request tests
-	persistance des messages
-	no creation of channels with empty name
-	hide joined channels in the getAllChannels panel
+	FRONT
+	update users in channels with leave/join front
 	
+	add friend
+	block,
+	ban
+	promote
+	mute
+
+	BACK
+	change channel password (back)
+	kick (limited time)
+	gestion de channel prive (front is sending the good DTO)
+
+	- v-if display only available options (don t block if already blocked etc)
 	- clickable profile on user -> opens 	OPTIONS PANEL	:	dm, profile page, add to friends, remove from friend block user, unblock user
 											ADVANCED PANEL	:	promote/demote/ban/kick/unban
-	- v-if (blocked) -> display red block icon
-	- v-if display only available options (don t block if already blocked etc)
-
+	persistance des messages
 */
 
 export default defineComponent({

@@ -226,9 +226,9 @@ const store = createStore({
         })
       })
     },
-    getStats({commit}) {
+    getStats({commit}, id) {
       return new Promise((resolve, reject) => {
-        instance.get("/user/stats")
+        instance.post("/user/id", {id: id, friends: true})
         .then((response: any) => {
           commit('setStats', response.data)
           commit('setFriends', response.data.friends)
