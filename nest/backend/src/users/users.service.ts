@@ -1,7 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import CreateUserDTO from 'src/users/dto/create-user.dto';
-import FindUserDTO from 'src/users/dto/find-user.dto';
 import ChangeUserDTO from './dto/change-user.dto';
 import SendDMDTO from 'src/dto/send-dm.dto';
 import { FriendMessage } from 'src/database/entities/FriendMessage';
@@ -10,7 +9,7 @@ import { Repository } from 'typeorm';
 import * as fs from 'fs';
 import { Game } from 'src/database/entities/Game';
 import { Equal } from 'typeorm';
-import { Logger } from '@nestjs/common';
+import FindUserDTO from './dto/find-user.dto';
 
 @Injectable()
 export class UserService {
@@ -107,43 +106,21 @@ export class UserService {
     }
 
     async changeUsername(dto: ChangeUserDTO): Promise<number> {
-        const user = await this.userRepository.findOneBy({ id: dto.id });
-        if (!user)
-          return HttpStatus.NOT_FOUND;
-        if (
-          (await this.userRepository.count({ where: { username: dto.username } })) != 0 || dto.username.length > 8 || !this.verifUsername(dto.username)
-        ) {
-          return HttpStatus.CONFLICT;
-        }
-        const oldUsername = user.username;
+        const user = await this.userRepository.findOneBy({ id: dto.id })
+
+        if (!user) return HttpStatus.NOT_FOUND;
+        if (await this.userRepository.count({ where: { username: dto.username } }) != 0
+            || dto.username.length > 8)
+            return HttpStatus.CONFLICT;
         user.username = dto.username;
-      
-        if (oldUsername && oldUsername.trim() !== '') {
-          const oldPath = UserService.PP_PATH + oldUsername + ".jpg";
-          const newPath = UserService.PP_PATH + dto.username + ".jpg";
-      
-          if (fs.existsSync(oldPath)) {
-            try {
-              await new Promise<void>((resolve, reject) => {
-                fs.rename(oldPath, newPath, (err) => {
-                  if (err) {
-                    reject(err);
-                  } else {
-                    resolve();
-                  }
-                });
-              });
-            } catch (err) {
-              Logger.error(`Failed to rename file: ${err.message}`, err.stack, 'changeUsername');
-            }
-          } else {
-            Logger.warn(`Source file does not exist: ${oldPath}`, 'changeUsername');
-          }
-        }
-      
-        await this.userRepository.save(user);
+        const oldPath = UserService.PP_PATH + user.login42 + '.jpg';
+        const newPath = UserService.PP_PATH + dto.username + '.jpg';
+        fs.rename(oldPath, newPath, (err) => {
+        })
+        await this.userRepository.save(user)
         return HttpStatus.OK;
-      }
+    }
+
 
     async delete(id: number) : Promise<number> {
         if (await this.userRepository.countBy({id}) == 0)
@@ -160,15 +137,30 @@ export class UserService {
         return user.twoFactorAuthenticationSecret;
     }
 
-    async sendDM(sendDMDTO: SendDMDTO) : Promise<number> {
-        const user1 = await this.userRepository.findOneBy({id: sendDMDTO.id1});
-        const user2 = await this.userRepository.findOneBy({id: sendDMDTO.id2});
-
+    async sendDM(dto: SendDMDTO) : Promise<number> {
+        const user1 = await this.userRepository.findOne({
+            select: {
+                id: true
+            },
+            relations: {
+                blocked: true
+            },
+            where: {id: dto.id1}
+        });
+        const user2 = await this.userRepository.findOne({
+            select: {
+                id: true
+            },
+            relations: {
+                blocked: true
+            },
+            where: {id: dto.id2}
+        });
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
         if (user1.isBlocked(user2) || user2.isBlocked(user1))
             return HttpStatus.FORBIDDEN;
         const message = this.messageRepository.create({
-            content: sendDMDTO.message,
+            content: dto.message,
             sender: user1,
             receiver: user2
         })
