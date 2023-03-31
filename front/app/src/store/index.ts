@@ -47,44 +47,9 @@ const store = createStore({
       blocked_users: [],
       current_message:  "",
       available_channels: [] as IChannel [],
-      dms_list: [{
-        name: "tata",
-        list: [{
-          content: 'test',
-          receiver: [{
-            username: 'tata',
-            login42: 'toto',
-            email: '',
-            rank: 0,
-            token: '',
-            wins: 0,
-            losses: 0,
-            level: 0,
-            profilePic: '',
-            friends: [],
-            blocked: [],
-            channels: [],
-            id: 1 // Add the missing 'id' propertyessage
-          }],
-          sender: {
-            username: 'tata',
-            login42: 'tata',
-            email: '',
-            rank: 0,
-            token: '',
-            wins: 0,
-            losses: 0,
-            level: 0,
-            profilePic: '',
-            friends: [],
-            blocked: [],
-            channels: [],
-            id: 2 // Add the missing 'id' property
-          },
-          id: 1,
-          timestamp: ''
-        }]
-      }] as IDmList[],
+      dms_list: [
+        {messages: [{content: 'test', id: 1, timestamp: '2022'}, {content: 'test2', id: 2, timestamp: '2022'}], sender: {id: 1, username: 'rcorenti', login42: 'toto', email: 'toto', rank: 0, token: 'qwe', wins: 0, losses: 0, level: 0, profilePic: '', friends: [], blocked: [], channels:[]}, receiver: {id: 2, username: 'tata', login42: 'tata', email: 'tata', rank: 0, token: 'iop', wins: 0, losses: 0, level: 0, profilePic: '', friends: [], blocked: [], channels:[]}, users: [{id: 1, username: 'rcorenti', login42: 'toto', email: 'toto', rank: 0, token: 'qwe', wins: 0, losses: 0, level: 0, profilePic: '', friends: [], blocked: [], channels:[]}, {id: 2, username: 'tata', login42: 'tata', email: 'tata', rank: 0, token: 'iop', wins: 0, losses: 0, level: 0, profilePic: '', friends: [], blocked: [], channels:[]}]}
+      ] as IDmList[],
       avatars_list: new Map<string, string>()
     },
     game: {
@@ -150,7 +115,7 @@ const store = createStore({
         console.log('messages in channel creation :', messages);
         const channelIndex = state.chat.joined_channels.findIndex(channel => channel.id === id);
         if (channelIndex === -1) {
-          const newfront = { name, password, isPrivate, users, id: id, messages: [] , mods : newchan.mods};
+          const newfront = { name, password, isPrivate, users, id: id, messages: [], mods: newchan.mods };
           state.chat.joined_channels.push(newfront);
         }
       }
@@ -190,11 +155,6 @@ const store = createStore({
       state.game.colorBackground = color
     }
   },
-
-
-
-
-
 
   actions: {
     isLogin({ commit }) {

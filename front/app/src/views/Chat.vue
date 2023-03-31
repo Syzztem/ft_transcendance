@@ -91,10 +91,23 @@ export default defineComponent({
 			chatSocket.emit('getAll');
 			this.allchans_dialog = true;
 		},
-		sendMessage(newMessage : string)
+		sendDM(message: string) {
+			if (!this.current_channel)
+				return
+			console.log('obj: ', this.current_channel)
+			const send = {
+				message: message,
+				id1: this.id,
+				id2: this.current_channel.receiver.id
+			}
+			this.chatSocket.emit('sendDM', send)
+		},
+		sendMessage(newMessage: string)
 		{
 			if (!this.current_channel)
 				return
+			if (this.current_channel.sender)
+				return this.sendDM(newMessage)
 			const message_dto = {
 				message : newMessage,
 				channelId : this.current_channel.id,
@@ -103,6 +116,7 @@ export default defineComponent({
 			this.newMessage = '';
 			this.chatSocket.emit('newmsg' , message_dto);
 		},
+
 		async startReceivingMessages() {
 			await this.receiveMessage();
 		},
@@ -201,13 +215,8 @@ export default defineComponent({
 					</v-card-title>
 					<ul v-if="current_channel">
 						<li>
-							<v-list-item v-for="user in current_channel.users ? current_channel.users : current_channel.list[0].receiver">
+							<v-list-item v-for="user in current_channel.users">
 								<v-card id="Usercard" class="d-flex align-center justify-center mt-4">
-									<v-badge class="mt-2" dot location="top right" color="green">
-									<v-badge location="bottom end" class="mb-2">
-										<template v-slot:badge>
-											<img src="@/assets/sens_interdit.webp"/>
-										</template>
 										<v-avatar size="60">
 											<img
 											:src="avatar.get(user.username)"
@@ -215,8 +224,6 @@ export default defineComponent({
 											height="60"
 											>
 										</v-avatar>
-									</v-badge>
-									</v-badge>
 									<v-card-text>
 										{{user.username}}
 										<v-menu activator="parent">
@@ -344,7 +351,7 @@ export default defineComponent({
 					<v-card id="ChanContent" v-if="joined_channels">
 								<v-list-item v-for="dm in dms_list">
 									<v-card id="DMcard" class="d-flex align-center justify-center mt-4" height="5vh" @click="selectChannel(dm)">
-										{{ dm.name }}
+										{{ dm.receiver.username }}
 									</v-card>
 								</v-list-item>
 						<v-list-item v-for="channel in joined_channels" :key="channel.id">
