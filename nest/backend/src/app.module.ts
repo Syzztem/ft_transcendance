@@ -17,6 +17,7 @@ import { BanAndMute } from './database/entities/BanAndMute';
 import { Channel } from './database/entities/Channel';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { CustomLoggerService } from './custom-logger.service';
 
 @Module({
   imports: [PassportModule, AuthModule, UsersModule, ConfigModule.forRoot({
@@ -41,14 +42,8 @@ import { join } from 'path';
     })
   ],
   controllers: [AppController],
-  providers: [AppService, AuthModule],
+  providers: [AppService, AuthModule, CustomLoggerService],
 })
 export class AppModule {
   constructor(private dataSource: DataSource) {}
-  // configure(consumer: MiddlewareConsumer) {
-  //   consumer.apply(CorsMiddleware).forRoutes({
-  //     path: '*',
-  //     method: RequestMethod.ALL
-  //   })
-// 
 }
