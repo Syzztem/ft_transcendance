@@ -191,7 +191,7 @@ const store = createStore({
     },
     getProfileInfos({commit}, id) {
       return new Promise((resolve, reject) => {
-        instance.get("/user/id/" + id)
+        instance.post("/user/id/", {id: id})
         .then((response: any) => {
           commit('profileInfos', response.data)
           commit('setStats', response.data)
@@ -399,6 +399,8 @@ const store = createStore({
       commit("setCurrentChannel", channel);
     },
     rmChannel({ commit }, id) {
+      if (id === -1)
+        return
       commit("removeChannel", id);
     },
     createChannel({ commit }, channelInfos) {

@@ -8,6 +8,7 @@ import { FriendMessage } from 'src/database/entities/FriendMessage';
 import { User } from 'src/database/entities/User';
 import { Repository } from 'typeorm';
 import * as fs from 'fs';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class UserService {
@@ -93,21 +94,47 @@ export class UserService {
     }
 
     async changeUsername(dto: ChangeUserDTO): Promise<number> {
-        const user = await this.userRepository.findOneBy({id: dto.id});
-        if (!user)
-            return HttpStatus.NOT_FOUND;
-        if (await this.userRepository.count({ where: { username: dto.username } }) != 0
-        || dto.username.length > 8)
-            return HttpStatus.CONFLICT;
-        const oldUsername = user.username
+        const user = await this.userRepository.findOneBy({ id: dto.id });
+        if (!user) {
+          return HttpStatus.NOT_FOUND;
+        }
+        if (
+          (await this.userRepository.count({ where: { username: dto.username } })) !=
+            0 ||
+          dto.username.length > 8
+        ) {
+          return HttpStatus.CONFLICT;
+        }
+        const oldUsername = user.username;
         user.username = dto.username;
-        const oldPath = UserService.PP_PATH + oldUsername + '.jpg';
-        const newPath = UserService.PP_PATH + dto.username + '.jpg';
-        fs.rename(oldPath, newPath, (err) => {console.log(err); return 404});
-        await this.userRepository.save(user)
+      
+        if (oldUsername && oldUsername.trim() !== '') {
+          const oldPath = UserService.PP_PATH + oldUsername + ".jpg";
+          const newPath = UserService.PP_PATH + dto.username + ".jpg";
+      
+          if (fs.existsSync(oldPath)) {
+            try {
+              await new Promise<void>((resolve, reject) => {
+                fs.rename(oldPath, newPath, (err) => {
+                  if (err) {
+                    reject(err);
+                  } else {
+                    resolve();
+                  }
+                });
+              });
+            } catch (err) {
+              Logger.error(`Failed to rename file: ${err.message}`, err.stack, 'changeUsername');
+              return HttpStatus.INTERNAL_SERVER_ERROR;
+            }
+          } else {
+            Logger.warn(`Source file does not exist: ${oldPath}`, 'changeUsername');
+          }
+        }
+      
+        await this.userRepository.save(user);
         return HttpStatus.OK;
-    }
-
+      }
 
     async delete(id: number) : Promise<number> {
         if (await this.userRepository.countBy({id}) == 0)

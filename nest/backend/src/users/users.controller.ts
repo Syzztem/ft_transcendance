@@ -13,7 +13,7 @@ export class UsersController {
     constructor(private userService: UserService) {}
 
     @UseGuards(JwtAuthGuard)
-    @Get("id")
+    @Post("id")
     async getUser(@Body() dto: FindUserDTO,
                   @Response() res: any) : Promise<User> {
         const user = await this.userService.getUserById(dto);
