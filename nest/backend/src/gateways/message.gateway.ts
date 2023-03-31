@@ -81,7 +81,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         const user = await this.userRepository.findOneBy({id: dto.uid});
         if (!user) throw new WsException("User doesn't exist");
         if (chan.isBanned(dto.uid)) throw new WsException("User is banned from this channel");
-//        if (chan.isOn(dto.uid)) throw new WsException("User is already on this channel")
+        if (chan.isOn(dto.uid)) throw new WsException("User is already on this channel")
         if (chan.password != null) throw new WsException("This channel requires a password");
         client.join(chan.id.toString());
         chan.users.push(user);
