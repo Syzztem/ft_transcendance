@@ -91,6 +91,9 @@ const store = createStore({
       state.profileInfos.losses = stats.losses
       state.profileInfos.games = stats.games
     },
+    setFriends(state, friends) {
+      state.userInfos.friends = friends
+    },
     setStatus() {},
     username(state, username) {
       state.userInfos.username = username
@@ -231,6 +234,7 @@ const store = createStore({
         instance.get("/user/stats")
         .then((response: any) => {
           commit('setStats', response.data)
+          commit('setFriends', response.data.friends)
           resolve(response)
         })
         .catch((error: any) => {

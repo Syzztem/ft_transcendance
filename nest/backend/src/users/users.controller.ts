@@ -34,10 +34,10 @@ export class UsersController {
     @UseGuards(JwtAuthGuard)
     @Get("/stats")
     async getStats(@Req() req: any, @Response() res: any) {
-        const user = await this.userService.getUserById(req.user.sub)
+        const user = await this.userService.getUserById({id: req.user.sub, friends: true})
         if (!user)
             return res.status(HttpStatus.NOT_FOUND).send();
-        return res.send({ wins: user.wins, losses: user.losses, game: await this.userService.getUserGameHistory(req.user.sub)})
+        return res.send({ friends: user.friends, wins: user.wins, losses: user.losses, game: await this.userService.getUserGameHistory(req.user.sub)})
     }
 
     @UseGuards(JwtAuthGuard)
