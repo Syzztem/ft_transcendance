@@ -270,13 +270,25 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     async deleteChannel(@MessageBody() id: number,
                         @ConnectedSocket() client: Socket) {
         const chan = await this.channelRepository.findOne({
-            relations: {admin: true},
+            relations: {
+                admin: true,
+                mods: true,
+                messages: true,
+                users: true,
+                bannedOrMuted: true
+            },
             where: {id}
         });
         if (!chan) throw new WsException("Channel doesn't exist");
         if (chan.admin.id != this.sockets.get(client)) throw new WsException("Nice try");
         this.server.to(chan.id.toString()).emit("deleteChannel", chan);
         this.server.socketsLeave(chan.id.toString());
+        chan.admin = null;
+        chan.mods = [];
+        chan.messages = [];
+        chan.users = [];
+        chan.bannedOrMuted = [];
+        await this.channelRepository.save(chan);
         this.channelRepository.delete(id);
     }
                    
