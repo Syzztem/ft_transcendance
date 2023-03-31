@@ -201,6 +201,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         });
         const user = await this.userRepository.findOneBy({id : dto.uid});
         if (!chan || !user) throw new WsException("Channel or user doesn't exist");
+        if (chan.updateBans())
+            this.channelRepository.save(chan);
         if (!chan.isMod(this.sockets.get(client))) throw new WsException("Nice try");
         const ban = await this.bansAndMutesRepository.findOneBy({
             channel: {id: dto.chanId},
