@@ -1,4 +1,4 @@
-import { AfterLoad, BeforeInsert, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { AfterLoad, BeforeInsert, BeforeRemove, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, Unique } from 'typeorm';
 import { Channel } from './Channel';
 import { Game } from './Game';
 import * as bcrypt from 'bcrypt'
@@ -48,13 +48,19 @@ export class User {
   @Column({type: 'timestamp', nullable: true})
   lastSuccessfulAuth: Date;
 
-  @ManyToMany(() => User)
+  @ManyToMany(() => User, user => user.friendOf, {cascade: true, onUpdate: 'CASCADE'})
   @JoinTable({name: "friends"})
   friends: User[];
 
-  @ManyToMany(() => User)
+  @ManyToMany(() => User, user => user.friends, {onUpdate: 'CASCADE'})
+  friendOf: User[]
+
+  @ManyToMany(() => User, user => user.blockedBy, {cascade: true, onUpdate: 'CASCADE'})
   @JoinTable({name: "blocked"})
   blocked: User[];
+
+  @ManyToMany(() => User, user => user.blocked, {onUpdate: 'CASCADE'})
+  blockedBy: User[];
 
   @ManyToMany(() => Channel, (chan) => chan.users, {onUpdate: 'CASCADE'})
   channels: Channel[];
@@ -90,5 +96,10 @@ export class User {
 
   public isBlocked(user: User) {
     return (this.blocked.find(u => u.id == user.id) != null)
+  }
+
+  @BeforeRemove()
+  public logRemoval() {
+    console.log("deleted " + this.username);
   }
 }

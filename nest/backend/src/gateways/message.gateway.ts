@@ -457,11 +457,10 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         });
 
         if (!user1 || !user2) throw new WsException("One or more of the users doesn't exist");
-        if (user1.friends.includes(user2))
+        if (user1.isFriend(user2))
             return ;
-        if(user1.blocked.includes(user2) || user2.blocked.includes(user1))
+        if(user1.isBlocked(user2) || user2.isBlocked(user1))
             throw new WsException("Users blocked each other");
-        this.clients.get(ids[1]).emit("friend", user1);
         this.clients.get(ids[0]).emit("friend" + user2);
         user1.friends.push(user2);
         this.userRepository.save(user1);
@@ -481,7 +480,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         });
         const user2 = await this.userRepository.findOneBy({id: ids[2]});
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
-        if (user1.blocked.includes(user2)) throw new WsException("Users blocked each other");
+        if (user1.isBlocked(user2)) throw new WsException("Users blocked each other");
         this.clients.get(user1.id).emit("block", user2)
         this.clients.get(user2.id).emit("blocked", user1)
         user1.blocked.push(user2);
@@ -505,7 +504,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         });
         const user2 = await this.userRepository.findOneBy({id: ids[2]});
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
-        if (!user1.blocked.includes(user2)) throw new WsException("User is already blocked")
+        if (!user1.isBlocked(user2)) throw new WsException("User is already blocked")
         client.emit("unblocked", user2);
         user1.blocked = user1.blocked.filter(usr => usr.id !== ids[2]);
         this.userRepository.save(user1);
@@ -533,13 +532,10 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         });
 
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
-        if (!user1.friends.includes(user2)) throw new WsException("Not friends")
+        if (!user1.isFriend(user2)) throw new WsException("Not friends")
         user1.friends = user1.friends.filter(usr => usr.id !== user2.id);
-        user2.friends = user2.friends.filter(usr => usr.id !== user1.id);
         this.userRepository.save(user1);
-        this.userRepository.save(user2);
         this.clients.get(user1.id).emit("unfriend", user2)
-        this.clients.get(user2.id).emit("unfriend", user1)
     }
 
     @SubscribeMessage('isOnline')
