@@ -560,7 +560,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         const user = await this.userRepository.findOne({
             relations : {
                 channels: {
-                    users: true
+                    users: true,
+                    mods: true
                 },
                 games: true,
                 games2: true,
@@ -568,6 +569,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
             },
             where: {id: this.sockets.get(client)}
         });
+        console.log(user);
         client.emit("getMe", user);
     }
 
