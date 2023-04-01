@@ -15,8 +15,10 @@ import router from "@/router";
 /*
 	TODO :
 
-	TEJ VUE WARNING !!
-	update users in channels with leave/join front
+	VUE WARNING !!!! friend list
+
+	listen sockets dm?
+
 	block
 	PATCH bugs 2FA
 	private channel
@@ -26,7 +28,6 @@ import router from "@/router";
 	ban (limited time)
 	mute
 	kick
-
 
 	BACK
 	change channel password
@@ -169,6 +170,11 @@ export default defineComponent({
 				// }
 				// case 7: {}
 			}
+		},
+		updateCurrentChannel(user : any)
+		{
+			this.current_channel.users.push(user);
+			this.$store.dispatch('getChatPic', user.username)
 		}
 	},
     computed: {
@@ -200,7 +206,11 @@ export default defineComponent({
 				console.log("updateChannels");
 			}
 			else
+			{
+				this.updateCurrentChannel(res.user);
 				console.log(res.user.username + " joined " + res.channel.name)
+			}
+
 		})
 		chatSocket.on('left_channel' , (res: any) => {
 			console.log("wubba lubba dub dub");

@@ -226,6 +226,18 @@ const store = createStore({
         })
       })
     },
+    getChatPic({commit}, username) {
+      return new Promise((resolve, reject) => {
+        instance.get("/user/profilepic/" + username)
+        .then((response: any) => {
+          commit('setChatAvatars', {username: username, avatar: response.data})
+          resolve(response)
+        })
+        .catch((error: any) => {
+          resolve(error)
+        })
+      })
+    },
     getStats({commit}, id) {
       return new Promise((resolve, reject) => {
         instance.post("/user/id", {id: id, friends: true})
