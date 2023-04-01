@@ -16,7 +16,7 @@ export class Channel {
     @JoinColumn()
     admin: User;
 
-    @ManyToMany(() => User)
+    @ManyToMany(() => User, user => user.modOn)
     @JoinTable({name: "mods"})
     mods: User[];
 
