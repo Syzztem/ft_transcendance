@@ -8,8 +8,6 @@ import { chatSocket } from "@/websocket";
 /*
 	TODO :
 
-	VUE WARNING !!!! friend list
-
 	listen sockets dm?
 
 	block
@@ -189,7 +187,8 @@ export default defineComponent({
 		available_channels() {return this.$store.state.chat.available_channels},
 		mergedChannels() {return this.$store.state.chat.dms_list.concat(this.$store.state.chat.joined_channels)}
 	},
-	mounted() {
+	async mounted() {
+		await this.$store.dispatch('getUserInfos')
 		this.startReceivingMessages();
 		chatSocket.on('sendAllChannels', (channels : any) => {
 			const res: any = []

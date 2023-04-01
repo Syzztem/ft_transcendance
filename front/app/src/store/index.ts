@@ -29,7 +29,8 @@ const store = createStore({
       username: '',
       isotp: false,
       qrcode: '',
-      friends: []
+      friends: [],
+      channels: [] as IChannel []
     },
     profileInfos: {
       profilePic: '',
@@ -77,8 +78,8 @@ const store = createStore({
       state.userInfos.profilePic = avatar
     },
     userInfos(state, userInfos) {
-      state.userInfos.username = userInfos.username
-      state.twoFactorAuthenticated = userInfos.TwoFactorAuthenticated
+      state.userInfos = userInfos
+      state.chat.joined_channels = userInfos.channels
     },
     setIsFriend(state, infos) {
       state.profileInfos.isFriend = infos

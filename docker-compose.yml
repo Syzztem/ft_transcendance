@@ -6,7 +6,7 @@
 #    By: lothieve <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/04 15:02:47 by lothieve          #+#    #+#              #
-#    Updated: 2023/02/07 18:45:04 by lothieve         ###   ########.fr        #
+#    Updated: 2023/04/01 13:53:46 by lothieve         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -61,24 +61,24 @@ services:
       VUE_APP_URL: ${URL}
     ports:
     - 8080:8080
-  pgadmin:
-    container_name: pgadmin
-    image: dpage/pgadmin4
-    restart: always
-    depends_on:
-      - db
-    volumes:
-      - pgadmin:/var/lib/pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-    ports:
-      - "5050:80"
-    networks:
-      - transcendence
+#  pgadmin:
+#    container_name: pgadmin
+#    image: dpage/pgadmin4
+#    restart: always
+#    depends_on:
+#      - db
+#    volumes:
+#      - pgadmin:/var/lib/pgadmin
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+#      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+#    ports:
+#      - "5050:80"
+#    networks:
+#      - transcendence
 networks:
   transcendence:
 volumes:
   db:
-  pgadmin:
+#  pgadmin:
   profilepics:
