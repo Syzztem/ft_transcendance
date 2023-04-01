@@ -49,14 +49,6 @@
 	<v-container id="ProfileContainer">
 		<v-row id="MainCol">
 			<div class="CardSpacer"></div>
-			<div id="interactionsContainer">
-				<div id="InteractionsBtn" @click="goToChangeAvatar">
-					<span id="InterTextBtn">Add friend</span><img id="InteractionsIcon" src="@/assets/edit-image.png"/>
-				</div>
-				<div id="InteractionsBtn" @click="goToChangeAvatar">
-					<span id="InterTextBtn">Block user</span><img id="InteractionsIcon" src="@/assets/edit-image.png"/>
-				</div>
-			</div>
 			<div id="CardContainer">
 				<div id="TrainerPic">
 					<img id="Pic" :src="user.avatar" :alt="user.username" />
@@ -96,44 +88,6 @@
 </template>
 
 <style scoped>
-
-#interactionsContainer {
-	height: 10px;
-	max-height: 10px;
-	flex-grow: 1;
-	display: flex;
-	flex-direction: row;
-	justify-content: end;
-	align-items: center;
-	gap: 2%;
-}
-
-#InteractionsBtn {
-	display: flex;
-	background:	linear-gradient(0deg,rgb(197, 197, 197) 0%, rgb(167, 167, 177) 50%, rgba(169, 169, 240, 0.93) 100%);
-	box-shadow: 0px 0px 3px #00000069;
-	backdrop-filter: blur(7px);
-	height: 40px;
-	width: 80px;
-	gap: 0px;
-	border-radius: 10px;
-}
-
-#InteractionsIcon {
-	justify-self: end;
-	align-self: center;
-	height: 100%;
-	padding: 7px;
-}
-
-#InterTextBtn {
-	align-self: center;
-	justify-self: start;
-	font-family: pixel;
-	font-size: 8px;
-	color:rgb(61, 61, 117);
-	padding-left: 5px;
-}
 
 .CardSpacer {
 	flex-grow:			3;
