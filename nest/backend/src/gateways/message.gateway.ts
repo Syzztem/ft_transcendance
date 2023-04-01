@@ -543,8 +543,21 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         this.clients.get(user2.id).emit("unfriend", user1)
     }
 
+    @SubscribeMessage('isOnline')
+    async isOnline( @MessageBody() id: number,
+                    @ConnectedSocket() client: Socket){
+        if (this.sockets.get(client) == null)
+            throw new WsException("Nice try");
+        client.emit("online", {
+            id: id,
+            online: this.clients.get(id) != null
+        })
+    }
+
     @SubscribeMessage('me')
     async getMe(client: Socket) {
+        if (this.sockets.get(client) == null)
+            throw new WsException("Nice try");
         const user = await this.userRepository.findOne({
             relations : {
                 channels: true,
