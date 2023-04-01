@@ -45,7 +45,10 @@ export class Channel {
 
     @BeforeInsert()
     async hashPassword() {
-        this.password = await bcrypt.hash(this.password, 15);
+        if (this.password && this.password.length == 0)
+            this.password = null;
+        else
+            this.password = await bcrypt.hash(this.password, 15);
     }
 
     public isMod(id: number) : boolean {
