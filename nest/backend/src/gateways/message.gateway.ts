@@ -87,6 +87,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         this.verifyId(client, dto.uid);
         const chan = await this.channelRepository.findOne({
             relations: {
+                admin: true,
                 users: true,
                 mods: true,
                 bannedOrMuted: true
@@ -250,7 +251,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         });
         if (!chan) throw new WsException("Channel Doesn't exist");
         if (!chan.isMod(this.sockets.get(client))) throw new WsException("Nice try");
-        const user = chan.users.find(user => user.id === dto.uid);
+        const user = chan.users.find(user => user.id == dto.uid);
         if (!user) throw new WsException("User doesn't exist or is not on this channel");
         chan.mods.push(user);
         this.server.to(chan.id.toString()).emit("mod", channel);
@@ -330,7 +331,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         channel.users = [user];
         channel.password = dto.password;
         channel.isPrivate = dto.isPrivate;
-        channel.mods = [];
+        channel.mods = [user];
         channel = await this.channelRepository.save(channel);
         client.join(channel.id.toString());
         client.emit('newChannel', (channel));
@@ -338,7 +339,12 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
     @SubscribeMessage("getAll")
     async getAllChannels(@ConnectedSocket() client: Socket) {
-        let channels = await this.channelRepository.find({relations: {users: true}});
+        let channels = await this.channelRepository.find({
+            relations: {
+                users: true,
+                mods: true
+            }
+        });
         client.emit("sendAllChannels", channels.filter(chan => !chan.isPrivate));
     }
 
@@ -349,9 +355,9 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         const chan = await this.channelRepository.findOne(
         {
             relations: {
-                users: true,
+                admin: true,
                 mods: true,
-                admin: true
+                users: true
             },
             where: {id: dto.chanId}
         });
@@ -373,6 +379,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
             select: {id: true},
             relations: {
                 channel: {
+                    admin: true,
                     mods: true,
                 }
             },
@@ -581,7 +588,10 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
                 channels: true,
             },
             relations: {
-                channels: true
+                channels: {
+                    users: true,
+                    mods: true
+                }
             },
             where: {id: uid}
         });

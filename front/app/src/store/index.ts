@@ -115,11 +115,9 @@ const store = createStore({
     },
     addChannel(state, newchan) {
       if (newchan) {
-        const { name, password, isPrivate, users, id, messages } = newchan;
         const channelIndex = state.chat.joined_channels.findIndex(channel => channel.id === id);
         if (channelIndex === -1) {
-          const newfront = { name, password, isPrivate, users, id: id, messages: [], mods: newchan.mods };
-          state.chat.joined_channels.push(newfront);
+          state.chat.joined_channels.push(newchan);
         }
       }
     },
@@ -419,7 +417,7 @@ const store = createStore({
         return
       commit("removeChannel", id);
     },
-    createChannel({ commit }, channelInfos) {
+    createChannel({ commit }, channelInfos: IChannel) {
       commit("addChannel", channelInfos);
     },
     joinChannel({commit}, id)

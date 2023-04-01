@@ -4,6 +4,8 @@ import IChannel from "@/models/IChannel";
 import { defineComponent } from 'vue';
 import { mapActions} from "vuex";
 import { chatSocket } from "@/websocket";
+import IDmList from "@/models/IDmList";
+import IUser from "@/models/IUser";
 
 /*
 	TODO :
@@ -32,19 +34,37 @@ import { chatSocket } from "@/websocket";
 	persistance des messages
 */
 
+enum opts {
+	SEND_DM,
+	PROFILE,
+	ADD_FRIEND,
+	DEL_FRIEND,
+	BLK_USER,
+	UNBLK_USER,
+	INVITE,
+	BAN,
+	MUTE,
+	PROMOTE,
+	DEMOTE,
+}
+
 export default defineComponent({
 	data() {
 		return {
 			id: Number(localStorage.getItem('id')),
 			options:
 			[
-				{ id: 1, title: 'Send DM' },
-				{ id: 2, title: 'profile page' },
-				{ id: 3, title: 'add friend' },
-				{ id: 4, title: 'remove friend' },
-				{ id: 5, title: 'block user' },
-				{ id: 6, title: 'unblock user' },
-				{ id: 7, title: 'invite to game' },
+				{ id: 0, title: 'Send DM' },
+				{ id: 1, title: 'profile page' },
+				{ id: 2, title: 'add friend' },
+				{ id: 3, title: 'remove friend' },
+				{ id: 4, title: 'block user' },
+				{ id: 5, title: 'unblock user' },
+				{ id: 6, title: 'invite to game' },
+				{ id: 7, title: 'ban'},
+				{ id: 8, title: 'mute'},
+				{ id: 9, title: 'promote'},
+				{ id: 10, title: 'demote'}
 			],
 			dialog: false,
 			allchans_dialog: false,
@@ -82,7 +102,6 @@ export default defineComponent({
 			this.dialog = false;
 		},
 		async selectChannel(channel: IChannel) {
-			console.log('channel' , channel);
 			await this.$store.dispatch('selectChannel', channel)
 		},
 		getAllChannels()
@@ -91,29 +110,33 @@ export default defineComponent({
 			chatSocket.emit('getAll');
 			this.allchans_dialog = true;
 		},
+
 		sendDM(message: string) {
 			if (!this.current_channel)
 				return
-			const send = {
-				message: message,
-				id1: this.id,
-				id2: this.current_channel.friend.id
-			}
-			this.chatSocket.emit('sendDM', send)
 		},
 		sendMessage(newMessage: string)
 		{
 			if (!this.current_channel)
 				return
-			if (this.current_channel.me)
-				return this.sendDM(newMessage)
-			const message_dto = {
-				message : newMessage,
-				channelId : this.current_channel.id,
-				senderId : this.id,
-			};
+			if (!this.isChannel(this.current_channel))
+			{
+				const send = {
+					message: newMessage,
+					id1: this.id,
+					id2: this.current_channel.friend.id
+				}
+				this.chatSocket.emit('sendDM', send)
+			}
+			else {
+				const message_dto = {
+					message : newMessage,
+					channelId : this.current_channel.id,
+					senderId : this.id,
+				};
+				this.chatSocket.emit('newmsg' , message_dto);
+			}
 			this.newMessage = '';
-			this.chatSocket.emit('newmsg' , message_dto);
 		},
 
 		async startReceivingMessages() {
@@ -172,18 +195,39 @@ export default defineComponent({
 		{
 			this.current_channel.users.push(user);
 			this.$store.dispatch('getChatPic', user.username)
+		},
+		isChannel(item: IChannel | IDmList) : item is IChannel {
+			return ((item as IChannel).mods ? true : false)
+		},
+		filterOptions(options: any[], target: IUser) : any[] {
+			const out: any[] = [options[opts.PROFILE], options[opts.INVITE]];
+			out.push(this.friends.find(f => f.id == target.id) ? options[opts.DEL_FRIEND] : options[opts.ADD_FRIEND]);
+			out.push(this.blocked_users.find(b => b.id == target.id) ? options[opts.UNBLK_USER] : options[opts.BLK_USER]);
+			if (this.isChannel(this.current_channel)) {
+				out.push(options[opts.SEND_DM]);
+				if (this.current_channel.mods.findIndex(mod => mod.id = this.user.id) != -1)
+				{
+					out.push([
+						options[opts.BAN],
+						options[opts.MUTE],
+						options[opts.PROMOTE],
+						options[opts.DEMOTE]
+					])
+				}
+			}
+			return out;
 		}
 	},
     computed: {
-		user() {return this.$store.state.userInfos},
+		user() : IUser {return this.$store.state.userInfos},
 		username() {return this.$store.state.userInfos.username},
 		channels() {return this.$store.state.chat.channels},
 		joined_channels() {
-			console.log('joined channels :', this.joined_channels);
 			return this.$store.state.chat.joined_channels},
+		friends() : IUser[] {return this.$store.state.userInfos.friends},
 		dms_list() {return this.$store.state.chat.dms_list},
-		current_channel() {return this.$store.state.chat.current_channel},
-		blocked_users() {return this.$store.state.chat.blocked_users},
+		current_channel() : IChannel | IDmList {return this.$store.state.chat.current_channel},
+		blocked_users() : IUser[] {return this.$store.state.chat.blocked_users},
 		available_channels() {return this.$store.state.chat.available_channels},
 		mergedChannels() {return this.$store.state.chat.dms_list.concat(this.$store.state.chat.joined_channels)}
 	},
@@ -265,7 +309,7 @@ export default defineComponent({
 										{{user.username}}
 										<v-menu activator="parent">
 											<v-list id="LighterCard">
-												<v-list-item v-for="(item, index) in options" :key="index" :value="index" @click="handleChatUsers(item, user)">
+												<v-list-item v-for="(item, index) in filterOptions(options, user)" :key="index" :value="index" @click="handleChatUsers(item, user)">
 													<v-list-item-title>
 														{{ item.title }}
 													</v-list-item-title>
@@ -283,11 +327,8 @@ export default defineComponent({
 			<!-- Messages -->
 			<v-col id="ChatColumn">
 				<v-card id="Messagebox" width="100%">
-					<v-card-title class="CardTitle" id="ChanTitle" v-if="current_channel && !current_channel.me">
-						{{current_channel.name}}
-					</v-card-title>
-					<v-card-title class="CardTitle" id="ChanTitle" v-if="current_channel && current_channel.me">
-						{{current_channel.me.username}}
+					<v-card-title class="CardTitle" id="ChanTitle" v-if="current_channel != null">
+						{{isChannel(current_channel) ? current_channel.name : current_channel.friend.username}}
 					</v-card-title>
 					<v-card-text class="Messagesscroller" height="100%" align="left">
 						<ul v-if="current_channel">
@@ -397,8 +438,8 @@ export default defineComponent({
 								height="5vh"
 								@click="selectChannel(channel)"
 								v-bind:class="{
-									'highlight': current_channel && !current_channel.me && current_channel.id == channel.id,
-									'DMhighlight': current_channel && current_channel.me && current_channel.id == channel.id}"
+									'highlight': current_channel && isChannel(current_channel) && current_channel.id == channel.id,
+									'DMhighlight': current_channel && !isChannel(current_channel) && current_channel.id == channel.id}"
 								>
 								{{channel.name ? channel.name : channel.friend.username}}
 							</v-card>

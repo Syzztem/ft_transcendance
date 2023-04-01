@@ -52,6 +52,7 @@ export class Channel {
     }
 
     public isMod(id: number) : boolean {
+        if (this.admin.id == id) return true;
         return (this.mods.find(mod => mod.id == id) != null)
     }
 
