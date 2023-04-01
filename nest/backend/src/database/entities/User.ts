@@ -39,11 +39,11 @@ export class User {
   @Column({nullable: true, type:'varchar'})
   twoFactorAuthenticationSecret: string;
 
-  @Column({type:'boolean'})
-  TwoFactorAuthenticated: boolean = false;
+  @Column({type:'boolean', default: false})
+  TwoFactorAuthenticated: boolean;
 
-  @Column({type:'boolean'})
-  isTwoFactorAuthenticationEnabled: boolean = false;
+  @Column({type:'boolean', default: false})
+  isTwoFactorAuthenticationEnabled: boolean;
 
   @Column({type: 'timestamp', nullable: true})
   lastSuccessfulAuth: Date;
