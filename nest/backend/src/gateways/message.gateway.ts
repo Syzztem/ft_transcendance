@@ -545,7 +545,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         this.clients.get(user2.id).emit("unfriend", user1)
     }
 
-    @SubscribeMessage('online')
+    @SubscribeMessage('isOnline')
     async isOnline( @MessageBody() id: number,
                     @ConnectedSocket() client: Socket){
         if (this.sockets.get(client) == null)
