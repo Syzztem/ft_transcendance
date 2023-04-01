@@ -81,32 +81,41 @@
 	<v-container id="ProfileContainer">
 		<v-row id="MainCol">
 			<div class="CardSpacer"></div>
+			<div id="interactionsContainer">
+				<div id="InteractionsBtn" v-if="!isFriend" @click="addFriend">
+					<span id="InterTextBtn">Add friend</span><img id="InteractionsIcon" src="@/assets/add-user.png"/>
+				</div>
+				<div id="InteractionsBtn" v-else @click="unfriend">
+					<span id="InterTextBtn">Rm friend</span><img id="InteractionsIcon" src="@/assets/remove-user.png"/>
+				</div>
+				<div id="InteractionsBtn" v-if="!isBlocked" @click="block">
+					<span id="InterTextBtn">Block user</span><img id="InteractionsIcon" src="@/assets/block-user.png"/>
+				</div>
+				<div id="InteractionsBtn" v-else @click="unblock">
+					<span id="InterTextBtn">Allow user</span><img id="InteractionsIcon" src="@/assets/user.png"/>
+				</div>
+			</div>
 			<div id="CardContainer">
 				<div id="TrainerPic">
-					<img id="Pic" :src="user.avatar" :alt="user.username" />
-					<div id="ChangepicBtn" @click="goToChangeAvatar">
-						<img id="ChangepicIcon" src="@/assets/edit-image.png"/>
-					</div>
+					<img id="Pic" :src="user.profilePic" alt="Avatar" />
 				</div>
 				<v-card id="TrainerCard">
 					<div id="TrainerTxt">
 						<span id="UsernameTitle">{{ user.username }} <span id="TrainerTitle">trainer card</span></span>
-						<div id="ChangenameBtn" @click="goToChangeUsername">
-							<img id="ChangepicIcon" src="@/assets/editer.png"/>
-						</div>
 					</div>
 					<v-card id="TrainerStat">
 						<h2>Game Statistics</h2>
-						<p><span id="sub">Total Games</span> : {{ user.gameStats.played }}</p>
-						<p><span id="sub">Wins</span> : {{ user.gameStats.won }}</p>
-						<p><span id="sub">Losses</span> : {{ user.gameStats.lost }}</p>
+						<p><span id="sub">Wins</span> : {{ user.wins }}</p>
+						<p><span id="sub">Losses</span> : {{ user.losses }}</p>
+						<p><span id="sub">Ratio wins/losses</span> : {{ (user.wins / user.losses).toFixed(2) }}</p>
+						<p><span id="sub">Total Games</span> : {{ (user.wins + user.losses) }}</p>
 					</v-card>
 				</v-card>
 			</div>
 			<v-card id="HistoryContainer">
 				<div id="itsaMatch">
 				</div>
-                <div id="itsaMatch" v-for="(game, index) in user.gameHistory" :key="game.id">
+                <div id="itsaMatch" v-for="(game, index) in user.games" :key="game.id">
                   <p>Date : {{ game.timestamp }}</p>
                   <p>Score : {{ game.player1Score }} : {{ game.player2Score }}</p>
                   <p>Winner : {{ game.winner }}</p>
@@ -119,7 +128,59 @@
 	</v-container>
 </template>
 
-  <style scoped>
+<style scoped>
+
+#MainCol {
+	display: 			flex;
+	flex-direction: 	column;
+	gap:				30px;
+}
+
+#interactionsContainer {
+	height: 10px;
+	max-height: 10px;
+	flex-grow: 1;
+	display: flex;
+	flex-direction: row;
+	justify-content: end;
+	align-items: center;
+	gap: 2%;
+}
+
+#InteractionsBtn {
+	display: flex;
+	background:	linear-gradient(0deg,rgb(197, 197, 197) 0%, rgb(167, 167, 177) 50%, rgba(169, 169, 240, 0.93) 100%);
+	box-shadow: 0px 0px 3px #00000069;
+	backdrop-filter: blur(7px);
+	height: 40px;
+	width: 80px;
+	gap: 0px;
+	border-radius: 10px;
+}
+
+#InteractionsIcon {
+	justify-self: end;
+	align-self: center;
+	height: 100%;
+	padding: 7px;
+}
+
+#InterTextBtn {
+	align-self: center;
+	justify-self: start;
+	font-family: pixel;
+	font-size: 8px;
+	color:rgb(61, 61, 117);
+	padding-left: 5px;
+}
+
+#InteractionsBtn:hover {
+	background:	linear-gradient(0deg,rgb(255, 255, 255) 0%, rgb(194, 194, 202) 50%, rgba(183, 183, 241, 0.93) 100%);
+}
+
+#InteractionsBtn:active {
+	filter: brightness(1.3);
+}
 
 .CardSpacer {
 	flex-grow:			3;
@@ -132,11 +193,7 @@
 	align-items:		center;
 }
 
-#MainCol {
-	display: 			flex;
-	flex-direction: 	column;
-	gap:				30px;
-}
+
 
 #CardContainer {
 	display: 			grid;
@@ -193,34 +250,6 @@
 	width: 160px;
 }
 
-#ChangepicBtn {
-	background:	linear-gradient(0deg,rgb(197, 197, 197) 0%, rgb(167, 167, 177) 50%, rgba(169, 169, 240, 0.93) 100%);
-	box-shadow: 0px 0px 3px #00000069;
-	align-self: end;
-	justify-self: end;
-	grid-column: 1;
-	grid-row: 1;
-	backdrop-filter: blur(7px);
-	height: 40px;
-	width: 40px;
-	z-index: 5;
-	border-radius: 0px 90px 90px 90px;
-}
-
-#ChangepicIcon {
-	height: 100%;
-	width: 100%;
-	padding: 7px;
-}
-
-#ChangepicBtn:hover {
-	background:	linear-gradient(0deg,rgb(255, 255, 255) 0%, rgb(194, 194, 202) 50%, rgba(183, 183, 241, 0.93) 100%);
-}
-
-#ChangepicBtn:active {
-	filter: brightness(1.3);
-}
-
 #TrainerTxt {
 	flex-grow: 1;
 	background:	linear-gradient(180deg,rgba(0, 0, 0, 0) 0%, rgba(7, 6, 71, 0.678) 100%);
@@ -247,27 +276,6 @@
 	padding-left: 20px;
 	padding-top: 3px;
 	grid-row: 1;
-}
-
-#ChangenameBtn {
-	background:	linear-gradient(0deg,rgb(197, 197, 197) 0%, rgb(167, 167, 177) 50%, rgba(169, 169, 240, 0.93) 100%);
-	box-shadow: 0px 0px 3px #00000069;
-	margin-top: 3px;
-	justify-self: end;
-	grid-row: 1;
-	backdrop-filter: blur(7px);
-	height: 28px;
-	width: 28px;
-	z-index: 5;
-	border-radius: 90px 90px 90px 0px;
-}
-
-#ChangenameBtn:hover {
-	background:	linear-gradient(0deg,rgb(255, 255, 255) 0%, rgb(194, 194, 202) 50%, rgba(183, 183, 241, 0.93) 100%);
-}
-
-#ChangenameBtn:active {
-	filter: brightness(1.3);
 }
 
 #TrainerStat {
@@ -340,28 +348,3 @@ p {
     height:				auto;
   }
   </style>
-
-<!--
-<style scoped>
-.v-avatar img {
-  object-fit: cover;
-  border-radius: 50%;
-}
-
-.button-container {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.button-container .v-btn {
-  width: 100%;
-  padding: 8px 12px;
-  text-transform: none;
-}
-
-.game-history-container {
-  max-height: 400px;
-  overflow-y: auto;
-}
-</style> -->
