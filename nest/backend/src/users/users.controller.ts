@@ -45,7 +45,12 @@ export class UsersController {
     @UseInterceptors(FileInterceptor('file'))
     async setProflePic(@Param('username') username: string,
                         @UploadedFile() file: Express.Multer.File,
-                        @Response() res : any) {
+                        @Response() res : any,
+                        @Req() req: any) {
+        const user = await this.userService.findOneByUsername(username);
+        if (!user) res.status(HttpStatus.NOT_FOUND).send();
+        if (user.id != req.user.sub)
+            res.status(HttpStatus.FORBIDDEN).send();
         if (!file)
             return res.status(HttpStatus.FAILED_DEPENDENCY).send()
         const path = 'http://' + process.env.URL + ':3000/profilepics/' + username + '.jpg';
@@ -88,7 +93,11 @@ export class UsersController {
     async changeUsername(   @Body() data: {username: string}, // {user: wour}
                             @Req() req,
                             @Response() res: any) {
-        res.status(await this.userService.changeUsername({id: req.user.sub, username: data.username, token: req.user.token})).send()
+        res.status(await this.userService.changeUsername({
+            id: req.user.sub,
+            username: data.username,
+            token: req.user.token
+        })).send()
     }
 
     @UseGuards(JwtAuthGuard)
@@ -120,25 +129,11 @@ export class UsersController {
     }
 
     @UseGuards(JwtAuthGuard)
-    @Post("dm")
-    @HttpCode(HttpStatus.CREATED)
-    async sendDM(@Body() sendDMDTO: SendDMDTO,
-                 @Response() res: any) {
-        res.status(await this.userService.sendDM(sendDMDTO)).send(sendDMDTO);
-    }
-
-    @UseGuards(JwtAuthGuard)
-    @Delete("dm/:id")
-    @HttpCode(HttpStatus.NO_CONTENT)
-    async deleteDM(@Param('id') id: number,
-                   @Response() res: any) {
-        res.status(await this.userService.deleteDM(id)).send(id);
-    }
-    
-    @UseGuards(JwtAuthGuard)
     @Delete(":id")
     async deleteUser(@Param('id') id: number,
-                     @Response() res: any) {
+                     @Response() res: any,
+                     @Req() req: any) {
+        if (req.user.sub != id) res.status(HttpStatus.FORBIDDEN).send();
         res.status(await this.userService.delete(id)).send();
     }
 }
