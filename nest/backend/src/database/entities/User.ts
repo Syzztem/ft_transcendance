@@ -56,15 +56,15 @@ export class User {
   @JoinTable()
   blocked: User[];
 
-  @ManyToMany(() => Channel)
+  @ManyToMany(() => Channel, (chan) => chan.users, {onUpdate: 'CASCADE'})
   @JoinTable()
-  channels: Channel[]
+  channels: Channel[];
 
-  @OneToMany(() => Game, (game) => game.player1)
-  games: Game[]
+  @OneToMany(() => Game, (game) => game.player1, {cascade: true})
+  games: Game[];
 
-  @OneToMany(() => Game, (game) =>game.player2)
-  games2: Game[]
+  @OneToMany(() => Game, (game) => game.player2, {cascade: true})
+  games2: Game[];
 
   @AfterLoad()
   removeToken() {
