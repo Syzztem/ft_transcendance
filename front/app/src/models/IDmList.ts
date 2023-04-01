@@ -4,8 +4,8 @@ import IUser from "./IUser"
 interface	IDmList
 {
 	messages: Array<IDmMessage>,
-	receiver: IUser,
-    sender: IUser,
+	me: IUser
+    friend: IUser,
 	users: Array<IUser>,
 	id: number
 }
