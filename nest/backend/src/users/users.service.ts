@@ -210,7 +210,10 @@ export class UserService {
             },
             where: {id: id1}
         });
-        const user2 = await this.userRepository.findOneBy({id: id2});
+        const user2 = await this.userRepository.findOne({
+            relations: {friends: true},
+            where: {id: id2}
+        });
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
         if (user1.isBlocked(user2))
             return HttpStatus.NO_CONTENT;
@@ -219,6 +222,7 @@ export class UserService {
         user2.friends = user2.friends.filter(usr => usr.id !== user1.id);
         this.userRepository.save(user1);
         this.userRepository.save(user2);
+        return HttpStatus.OK;
     }
 
     async unBlockUser(id1: number, id2: number) {
