@@ -1,16 +1,9 @@
 <script lang="ts">
 
-import vuetify from "@/plugins/vuetify";
-import {reactive, ref, onMounted} from "vue";
-import IMessage from "@/models/IMessage";
 import IChannel from "@/models/IChannel";
-import IUser from "@/models/IUser";
-import store from "@/store";
 import { defineComponent } from 'vue';
-import { mapActions ,mapState} from "vuex";
+import { mapActions} from "vuex";
 import { chatSocket } from "@/websocket";
-import { onBeforeMount } from "vue";
-import router from "@/router";
 
 /*
 	TODO :

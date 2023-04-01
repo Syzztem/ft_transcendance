@@ -16,6 +16,8 @@ import { ChannelMessage } from 'src/database/entities/ChannelMessage';
 import { JwtService } from '@nestjs/jwt';
 import { HttpStatus, Logger } from '@nestjs/common';
 import { channel } from 'diagnostics_channel';
+import changePasswordDTO from 'src/dto/change-pw.dto';
+import { admin } from 'googleapis/build/src/apis/admin';
 
 @WebSocketGateway({ namespace: 'chat' })
 export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -38,6 +40,19 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     private verifyId(client: Socket, id: number) {
         if (this.sockets.get(client) != id)
             throw new WsException("Nice try");
+    }
+
+    @SubscribeMessage("editpw")
+    async editPassword( @MessageBody() dto: changePasswordDTO,
+                        @ConnectedSocket() client: Socket) {
+        const chan = await this.channelRepository.findOne({
+            relations: {admin : true},
+            where : {id: dto.id}
+        });
+        if (!chan) throw new WsException("Channel doesn't exist");
+        this.verifyId(client, chan.admin.id);
+        chan.password = dto.newPw;
+        this.channelRepository.save(chan);
     }
 
     @SubscribeMessage('newmsg')
@@ -85,7 +100,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         chan.updateBans();
         if (chan.isBanned(dto.uid)) throw new WsException("User is banned from this channel");
         if (chan.isOn(dto.uid)) throw new WsException("User is already on this channel")
-        if (chan.password != null) throw new WsException("This channel requires a password");
+        if (chan.password != null && chan.password.length > 0) throw new WsException("This channel requires a password");
         client.join(chan.id.toString());
         chan.users.push(user);
         this.channelRepository.save(chan);
@@ -316,7 +331,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         channel.admin = user;
         channel.users = [user];
         channel.password = dto.password;
-        channel.isPrivate = dto.password == null ? false : true;
+        channel.isPrivate = dto.isPrivate;
         channel.mods = [];
         channel = await this.channelRepository.save(channel);
         client.join(channel.id.toString());
@@ -401,7 +416,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         if (user1.blocked.includes(user2) || user2.blocked.includes(user1))
             throw new WsException("Users blocked each other");
         const socket = this.clients.get(user2.id);
-        client.emit('dmSent', user1.username + ":" + dto.message)
+        client.emit(user1.username + ":" + dto.message)
         if (socket) socket.emit(user1.username + ":" + dto.message)
         const message = this.usrmessageRepository.create({
             content: dto.message,

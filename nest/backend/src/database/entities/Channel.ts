@@ -76,6 +76,8 @@ export class Channel {
     }
 
     public updateBans() {
+        if (this.bannedOrMuted.length == 0)
+            return false
         const bmcpy = this.bannedOrMuted.filter(ban => (ban.expires <= new Date()))
         if (bmcpy.length == this.bannedOrMuted.length)
             return false;
