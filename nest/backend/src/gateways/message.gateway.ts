@@ -547,9 +547,10 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
                     @ConnectedSocket() client: Socket){
         if (this.sockets.get(client) == null)
             throw new WsException("Nice try");
+        console.log(this.clients.get(id));
         client.emit("online", {
             id: id,
-            online: this.clients.get(id) != null
+            online: (this.clients.get(id) == null ? false : true)
         })
     }
 
