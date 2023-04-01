@@ -15,19 +15,21 @@ import router from "@/router";
 /*
 	TODO :
 
-	invite to game(lina)
-
-	FRONT
+	TEJ VUE WARNING !!
 	update users in channels with leave/join front
-	
-	add friend
-	block,
-	ban
+	block
+	PATCH bugs 2FA
+	private channel
+	invite to game(lina)
+	change password channel
 	promote
+	ban (limited time)
 	mute
+	kick
+
 
 	BACK
-	change channel password (back)
+	change channel password
 	kick (limited time)
 	gestion de channel prive (front is sending the good DTO)
 
