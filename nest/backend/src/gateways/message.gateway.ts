@@ -543,10 +543,13 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
                     @ConnectedSocket() client: Socket){
         if (this.sockets.get(client) == null)
             throw new WsException("Nice try");
-        console.log(this.clients.get(id));
+        console.log("==============================================================================")
+        console.log(await this.userRepository.findOneBy({id}));
+        console.log(this.clients.get(id) ? "Offline" : "Online");
+        console.log("==============================================================================")
         client.emit("online", {
             id: id,
-            online: (this.clients.get(id) == null ? false : true)
+            online: (this.clients.get(id) ? false : true)
         })
     }
 
@@ -556,7 +559,9 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
             throw new WsException("Nice try");
         const user = await this.userRepository.findOne({
             relations : {
-                channels: true,
+                channels: {
+                    users: true
+                },
                 games: true,
                 games2: true,
                 friends: true
