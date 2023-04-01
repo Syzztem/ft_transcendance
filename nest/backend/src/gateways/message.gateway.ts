@@ -340,7 +340,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     @SubscribeMessage("getAll")
     async getAllChannels(@ConnectedSocket() client: Socket) {
         let channels = await this.channelRepository.find({relations: {users: true}});
-        client.emit("sendAllChannels", channels);
+        client.emit("sendAllChannels", channels.filter(chan => !chan.isPrivate));
     }
 
     @SubscribeMessage('leave')
@@ -590,7 +590,6 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         client.emit("login", user);
         this.clients.set(user.id, client);
         this.sockets.set(client, user.id);
-        console.log(user);
         client.join(user.channels.map(chan => chan.id.toString()));
         this.logger.log('New client connected in chat gateway');
     }
