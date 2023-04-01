@@ -81,6 +81,7 @@ export default defineComponent({
 			this.dialog = false;
 		},
 		async selectChannel(channel: IChannel) {
+			console.log('channel' , channel);
 			await this.$store.dispatch('selectChannel', channel)
 		},
 		getAllChannels()
@@ -180,7 +181,9 @@ export default defineComponent({
 		user() {return this.$store.state.userInfos},
 		username() {return this.$store.state.userInfos.username},
 		channels() {return this.$store.state.chat.channels},
-		joined_channels() {return this.$store.state.chat.joined_channels},
+		joined_channels() {
+			console.log('joined channels :', this.joined_channels);
+			return this.$store.state.chat.joined_channels},
 		dms_list() {return this.$store.state.chat.dms_list},
 		current_channel() {return this.$store.state.chat.current_channel},
 		blocked_users() {return this.$store.state.chat.blocked_users},
@@ -190,7 +193,7 @@ export default defineComponent({
 	async mounted() {
 		await this.$store.dispatch('getUserInfos')
 		this.startReceivingMessages();
-		chatSocket.on('sendAllChannels', (channels : any) => {
+		chatSocket.on('sendAllChannels', (channels : IChannel[]) => {
 			const res: any = []
 			for (const chan of channels) {
 				const index = this.$store.state.chat.joined_channels.findIndex((element: any) => element.id === chan.id)

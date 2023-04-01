@@ -150,6 +150,8 @@ const store = createStore({
       // Check if the target channel exists
       if (targetChannel) {
         // Push the new message to the target channel's messages array
+        if (!targetChannel.messages)
+          targetChannel.messages = [];
         targetChannel.messages.push(newMessage);
       } else {
         console.error(`Channel not found: ${channel}`);
@@ -402,6 +404,8 @@ const store = createStore({
       })
     },
     async selectChannel({ commit }, channel) {
+      if (!channel.users || channel.users.length === 0)
+        return
       for (const user of channel.users) {
         const res: any = await new Promise((resolve, reject) => {
           instance.get("/user/profilepic/" + user.username)

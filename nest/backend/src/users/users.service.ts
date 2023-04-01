@@ -75,13 +75,17 @@ export class UserService {
     async getMe(id: number) : Promise<User>{
         const user = await this.userRepository.findOne({
             relations : {
-                channels: true,
+                channels: {
+                    users: true,
+                    mods: true
+                },
                 games: true,
                 games2: true,
                 friends: true,
             },
             where: {id}
         });
+        console.log(user);
         return user;
     }
 
