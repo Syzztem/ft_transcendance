@@ -210,7 +210,10 @@ export class UserService {
             },
             where: {id: id1}
         });
-        const user2 = await this.userRepository.findOneBy({id: id2});
+        const user2 = await this.userRepository.findOne({
+            relations: {friends: true},
+            where: {id: id2}
+        });
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
         if (user1.isBlocked(user2))
             return HttpStatus.NO_CONTENT;
