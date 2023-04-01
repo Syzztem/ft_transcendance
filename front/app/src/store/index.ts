@@ -49,7 +49,7 @@ const store = createStore({
       blocked_users: [],
       current_message:  "",
       available_channels: [] as IChannel [],
-      dms_list: [],
+      dms_list: [] as IDmList[],
       avatars_list: new Map<string, string>()
     },
     game: {
@@ -105,6 +105,12 @@ const store = createStore({
     },
     isOnline(state, infos) {
       state.status.set(infos.id, infos.online)
+    },
+    createDMList(state, infos) {
+      const list = {me: infos.me, friend: infos.friend, users: [infos.me, infos.friend]} as IDmList
+      const isAlreadyInList = state.chat.dms_list.some((item) => item.me === list.me && item.friend === list.friend && item.users[0] === list.users[0] && item.users[1] === list.users[1]);
+      if (!isAlreadyInList)
+        state.chat.dms_list.push(list);
     },
     logout(state) {
       id = -1

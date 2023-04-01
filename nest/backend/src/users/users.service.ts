@@ -148,12 +148,18 @@ export class UserService {
         if (await this.userRepository.count({ where: { username: dto.username } }) != 0
             || dto.username.length > 8)
             return HttpStatus.CONFLICT;
+        const oldUsername = user.username
         user.username = dto.username;
-        const oldPath = UserService.PP_PATH + user.login42 + '.jpg';
-        const newPath = UserService.PP_PATH + dto.username + '.jpg';
-        fs.rename(oldPath, newPath, (err) => {
-        })
         await this.userRepository.save(user)
+
+        const oldPath = UserService.PP_PATH + oldUsername + '.jpg';
+        const newPath = UserService.PP_PATH + dto.username + '.jpg';
+        fs.access(oldPath, fs.constants.F_OK, (err) => {
+            if (!err) {
+                fs.rename(oldPath, newPath, (err) => {
+                });
+            }
+        });
         return HttpStatus.OK;
     }
 

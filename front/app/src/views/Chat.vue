@@ -101,7 +101,7 @@ export default defineComponent({
 			})
 			this.dialog = false;
 		},
-		async selectChannel(channel: IChannel) {
+		async selectChannel(channel: IChannel | IUser) {
 			await this.$store.dispatch('selectChannel', channel)
 		},
 		getAllChannels()
@@ -160,35 +160,39 @@ export default defineComponent({
 			const leave_dto = {chanId: id, uid: this.id, password : ''};
 			this.chatSocket.emit('leave', leave_dto);
 		},
-		handleChatUsers(item: any, user: any) {
+		async handleChatUsers(item: any, user: any) {
 			switch(item.id) {
 				case 1: {
-					this.chatSocket.emit('sendDM', {id1: 1, id2: 2, message : "dmtest"});
+					const i = {me: this.$store.state.user, friend: user} as any
+					this.$store.commit("createDMList", i)
+
+
+
+
+
+					this.chatSocket.emit('sendDM', {id1: this.id, id2: user.id, message : this.newMessage});
 					break
 				}
 				case 2: {
 					this.$router.push('/profile/' + user.id)
 					break
 				}
-				// case 3: {
-				// 	this.chatSocket.emit('addfriend', addfriendDTO)
-				// break
-				// }
-				// case 4: {
-				// 	this.chatSocket.emit('rmfriend', rmfriendDto)
-				// break
-				// }
-				// case 5: {
-				// 	this.chatSocket.emit('block user', )
-				// break
-				// }
-				// case 6: {
-				// 	this.chatSocket.emit('unblock user')
-				// break
-				// }
-				// case 7: {
-				// break
-				//}
+				 case 3: {
+					await this.$store.dispatch('addFriend', user.id)
+				 break
+				 }
+				 case 4: {
+				 	this.$store.dispatch('deleteFriend', user.id)
+				 break
+				 }
+				 case 5: {
+				 	this.$store.dispatch('block', user.id)
+				 break
+				 }
+				 case 6: {
+				 	this.$store.dispatch('unblock', user.id)
+				 break
+				 }
 			}
 		},
 		updateCurrentChannel(user : any)
@@ -431,26 +435,26 @@ export default defineComponent({
 					</v-card>
 					<v-card id="ChanContent" v-if="joined_channels || dms_list">
 						
-						<v-list-item v-for="channel, index in mergedChannels" :key="index">
+						<v-list-item v-for="chat, index in mergedChannels" :key="index">
 							<v-card
 								id="Channelcard"
 								class="d-flex align-center justify-center mt-4"
 								height="5vh"
-								@click="selectChannel(channel)"
+								@click="selectChannel(chat)"
 								v-bind:class="{
-									'highlight': current_channel && isChannel(current_channel) && current_channel.id == channel.id,
-									'DMhighlight': current_channel && !isChannel(current_channel) && current_channel.id == channel.id}"
+									'highlight': current_channel && isChannel(current_channel) && current_channel.id == chat.id,
+									'DMhighlight': current_channel && !isChannel(current_channel) && current_channel.friend.id == chat.id}"
 								>
-								{{channel.name ? channel.name : channel.friend.username}}
+								{{chat.name ? chat.name : chat.friend.username}}
 							</v-card>
 						</v-list-item>
 					</v-card>
 					<v-card id="Channelactions">
-						<v-card-actions class="justify-center">
+						<v-card-actions class="justify-center" v-if="current_channel && isChannel(current_channel)">
 							<v-btn
 								class="altbtn"
 								id="Btnchannel"
-								@click="leaveChannel(current_channel ? current_channel.id : -1)"
+								@click="leaveChannel(isChannel(current_channel) ? current_channel.id : -1)"
 								
 							>
 								<p class="alttxt">
@@ -573,6 +577,7 @@ export default defineComponent({
 	padding-left:		20px!important;
 	display:			flex;
 	overflow-x:			auto;
+	overflow-y: hidden;
 }
 
 #Messagebox
