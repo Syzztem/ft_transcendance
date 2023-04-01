@@ -220,12 +220,8 @@ export default defineComponent({
 		chatSocket.on('deleteChannel', (res: IChannel) => {
 			this.rmChannel(res.id);
 		})
-<<<<<<< HEAD
-		chatSocket.on('receiveDm', (res: any) => {
-=======
 		chatSocket.on('dm', (res: any) => {
 			console.log('received dm :', res);
->>>>>>> fea1335e32946eae5a88a7c2ab9d1624ec9a4388
 		})
 		chatSocket.on('error', args => {
 		})
