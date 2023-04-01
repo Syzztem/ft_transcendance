@@ -222,6 +222,7 @@ export class UserService {
         user2.friends = user2.friends.filter(usr => usr.id !== user1.id);
         this.userRepository.save(user1);
         this.userRepository.save(user2);
+        return HttpStatus.OK;
     }
 
     async unBlockUser(id1: number, id2: number) {
