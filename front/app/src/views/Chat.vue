@@ -104,7 +104,7 @@ export default defineComponent({
 			const send = {
 				message: message,
 				id1: this.id,
-				id2: this.current_channel.receiver.id
+				id2: this.current_channel.friend.id
 			}
 			this.chatSocket.emit('sendDM', send)
 		},
@@ -112,7 +112,7 @@ export default defineComponent({
 		{
 			if (!this.current_channel)
 				return
-			if (this.current_channel.sender)
+			if (this.current_channel.me)
 				return this.sendDM(newMessage)
 			const message_dto = {
 				message : newMessage,
@@ -277,17 +277,17 @@ export default defineComponent({
 			<!-- Messages -->
 			<v-col id="ChatColumn">
 				<v-card id="Messagebox" width="100%">
-					<v-card-title class="CardTitle" id="ChanTitle" v-if="current_channel && !current_channel.sender">
+					<v-card-title class="CardTitle" id="ChanTitle" v-if="current_channel && !current_channel.me">
 						{{current_channel.name}}
 					</v-card-title>
-					<v-card-title class="CardTitle" id="ChanTitle" v-if="current_channel && current_channel.sender">
-						{{current_channel.receiver.username}}
+					<v-card-title class="CardTitle" id="ChanTitle" v-if="current_channel && current_channel.me">
+						{{current_channel.me.username}}
 					</v-card-title>
 					<v-card-text class="Messagesscroller" height="100%" align="left">
 						<ul v-if="current_channel">
 							<div v-for="message in current_channel.messages">
 								<li id="messContent" v-if="message.content != ''">
-									<span id="username">{{message.sender.username}}</span>: {{message.content}}
+									<span id="username">{{message.me.username}}</span>: {{message.content}}
 								</li>
 							</div>
 						</ul>
@@ -391,10 +391,10 @@ export default defineComponent({
 								height="5vh"
 								@click="selectChannel(channel)"
 								v-bind:class="{
-									'highlight': current_channel && !current_channel.sender && current_channel.id == channel.id,
-									'DMhighlight': current_channel && current_channel.sender && current_channel.id == channel.id}"
+									'highlight': current_channel && !current_channel.me && current_channel.id == channel.id,
+									'DMhighlight': current_channel && current_channel.me && current_channel.id == channel.id}"
 								>
-								{{channel.name ? channel.name : channel.receiver.username}}
+								{{channel.name ? channel.name : channel.friend.username}}
 							</v-card>
 						</v-list-item>
 					</v-card>

@@ -78,7 +78,7 @@ export class UserService {
                 channels: true,
                 games: true,
                 games2: true,
-                friends: true
+                friends: true,
             },
             where: {id}
         });

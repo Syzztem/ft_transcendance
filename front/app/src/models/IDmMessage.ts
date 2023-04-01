@@ -2,7 +2,7 @@ import IUser from "./IUser"
 
 interface	IDmMessage
 {
-	content:string,
+	content: string,
 	id: number,
     timestamp: string,
 	sender: IUser
