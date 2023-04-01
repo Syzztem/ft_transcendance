@@ -17,11 +17,11 @@ export class Channel {
     admin: User;
 
     @ManyToMany(() => User)
-    @JoinTable()
+    @JoinTable({name: "mods"})
     mods: User[];
 
-    @ManyToMany(() => User, (user) => user.channels, {onUpdate: 'CASCADE'})
-    @JoinTable()
+    @ManyToMany(() => User, (user) => user.channels, {cascade: true, onUpdate: 'CASCADE'})
+    @JoinTable({name: "users"})
     users: User[];
 
     @OneToMany(() => ChannelMessage, message => message.channel, {cascade: true})

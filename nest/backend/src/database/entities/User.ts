@@ -49,16 +49,18 @@ export class User {
   lastSuccessfulAuth: Date;
 
   @ManyToMany(() => User)
-  @JoinTable()
+  @JoinTable({name: "friends"})
   friends: User[];
 
   @ManyToMany(() => User)
-  @JoinTable()
+  @JoinTable({name: "blocked"})
   blocked: User[];
 
   @ManyToMany(() => Channel, (chan) => chan.users, {onUpdate: 'CASCADE'})
-  @JoinTable()
   channels: Channel[];
+
+  @ManyToMany(() => Channel, (chan) => chan.mods, {onUpdate: 'CASCADE'})
+  modOn: Channel[];
 
   @OneToMany(() => Game, (game) => game.player1, {cascade: true})
   games: Game[];

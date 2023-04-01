@@ -123,6 +123,10 @@ export class UserService {
         if (await this.userRepository.count({ where: { login42: createUserDTO.login42 } }) != 0)
             return null;
         const user = this.userRepository.create(createUserDTO);
+        user.channels = [];
+        user.friends = [];
+        user.games = [];
+        user.games2 = [];
         return this.userRepository.save(user);
     }
 
