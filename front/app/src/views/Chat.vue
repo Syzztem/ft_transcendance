@@ -8,7 +8,6 @@ import { chatSocket } from "@/websocket";
 /*
 	TODO :
 
-	ERROR : when someone joins a channel and the channel creator didn t click on it.
 	VUE WARNING !!!! friend list
 
 	listen sockets dm?
