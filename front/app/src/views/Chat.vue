@@ -145,25 +145,32 @@ export default defineComponent({
 		handleChatUsers(item: any, user: any) {
 			switch(item.id) {
 				case 1: {
-					// this.chatSocket.emit('sendDM', dmDTO);
+					this.chatSocket.emit('sendDM', {id1: 1, id2: 2, message : "dmtest"});
+					break
 				}
 				case 2: {
 					this.$router.push('/profile/' + user.id)
+					break
 				}
 				// case 3: {
 				// 	this.chatSocket.emit('addfriend', addfriendDTO)
+				// break
 				// }
 				// case 4: {
 				// 	this.chatSocket.emit('rmfriend', rmfriendDto)
+				// break
 				// }
 				// case 5: {
 				// 	this.chatSocket.emit('block user', )
-
+				// break
 				// }
 				// case 6: {
 				// 	this.chatSocket.emit('unblock user')
+				// break
 				// }
-				// case 7: {}
+				// case 7: {
+				// break
+				//}
 			}
 		},
 		updateCurrentChannel(user : any)
@@ -229,12 +236,18 @@ export default defineComponent({
 			console.log(res.name, " was deleted");
 			this.rmChannel(res.id);
 		})
+		chatSocket.on('receiveDm', (res: any) => {
+  console.log(res);
+});
+
 	},
 	unmounted() {
   		this.stopReceivingMessages();
 		chatSocket.off('sendAllChannels');
 		chatSocket.off('joined_channel');
 		chatSocket.off('left_channel');
+		chatSocket.off('receiveDm');
+
 	},
 })
 
