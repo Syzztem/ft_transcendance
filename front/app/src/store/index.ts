@@ -30,7 +30,7 @@ const store = createStore({
       isotp: false,
       qrcode: '',
       friends: [],
-      channels: [] as IChannel []
+      channels: [] as IChannel [],
     },
     profileInfos: {
       profilePic: '',
@@ -42,6 +42,7 @@ const store = createStore({
       losses: 0,
       games: []
     },
+    status: new Map<number, boolean>(),
     chat: {
       joined_channels:  [] as IChannel[],
       current_channel:  null as IChannel | IDmList | null,
@@ -103,6 +104,9 @@ const store = createStore({
     },
     isLogin(state, infos) {
       state.isLogin = infos
+    },
+    isOnline(state, infos) {
+      state.status.set(infos.id, infos.online)
     },
     logout(state) {
       id = -1
@@ -436,15 +440,19 @@ const store = createStore({
     {
       chatSocket.off('displayMessage');
     },
-    receiveStatus({commit}) {
-      statusSocket.on('displayStatus', (status: any) => {
-        commit('', status)
-      })
-    },
     updateChannelsStore({commit}, channel)
     {
       commit("addChannel", channel);
     },
+    isOnline({commit}, id) {
+      chatSocket.emit('isOnline', id)
+    },
+    receiveIsOnline({commit}) {
+      chatSocket.on('online', (id: number, online: boolean) => commit("isOnline", {id: id, online: online}))
+    },
+    stopOnline({commit}) {
+      chatSocket.off('online')
+    }
   },
   getters: {
     getUsername(state) {
