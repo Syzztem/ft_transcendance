@@ -480,7 +480,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         });
         const user2 = await this.userRepository.findOneBy({id: ids[2]});
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
-        if (user1.isBlocked(user2)) throw new WsException("Users blocked each other");
+        if (user1.isBlocked(user2)) throw new WsException("Users already blocked each other");
         this.clients.get(user1.id).emit("block", user2)
         this.clients.get(user2.id).emit("blocked", user1)
         user1.blocked.push(user2);
