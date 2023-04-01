@@ -35,7 +35,7 @@ export default defineComponent({
     }
   },
   async mounted() {
-    await this.$store.dispatch('get2fa')
+    await this.$store.dispatch('getUserInfos')
     this.isotp = this.$store.state.userInfos.isotp
     if (!this.isotp) {
        await this.$store.dispatch('qrcode')
@@ -49,12 +49,12 @@ export default defineComponent({
       const code = this.otp
       this.otp = ''
       await this.$store.dispatch('turnOn2fa', code)
-      await this.$store.dispatch('get2fa')
+      await this.$store.dispatch('getUserInfos')
       this.isotp = this.$store.state.userInfos.isotp
     },
     async disable() {
       await this.$store.dispatch('turnOff2fa')
-      await this.$store.dispatch('get2fa')
+      await this.$store.dispatch('getUserInfos')
       this.isotp = this.$store.state.userInfos.isotp
     }
   }

@@ -7,7 +7,7 @@
             <v-list>
               <v-list-item v-for="(friend, index) in friends" :key="index">
                 <div class="avatar">
-                  <img :src="friend.avatar" :alt="friend.username" />
+                  <img :src="avatar.get(friend.username)" :alt="friend.username" />
                   <span :class="statusClass(friend.status)"></span>
                 </div>
                 <v-list-item-content>
@@ -32,13 +32,16 @@
     data() {
       return {
         friends: this.$store.state.userInfos.friends,
-        maxFriends: 2
+        maxFriends: 2,
+        avatar: this.$store.state.chat.avatars_list
       };
     },
     async mounted() {
-      await this.$store.dispatch('getStats');
-      console.log(this.friends)
+      await this.$store.dispatch('getUserInfos');
       this.friends = this.$store.state.userInfos.friends;
+      for (let friend of this.friends) {
+        await this.$store.dispatch('getChatPic', friend.username)
+      }
     },
     methods: {
       async removeFriend(id: any) {

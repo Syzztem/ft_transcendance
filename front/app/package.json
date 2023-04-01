@@ -8,6 +8,7 @@
     "prod": "vue-cli-service serve --mode production"
   },
   "dependencies": {
+    "@babel/core": "^7.21.4",
     "@jridgewell/sourcemap-codec": "^1.4.14",
     "@types/js-cookie": "^3.0.3",
     "@types/qrcode": "^1.5.0",
@@ -16,10 +17,9 @@
     "buffer": "^6.0.3",
     "Buffer": "^0.0.0",
     "canvg": "^4.0.1",
-    "fork-ts-checker-webpack-plugin": "^7.3.0",
     "js-cookie": "^3.0.1",
     "mitt": "3.0.0",
-    "npm": "^9.3.1",
+    "npm": "^9.6.3",
     "qrcode": "^1.5.1",
     "save-svg-as-png": "^1.4.17",
     "serve": "^14.1.2",

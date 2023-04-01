@@ -36,8 +36,6 @@ export default defineComponent({
             localStorage.setItem('id', this.$route.query.id?.toString() as any)
             socket.connect()
             await this.$store.dispatch('get2fa')
-            console.log("twoFactorAuthenticated: ", this.$store.state.twoFactorAuthenticated)
-            console.log("isotp: ", this.$store.state.userInfos.isotp)
             if (this.$store.state.userInfos.isotp && !this.$store.state.twoFactorAuthenticated)
                 await this.$router.push('2fa')
             else {

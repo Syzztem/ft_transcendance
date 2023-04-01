@@ -93,7 +93,6 @@ export default defineComponent({
 		sendDM(message: string) {
 			if (!this.current_channel)
 				return
-			console.log('obj: ', this.current_channel)
 			const send = {
 				message: message,
 				id1: this.id,
@@ -130,13 +129,11 @@ export default defineComponent({
 		joinChannel(channel : any, password : string)
 		{
 			const join_dto = {chanId: channel.id, uid: this.id, password : password};
-			console.log('join dto :', join_dto);
 			this.chatSocket.emit('join', join_dto);
 		},
 		leaveChannel(id : any)
 		{
 			const leave_dto = {chanId: id, uid: this.id, password : ''};
-			console.log('leave DTO', leave_dto);
 			this.chatSocket.emit('leave', leave_dto);
 		},
 		handleChatUsers(item: any, user: any) {
@@ -203,39 +200,29 @@ export default defineComponent({
 			if (res.user.id == this.id)
 			{
 				this.updateChannels(res.channel);
-				console.log("updateChannels");
 			}
 			else
 			{
 				this.updateCurrentChannel(res.user);
-				console.log(res.user.username + " joined " + res.channel.name)
 			}
 
 		})
 		chatSocket.on('left_channel' , (res: any) => {
 			if (res.uid == this.id)
 				this.rmChannel(res.channel.id);
-			else
-				console.log(res.uid + " left channel " + res.channel.name)
 		})
 		chatSocket.on('banned', (res:any) => {
 			if (res.uid == this.id)
 				this.rmChannel(res.channel.id);
-			else
-				console.log(res.uid + " was banned");
 		})
 		chatSocket.on('mod', (res: IChannel) => {
-			console.log("promote/demote on " + res.name);
 		})
 		chatSocket.on('deleteChannel', (res: IChannel) => {
-			console.log(res.name, " was deleted");
 			this.rmChannel(res.id);
 		})
 		chatSocket.on('receiveDm', (res: any) => {
-			console.log('received dm :', res);
 		})
 		chatSocket.on('error', args => {
-			console.log(args);
 		})
 	},
 	unmounted() {

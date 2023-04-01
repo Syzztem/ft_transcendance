@@ -80,6 +80,8 @@ const store = createStore({
     userInfos(state, userInfos) {
       state.userInfos = userInfos
       state.chat.joined_channels = userInfos.channels
+      state.userInfos.isotp = userInfos.isTwoFactorAuthenticationEnabled
+      state.twoFactorAuthenticated = userInfos.TwoFactorAuthenticated
     },
     setIsFriend(state, infos) {
       state.profileInfos.isFriend = infos
@@ -112,8 +114,6 @@ const store = createStore({
     addChannel(state, newchan) {
       if (newchan) {
         const { name, password, isPrivate, users, id, messages } = newchan;
-        console.log('password in channel create : ', password);
-        console.log('messages in channel creation :', messages);
         const channelIndex = state.chat.joined_channels.findIndex(channel => channel.id === id);
         if (channelIndex === -1) {
           const newfront = { name, password, isPrivate, users, id: id, messages: [], mods: newchan.mods };
@@ -138,7 +138,6 @@ const store = createStore({
     {
       const {channel, sender, content} = message;
       const newMessage = {channel, sender, content};
-      console.log(newMessage);
       const targetChannel = state.chat.joined_channels.find(ch => ch.id === channel.id);
       // Check if the target channel exists
       if (targetChannel) {
@@ -159,7 +158,6 @@ const store = createStore({
 
   actions: {
     isLogin({ commit }) {
-      console.log('isLogin: début');
       if (!localStorage.getItem('token')) {
         commit('isLogin', false)
         return
@@ -317,19 +315,17 @@ const store = createStore({
       return new Promise((resolve, reject) => {
         instance.post("/user/setpp/" + this.state.userInfos.username, data.formData)
         .then((response: any) => {
-          console.log('New profile pic URL:', response.data)
           commit('profilePic', response.data)
           resolve(response)
         })
         .catch((error: any) => {
-          console.log(error)
           resolve(error)
         })
       })
     },
     get2fa({commit}) {
       return new Promise((resolve, reject) => {
-        instance.get('/auth/2fa/actived')
+        instance.get('/user/me')
         .then((response: any) => {
           commit("setisotp", response.data)
           resolve(response)
@@ -429,7 +425,6 @@ const store = createStore({
 			chatSocket.
 			on('displayMessage', (message : any) =>
 			{
-				console.log('message from back :', message);
         commit("broadcast", message);
 			})
 		},
@@ -448,7 +443,6 @@ const store = createStore({
     },
     updateChannelsStore({commit}, channel)
     {
-      console.log('channel in store', channel);
       commit("addChannel", channel);
     },
   },

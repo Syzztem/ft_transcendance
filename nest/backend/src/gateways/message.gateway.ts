@@ -103,7 +103,6 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         client.join(chan.id.toString());
         chan.users.push(user);
         this.channelRepository.save(chan);
-        console.log(chan);
         chan.bannedOrMuted = null;
         this.server.to(chan.id.toString()).emit("joined_channel", {
             channel: chan,
@@ -358,15 +357,12 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         });
         if (!chan || !chan.removeUser(dto.uid))
             throw new WsException("Channel doesn't exist or user doesn't exist or is not on this channel");
-        console.log(chan);
         if (chan.admin.id == dto.uid) return this.deleteChannel(dto.chanId, client);
-        console.log(chan);
         this.server.to(chan.id.toString()).emit('left_channel', {
             channel: chan,
             uid: dto.uid
         });
         client.leave(chan.id.toString());
-        console.log("sent");
         this.channelRepository.save(chan);
     }
 
@@ -580,7 +576,6 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         client.emit("login", user);
         this.clients.set(user.id, client);
         this.sockets.set(client, user.id);
-        console.log(user);
         client.join(user.channels.map(chan => chan.id.toString()));
         this.logger.log('New client connected in chat gateway');
     }
