@@ -401,7 +401,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         if (user1.blocked.includes(user2) || user2.blocked.includes(user1))
             throw new WsException("Users blocked each other");
         const socket = this.clients.get(user2.id);
-        client.emit(user1.username + ":" + dto.message)
+        client.emit('dmSent', user1.username + ":" + dto.message)
         if (socket) socket.emit(user1.username + ":" + dto.message)
         const message = this.usrmessageRepository.create({
             content: dto.message,

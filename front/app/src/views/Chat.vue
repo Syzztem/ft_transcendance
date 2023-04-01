@@ -15,12 +15,14 @@ import router from "@/router";
 /*
 	TODO :
 
+	ERROR : when someone joins a channel and the channel creator didn t click on it.
 	VUE WARNING !!!! friend list
 
 	listen sockets dm?
 
 	block
-	PATCH bugs 2FA
+	PATCH bugs 2FA -> le controller "me" renvoie toujours false sur is2FAenabled
+	creer getAllJoinedChannels qui return les channels de l user -louis
 	private channel
 	invite to game(lina)
 	change password channel
@@ -297,7 +299,7 @@ export default defineComponent({
 						<ul v-if="current_channel">
 							<div v-for="message in current_channel.messages">
 								<li id="messContent" v-if="message.content != ''">
-									<span id="username">{{message.me.username}}</span>: {{message.content}}
+									<span id="username">{{message.sender.username}}</span>: {{message.content}}
 								</li>
 							</div>
 						</ul>
