@@ -14,7 +14,6 @@ import { aliases, mdi } from 'vuetify/iconsets/mdi'
 import '@mdi/font/css/materialdesignicons.css'
 import 'vuetify/dist/vuetify.min.css'
 
-
 const vuetify = createVuetify({
   components,
   directives,

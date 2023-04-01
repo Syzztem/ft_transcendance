@@ -6,10 +6,10 @@
           <div class="friends-list" :class="{ 'scrollable': friends.length > maxFriends }">
             <v-list>
               <v-list-item v-for="(friend, index) in friends" :key="index">
-                <v-list-item-avatar>
+                <div class="avatar">
                   <img :src="friend.avatar" :alt="friend.username" />
                   <span :class="statusClass(friend.status)"></span>
-                </v-list-item-avatar>
+                </div>
                 <v-list-item-content>
                   <v-list-item-title>{{ friend.username }}</v-list-item-title>
                 </v-list-item-content>
@@ -92,4 +92,24 @@
       border-radius: 50%;
       margin-left: 5px;
     }
+
+    .avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+}
+.status {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid white;
+}
   </style>

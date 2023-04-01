@@ -303,7 +303,7 @@ export default defineComponent({
 						<ul v-if="current_channel">
 							<div v-for="message in current_channel.messages">
 								<li id="messContent" v-if="message.content != ''">
-									<span id="username">{{message.sender.username}}</span>: {{message.content}}
+									<span id="username">{{message.sender.username }}</span>: {{message.content}}
 								</li>
 							</div>
 						</ul>
@@ -510,7 +510,7 @@ export default defineComponent({
 	height:				35px!important;
 	min-height:			35px!important;
 	flex-shrink: 0;
-	flex-grow: 1;
+	/* flex-grow: 1; */
 	flex-basis: 0;
 	letter-spacing:		1.5px!important;
 	color:				#ffae00;
