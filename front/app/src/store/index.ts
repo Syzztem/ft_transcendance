@@ -48,7 +48,7 @@ const store = createStore({
       current_message:  "",
       available_channels: [] as IChannel [],
       dms_list: [
-        {messages: [{content: 'test', id: 1, timestamp: '2022'}, {content: 'test2', id: 2, timestamp: '2022'}], sender: {id: 1, username: 'rcorenti', login42: 'toto', email: 'toto', rank: 0, token: 'qwe', wins: 0, losses: 0, level: 0, profilePic: '', friends: [], blocked: [], channels:[]}, receiver: {id: 2, username: 'tata', login42: 'tata', email: 'tata', rank: 0, token: 'iop', wins: 0, losses: 0, level: 0, profilePic: '', friends: [], blocked: [], channels:[]}, users: [{id: 1, username: 'rcorenti', login42: 'toto', email: 'toto', rank: 0, token: 'qwe', wins: 0, losses: 0, level: 0, profilePic: '', friends: [], blocked: [], channels:[]}, {id: 2, username: 'tata', login42: 'tata', email: 'tata', rank: 0, token: 'iop', wins: 0, losses: 0, level: 0, profilePic: '', friends: [], blocked: [], channels:[]}]}
+        {messages: [{content: 'test', id: 1, timestamp: '2022'}, {content: 'test2', id: 2, timestamp: '2022'}], sender: {id: 1, username: 'rcorenti', login42: 'toto', email: 'toto', rank: 0, token: 'qwe', wins: 0, losses: 0, level: 0, profilePic: '', friends: [], blocked: [], channels:[]}, receiver: {id: 2, username: 'tata', login42: 'tata', email: 'tata', rank: 0, token: 'iop', wins: 0, losses: 0, level: 0, profilePic: '', friends: [], blocked: [], channels:[]}, users: [{id: 1, username: 'rcorenti', login42: 'toto', email: 'toto', rank: 0, token: 'qwe', wins: 0, losses: 0, level: 0, profilePic: '', friends: [], blocked: [], channels:[]}, {id: 2, username: 'tata', login42: 'tata', email: 'tata', rank: 0, token: 'iop', wins: 0, losses: 0, level: 0, profilePic: '', friends: [], blocked: [], channels:[]}], id: 812}
       ] as IDmList[],
       avatars_list: new Map<string, string>()
     },
@@ -385,7 +385,7 @@ const store = createStore({
       })
     },
     async selectChannel({ commit }, channel) {
-      for (const user of channel.users ? channel.users : channel.list[0].receiver) {
+      for (const user of channel.users) {
         const res: any = await new Promise((resolve, reject) => {
           instance.get("/user/profilepic/" + user.username)
           .then((response: any) => {

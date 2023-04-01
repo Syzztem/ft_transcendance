@@ -174,6 +174,7 @@ export default defineComponent({
 		current_channel() {return this.$store.state.chat.current_channel},
 		blocked_users() {return this.$store.state.chat.blocked_users},
 		available_channels() {return this.$store.state.chat.available_channels},
+		mergedChannels() {return this.$store.state.chat.dms_list.concat(this.$store.state.chat.joined_channels)}
 	},
 	mounted() {
 		this.startReceivingMessages();
@@ -246,8 +247,11 @@ export default defineComponent({
 			<!-- Messages -->
 			<v-col id="ChatColumn">
 				<v-card id="Messagebox" width="100%">
-					<v-card-title class="CardTitle" id="ChanTitle" v-if="current_channel">
+					<v-card-title class="CardTitle" id="ChanTitle" v-if="current_channel && !current_channel.sender">
 						{{current_channel.name}}
+					</v-card-title>
+					<v-card-title class="CardTitle" id="ChanTitle" v-if="current_channel && current_channel.sender">
+						{{current_channel.receiver.username}}
 					</v-card-title>
 					<v-card-text class="Messagesscroller" height="100%" align="left">
 						<ul v-if="current_channel">
@@ -348,21 +352,19 @@ export default defineComponent({
 							</v-card>
 						</v-dialog>
 					</v-card>
-					<v-card id="ChanContent" v-if="joined_channels">
-								<v-list-item v-for="dm in dms_list">
-									<v-card id="DMcard" class="d-flex align-center justify-center mt-4" height="5vh" @click="selectChannel(dm)">
-										{{ dm.receiver.username }}
-									</v-card>
-								</v-list-item>
-						<v-list-item v-for="channel in joined_channels" :key="channel.id">
+					<v-card id="ChanContent" v-if="joined_channels || dms_list">
+						
+						<v-list-item v-for="channel, index in mergedChannels" :key="index">
 							<v-card
 								id="Channelcard"
 								class="d-flex align-center justify-center mt-4"
 								height="5vh"
 								@click="selectChannel(channel)"
-								v-bind:class="{ 'highlight': current_channel && current_channel.id == channel.id}"
-							>
-								{{channel.name}}
+								v-bind:class="{
+									'highlight': current_channel && !current_channel.sender && current_channel.id == channel.id,
+									'DMhighlight': current_channel && current_channel.sender && current_channel.id == channel.id}"
+								>
+								{{channel.name ? channel.name : channel.receiver.username}}
 							</v-card>
 						</v-list-item>
 					</v-card>
@@ -591,7 +593,12 @@ export default defineComponent({
 
 .highlight {
     color:				#ffae00!important;
-    background-color:	#162680!important;
+    background-color:	#1b2c8f!important;
+}
+
+.DMhighlight {
+    color:				#ffae00!important;
+    background-color:	#cc2727!important;
 }
 
 .alticon {

@@ -7,6 +7,7 @@ interface	IDmList
 	receiver: IUser,
     sender: IUser,
 	users: Array<IUser>,
+	id: number
 }
 
 export default IDmList
