@@ -45,50 +45,18 @@
   });
   </script>
 
-<!-- <template>
-    <v-container>
-      <v-row justify="center">
-        <v-card>
-          <v-row align="center">
-            <v-col cols="12" sm="3" class="text-center">
-              <v-avatar size="200">
-                <img :src="user.avatar" :alt="user.username" />
-              </v-avatar>
-              <v-btn color="primary" @click="goToChangeAvatar" class="mt-2">
-                Change avatar
-              </v-btn>
-            </v-col>
-            <v-col cols="12" sm="9">
-              <h1>{{ user.username }}</h1>
-              <v-btn color="primary" @click="goToChangeUsername" class="mb-2">
-                Change username
-              </v-btn>
-              <h2>Game Statistics</h2>
-              <p>Total Games : {{ user.gameStats.played }}</p>
-              <p>Wins : {{ user.gameStats.won }}</p>
-              <p>Losses : {{ user.gameStats.lost }}</p>
-              <h3>Game History :</h3>
-              <div class="game-history-container">
-                <div v-for="(game, index) in user.gameHistory" :key="game.id">
-                  <p>Date : {{ game.timestamp }}</p>
-                  <p>Score : {{ game.player1Score }} : {{ game.player2Score }}</p>
-                  <p>Winner : {{ game.winner }}</p>
-                  <p>Looser : {{ game.looser }}</p>
-                  <p>Game ID : {{ game.id }}</p>
-                  <v-divider class="border-opacity-100"></v-divider>
-                </div>
-              </div>
-            </v-col>
-          </v-row>
-        </v-card>
-      </v-row>
-    </v-container>
-  </template> -->
-<!-- <span id="TrainerTitle">official trainer card</span> -->
 <template>
 	<v-container id="ProfileContainer">
 		<v-row id="MainCol">
 			<div class="CardSpacer"></div>
+			<div id="interactionsContainer">
+				<div id="InteractionsBtn" @click="goToChangeAvatar">
+					<span id="InterTextBtn">Add friend</span><img id="InteractionsIcon" src="@/assets/edit-image.png"/>
+				</div>
+				<div id="InteractionsBtn" @click="goToChangeAvatar">
+					<span id="InterTextBtn">Block user</span><img id="InteractionsIcon" src="@/assets/edit-image.png"/>
+				</div>
+			</div>
 			<div id="CardContainer">
 				<div id="TrainerPic">
 					<img id="Pic" :src="user.avatar" :alt="user.username" />
@@ -112,8 +80,8 @@
 				</v-card>
 			</div>
 			<v-card id="HistoryContainer">
-				<!-- <div id="itsaMatch">
-				</div> -->
+				<div id="itsaMatch">
+				</div>
                 <div id="itsaMatch" v-for="(game, index) in user.gameHistory" :key="game.id">
                   <p>Date : {{ game.timestamp }}</p>
                   <p>Score : {{ game.player1Score }} : {{ game.player2Score }}</p>
@@ -127,7 +95,45 @@
 	</v-container>
 </template>
 
-  <style scoped>
+<style scoped>
+
+#interactionsContainer {
+	height: 10px;
+	max-height: 10px;
+	flex-grow: 1;
+	display: flex;
+	flex-direction: row;
+	justify-content: end;
+	align-items: center;
+	gap: 2%;
+}
+
+#InteractionsBtn {
+	display: flex;
+	background:	linear-gradient(0deg,rgb(197, 197, 197) 0%, rgb(167, 167, 177) 50%, rgba(169, 169, 240, 0.93) 100%);
+	box-shadow: 0px 0px 3px #00000069;
+	backdrop-filter: blur(7px);
+	height: 40px;
+	width: 80px;
+	gap: 0px;
+	border-radius: 10px;
+}
+
+#InteractionsIcon {
+	justify-self: end;
+	align-self: center;
+	height: 100%;
+	padding: 7px;
+}
+
+#InterTextBtn {
+	align-self: center;
+	justify-self: start;
+	font-family: pixel;
+	font-size: 8px;
+	color:rgb(61, 61, 117);
+	padding-left: 5px;
+}
 
 .CardSpacer {
 	flex-grow:			3;

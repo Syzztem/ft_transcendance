@@ -217,7 +217,7 @@ export default defineComponent({
 							<p class="alttxt">
 								Add
 							</p>
-							<img class="alticon" src="@/assets/add.png" />
+							<img class="alticon" src="@/assets/addchan.png" />
 						</v-btn>
 						<v-dialog v-model="dialog" max-width="500px">
 						<v-card id="Dialogbox">
@@ -241,7 +241,7 @@ export default defineComponent({
 							<p class="alttxt">
 								Search
 							</p>
-							<img class="alticon" src="@/assets/magnifying-glass.png" />
+							<img class="alticon" src="@/assets/quest.png" />
 						</v-btn>
 						<v-dialog v-model="allchans_dialog" max-width="500">
 						<v-card id="Dialogbox">
@@ -303,7 +303,7 @@ export default defineComponent({
 								<p class="alttxt">
 								leave channel
 								</p>
-								<img class="alticon" src="@/assets/fleche-droite.png" />
+								<img class="alticon" src="@/assets/sign-out.png" />
 							</v-btn>
 						</v-card-actions>
 					</v-card>
@@ -533,9 +533,13 @@ export default defineComponent({
 
 .alticon {
 	display: 			block;
+	padding:			2px;
 	width: 				35px!important;
 	height: 			35px!important;
-	filter: 			invert(7%) sepia(33%) saturate(7480%) hue-rotate(242deg) brightness(95%) contrast(101%);
+}
+
+.alticon:hover {
+	filter: brightness(1.4);
 }
 
 .alttxt {
