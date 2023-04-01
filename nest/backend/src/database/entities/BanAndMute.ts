@@ -11,7 +11,6 @@ export class BanAndMute {
     user: User;
 
     @ManyToOne(() => Channel, channel => channel.bannedOrMuted)
-    @JoinColumn()
     channel: Channel;
 
     @Column('boolean')

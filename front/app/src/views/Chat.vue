@@ -13,24 +13,28 @@ import { onBeforeMount } from "vue";
 import router from "@/router";
 
 /*
-
 	TODO :
 
-	current : leave : debug
-	getmessages inside leave , ban , join
+	invite to game(lina)
 
-	gestion de channel prive (send DTO OK)
-	add friend
-	moderation front -> todo : basic request tests
-	persistance des messages
-	no creation of channels with empty name
-	hide joined channels in the getAllChannels panel
+	FRONT
+	update users in channels with leave/join front
 	
+	add friend
+	block,
+	ban
+	promote
+	mute
+
+	BACK
+	change channel password (back)
+	kick (limited time)
+	gestion de channel prive (front is sending the good DTO)
+
+	- v-if display only available options (don t block if already blocked etc)
 	- clickable profile on user -> opens 	OPTIONS PANEL	:	dm, profile page, add to friends, remove from friend block user, unblock user
 											ADVANCED PANEL	:	promote/demote/ban/kick/unban
-	- v-if (blocked) -> display red block icon
-	- v-if display only available options (don t block if already blocked etc)
-
+	persistance des messages
 */
 
 export default defineComponent({
@@ -187,12 +191,36 @@ export default defineComponent({
 			}
 			this.$store.state.chat.available_channels = res
 		})
-		chatSocket.on('joined_channel', (channel : any ) => {
-			this.updateChannels(channel);
-			console.log('updateChannels')
+		chatSocket.on('joined_channel', (res : any ) => {
+			if (res.user.id == this.id)
+			{
+				this.updateChannels(res.channel);
+				console.log("updateChannels");
+			}
+			else
+				console.log(res.user.username + " joined " + res.channel.name)
 		})
-		chatSocket.on('left_channel' , (channel : any) => {
-			this.rmChannel(channel.id);
+		chatSocket.on('left_channel' , (res: any) => {
+			console.log("wubba lubba dub dub");
+			console.log('leave channel uid dto :' , res.uid);
+			console.log(`User ${res.uid} left channel ${res.channel}`);
+			if (res.uid == this.id)
+				this.rmChannel(res.channel.id);
+			else
+				console.log(res.uid + " left channel " + res.channel.name)
+		})
+		chatSocket.on('banned', (res:any) => {
+			if (res.uid == this.id)
+				this.rmChannel(res.channel.id);
+			else
+				console.log(res.uid + " was banned");
+		})
+		chatSocket.on('mod', (res: IChannel) => {
+			console.log("promote/demote on " + res.name);
+		})
+		chatSocket.on('deleteChannel', (res: IChannel) => {
+			console.log(res.name, " was deleted");
+			this.rmChannel(res.id);
 		})
 	},
 	unmounted() {
