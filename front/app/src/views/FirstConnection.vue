@@ -109,6 +109,17 @@ html, body {
   color: rgb(255, 200, 0);
 }
 
+.btn {
+	justify-self: center;
+	align-self: center;
+}
+
+.v-row {
+	width: 300px!important;
+	align-items: center;
+	justify-content: center;
+}
+
 .btn:hover {
   color: rgb(255, 233, 0);
 }
