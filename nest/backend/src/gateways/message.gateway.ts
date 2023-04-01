@@ -532,6 +532,20 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         this.clients.get(user2.id).emit("unfriend", user1)
     }
 
+    @SubscribeMessage('me')
+    async getMe(client: Socket) {
+        const user = await this.userRepository.findOne({
+            relations : {
+                channels: true,
+                games: true,
+                games2: true,
+                friends: true
+            },
+            where: {id: this.sockets.get(client)}
+        });
+        client.emit("getMe", user);
+    }
+
     async handleConnection(client: Socket) {
         const uid: number = this.jwtService.decode(client.handshake.auth.token).sub;
         const user: User = await this.userRepository.findOne({
