@@ -231,7 +231,7 @@ export default defineComponent({
 			console.log(res.name, " was deleted");
 			this.rmChannel(res.id);
 		})
-		chatSocket.on('receiveDm', (res: any) => {
+		chatSocket.on('dm', (res: any) => {
 			console.log('received dm :', res);
 		})
 		chatSocket.on('error', args => {

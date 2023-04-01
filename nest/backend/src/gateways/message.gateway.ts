@@ -410,17 +410,16 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
         if (!user1 || !user2)
             return HttpStatus.NOT_FOUND;
-        if (user1.blocked.includes(user2) || user2.blocked.includes(user1))
+        if (user1.isBlocked(user2) || user2.isBlocked(user1))
             throw new WsException("Users blocked each other");
-        const socket = this.clients.get(user2.id);
-        this.clients.get(user2.id).emit('receiveDm', { username: user1.username, message: dto.message });
-        client.emit('receiveDm', { username: user1.username, message: dto.message });        
-        if (socket) socket.emit(user1.username + ":" + dto.message)
         const message = this.usrmessageRepository.create({
             content: dto.message,
             sender: user1,
             receiver: user2
         })
+        const socket = this.clients.get(user2.id);
+        if (socket) socket.emit('dm', message);
+        client.emit('dm', message);        
         this.messageRepository.save(message)
         return HttpStatus.OK;
     }
