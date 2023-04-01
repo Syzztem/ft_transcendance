@@ -237,7 +237,7 @@ export default defineComponent({
 			this.rmChannel(res.id);
 		})
 		chatSocket.on('receiveDm', (res: any) => {
-  console.log(res);
+  console.log('received dm :', res);
 });
 
 	},
