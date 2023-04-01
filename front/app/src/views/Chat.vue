@@ -215,9 +215,6 @@ export default defineComponent({
 
 		})
 		chatSocket.on('left_channel' , (res: any) => {
-			console.log("wubba lubba dub dub");
-			console.log('leave channel uid dto :' , res.uid);
-			console.log(`User ${res.uid} left channel ${res.channel}`);
 			if (res.uid == this.id)
 				this.rmChannel(res.channel.id);
 			else
@@ -237,9 +234,11 @@ export default defineComponent({
 			this.rmChannel(res.id);
 		})
 		chatSocket.on('receiveDm', (res: any) => {
-  console.log('received dm :', res);
-});
-
+			console.log('received dm :', res);
+		})
+		chatSocket.on('error', args => {
+			console.log(args);
+		})
 	},
 	unmounted() {
   		this.stopReceivingMessages();
