@@ -44,7 +44,6 @@ export default defineComponent({
 				{ id: 4, title: 'remove friend' },
 				{ id: 5, title: 'block user' },
 				{ id: 6, title: 'unblock user' },
-				{ id: 7, title: 'invite to game' },
 			],
 			dialog: false,
 			allchans_dialog: false,
@@ -139,32 +138,29 @@ export default defineComponent({
 		handleChatUsers(item: any, user: any) {
 			switch(item.id) {
 				case 1: {
-					this.chatSocket.emit('sendDM', {id1: 1, id2: 2, message : "dmtest"});
+					this.chatSocket.emit('sendDM', {id1: this.id, id2: user.id, message : this.newMessage});
 					break
 				}
 				case 2: {
 					this.$router.push('/profile/' + user.id)
 					break
 				}
-				// case 3: {
-				// 	this.chatSocket.emit('addfriend', addfriendDTO)
-				// break
-				// }
-				// case 4: {
-				// 	this.chatSocket.emit('rmfriend', rmfriendDto)
-				// break
-				// }
-				// case 5: {
-				// 	this.chatSocket.emit('block user', )
-				// break
-				// }
-				// case 6: {
-				// 	this.chatSocket.emit('unblock user')
-				// break
-				// }
-				// case 7: {
-				// break
-				//}
+				 case 3: {
+				 	this.$store.dispatch('addFriend', user.id)
+				 break
+				 }
+				 case 4: {
+				 	this.$store.dispatch('deleteFriend', user.id)
+				 break
+				 }
+				 case 5: {
+				 	this.$store.dispatch('block', user.id)
+				 break
+				 }
+				 case 6: {
+				 	this.$store.dispatch('unblock', user.id)
+				 break
+				 }
 			}
 		},
 		updateCurrentChannel(user : any)
@@ -529,6 +525,7 @@ export default defineComponent({
 	padding-left:		20px!important;
 	display:			flex;
 	overflow-x:			auto;
+	overflow-y: hidden;
 }
 
 #Messagebox
