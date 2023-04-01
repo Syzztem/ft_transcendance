@@ -135,9 +135,16 @@ export default defineComponent({
 			const leave_dto = {chanId: id, uid: this.id, password : ''};
 			this.chatSocket.emit('leave', leave_dto);
 		},
-		handleChatUsers(item: any, user: any) {
+		async handleChatUsers(item: any, user: any) {
 			switch(item.id) {
 				case 1: {
+					const i = {me: this.$store.state.user, friend: user} as any
+					this.$store.commit("createDMList", i)
+
+
+
+
+
 					this.chatSocket.emit('sendDM', {id1: this.id, id2: user.id, message : this.newMessage});
 					break
 				}
@@ -146,7 +153,7 @@ export default defineComponent({
 					break
 				}
 				 case 3: {
-				 	this.$store.dispatch('addFriend', user.id)
+					await this.$store.dispatch('addFriend', user.id)
 				 break
 				 }
 				 case 4: {

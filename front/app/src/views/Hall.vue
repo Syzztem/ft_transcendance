@@ -2,7 +2,7 @@
   <v-container>
     <v-card id="card" black color="transparent" height="100vh" rounded flat>
     <v-row class="" justify="center">
-      <v-card id="card" black color="transparent" height="50vh" rounded flat class="mr-10">
+      <!-- <v-card id="card" black color="transparent" height="50vh" rounded flat class="mr-10">
         <v-row justify="center" class="mt-16">
           <a href="https://profile.intra.42.fr/users/lnoirot">
             <img src="@/assets/lnoirot.png"/>
@@ -13,7 +13,7 @@
                 LNOIROT
             </p>
         </v-row>
-      </v-card>
+      </v-card> -->
       <v-card id="card" black color="transparent" height="50vh" rounded flat class="ml-10">
         <v-row justify="center" class="mt-16">
           <a href="https://profile.intra.42.fr/users/aedouard">

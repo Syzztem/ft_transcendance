@@ -6,8 +6,7 @@ interface	IDmList
 	messages: Array<IDmMessage>,
 	me: IUser
     friend: IUser,
-	users: Array<IUser>,
-	id: number
+	users: Array<IUser>
 }
 
 export default IDmList

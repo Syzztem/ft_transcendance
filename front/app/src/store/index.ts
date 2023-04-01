@@ -49,9 +49,7 @@ const store = createStore({
       blocked_users: [],
       current_message:  "",
       available_channels: [] as IChannel [],
-      dms_list: [
-        {messages: [{content: 'test', id: 1, timestamp: '2022', sender: {id: 1, username: 'rcorenti', login42: 'toto', email: 'toto', rank: 0, token: 'qwe', wins: 0, losses: 0, level: 0, profilePic: '', friends: [], blocked: [], channels:[]}}, {content: 'test2', id: 2, timestamp: '2022', sender: {id: 1, username: 'rcorenti', login42: 'toto', email: 'toto', rank: 0, token: 'qwe', wins: 0, losses: 0, level: 0, profilePic: '', friends: [], blocked: [], channels:[]}}], me: {id: 1, username: 'rcorenti', login42: 'toto', email: 'toto', rank: 0, token: 'qwe', wins: 0, losses: 0, level: 0, profilePic: '', friends: [], blocked: [], channels:[]}, friend: {id: 2, username: 'tata', login42: 'tata', email: 'tata', rank: 0, token: 'iop', wins: 0, losses: 0, level: 0, profilePic: '', friends: [], blocked: [], channels:[]}, users: [{id: 1, username: 'rcorenti', login42: 'toto', email: 'toto', rank: 0, token: 'qwe', wins: 0, losses: 0, level: 0, profilePic: '', friends: [], blocked: [], channels:[]}, {id: 2, username: 'tata', login42: 'tata', email: 'tata', rank: 0, token: 'iop', wins: 0, losses: 0, level: 0, profilePic: '', friends: [], blocked: [], channels:[]}], id: 812}
-      ] as IDmList[],
+      dms_list: [] as IDmList[],
       avatars_list: new Map<string, string>()
     },
     game: {
@@ -107,6 +105,12 @@ const store = createStore({
     },
     isOnline(state, infos) {
       state.status.set(infos.id, infos.online)
+    },
+    createDMList(state, infos) {
+      const list = {me: infos.me, friend: infos.friend, users: [infos.me, infos.friend]} as IDmList
+      const isAlreadyInList = state.chat.dms_list.some((item) => item.me === list.me && item.friend === list.friend && item.users[0] === list.users[0] && item.users[1] === list.users[1]);
+      if (!isAlreadyInList)
+        state.chat.dms_list.push(list);
     },
     logout(state) {
       id = -1

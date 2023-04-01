@@ -50,8 +50,8 @@
     },
     methods: {
       async removeFriend(id: any) {
-        await this.$store.dispatch('unfriend', id);
-        await this.$store.dispatch('getProfileInfos', id);
+        await this.$store.dispatch('deleteFriend', id)
+        //await this.$store.dispatch('getProfileInfos', id);
       },
       statusClass(id: number) {
         const res: any = this.getStatus(id)
