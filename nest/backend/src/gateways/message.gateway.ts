@@ -1,5 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, ConnectedSocket, WsException } from '@nestjs/websockets';
+import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect, ConnectedSocket, WsException } from '@nestjs/websockets';
 import {Server, Socket} from 'socket.io'
 import PostMessageDTO from 'src/dto/post-message.dto';
 import { Repository } from 'typeorm';
@@ -17,7 +17,6 @@ import { JwtService } from '@nestjs/jwt';
 import { HttpStatus, Logger } from '@nestjs/common';
 import { channel } from 'diagnostics_channel';
 import changePasswordDTO from 'src/dto/change-pw.dto';
-import { admin } from 'googleapis/build/src/apis/admin';
 
 @WebSocketGateway({ namespace: 'chat' })
 export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -67,9 +66,9 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
             },
             where: {id: dto.channelId}
         })
+        if (!chan) throw new WsException("Channel Doesn't exist")
         if (chan.updateBans())
             this.channelRepository.save(chan);
-        if (!chan) throw new WsException("Channel Doesn't exist")
         const user = chan.users.find(user => user.id === dto.senderId);
         if (!user || chan.isMuted(dto.senderId))
             throw new WsException("User doesn't exist, is not on this channel or is muted");
