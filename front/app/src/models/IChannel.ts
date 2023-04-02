@@ -3,6 +3,7 @@ import IUser from "./IUser"
 
 interface IChannel {
     name:       string,
+    admin:      IUser,
     password:   string,
     isPrivate:  boolean,
     users:      Array<IUser>,

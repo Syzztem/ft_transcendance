@@ -73,15 +73,20 @@ export class UserService {
     }
 
     async getMe(id: number) : Promise<User>{
-        return this.userRepository.findOne({
+        const user = await this.userRepository.findOne({
             relations : {
-                channels: true,
+                channels: {
+                    users: true,
+                    mods: true
+                },
                 games: true,
                 games2: true,
-                friends: true
+                friends: true,
             },
             where: {id}
         });
+        console.log(user);
+        return user;
     }
 
     async getUserById(dto: FindUserDTO): Promise<User> {
@@ -121,6 +126,10 @@ export class UserService {
         if (await this.userRepository.count({ where: { login42: createUserDTO.login42 } }) != 0)
             return null;
         const user = this.userRepository.create(createUserDTO);
+        user.channels = [];
+        user.friends = [];
+        user.games = [];
+        user.games2 = [];
         return this.userRepository.save(user);
     }
 
@@ -139,12 +148,18 @@ export class UserService {
         if (await this.userRepository.count({ where: { username: dto.username } }) != 0
             || dto.username.length > 8)
             return HttpStatus.CONFLICT;
+        const oldUsername = user.username
         user.username = dto.username;
-        const oldPath = UserService.PP_PATH + user.login42 + '.jpg';
-        const newPath = UserService.PP_PATH + dto.username + '.jpg';
-        fs.rename(oldPath, newPath, (err) => {
-        })
         await this.userRepository.save(user)
+
+        const oldPath = UserService.PP_PATH + oldUsername + '.jpg';
+        const newPath = UserService.PP_PATH + dto.username + '.jpg';
+        fs.access(oldPath, fs.constants.F_OK, (err) => {
+            if (!err) {
+                fs.rename(oldPath, newPath, (err) => {
+                });
+            }
+        });
         return HttpStatus.OK;
     }
 
@@ -205,15 +220,19 @@ export class UserService {
             },
             where: {id: id1}
         });
-        const user2 = await this.userRepository.findOneBy({id: id2});
+        const user2 = await this.userRepository.findOne({
+            relations: {friends: true},
+            where: {id: id2}
+        });
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
         if (user1.isBlocked(user2))
             return HttpStatus.NO_CONTENT;
         user1.blocked.push(user2);
-        user1.friends.filter(usr => usr.id !== user2.id);
-        user2.friends.filter(usr => usr.id !== user1.id);
+        user1.friends = user1.friends.filter(usr => usr.id !== user2.id);
+        user2.friends = user2.friends.filter(usr => usr.id !== user1.id);
         this.userRepository.save(user1);
         this.userRepository.save(user2);
+        return HttpStatus.OK;
     }
 
     async unBlockUser(id1: number, id2: number) {
@@ -231,7 +250,7 @@ export class UserService {
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
         if (!user1.isBlocked(user2))
             return HttpStatus.NO_CONTENT;
-        user1.blocked.filter(usr => usr.id !== id2);
+        user1.blocked = user1.blocked.filter(usr => usr.id !== id2);
         this.userRepository.save(user1);
         return HttpStatus.OK;
     }
@@ -264,7 +283,7 @@ export class UserService {
         if(user1.isBlocked(user2) || user2.isBlocked(user1))
             return HttpStatus.FORBIDDEN
         user1.friends.push(user2);
-        this.userRepository.save(user2);
+        this.userRepository.save(user1);
         return HttpStatus.OK;
     }
 
@@ -291,10 +310,8 @@ export class UserService {
         if (!user1 || !user2) return HttpStatus.NOT_FOUND;
         if (!user1.isFriend(user2))
             return HttpStatus.NO_CONTENT;
-        user1.friends.filter(usr => usr.id !== user2.id);
-        user2.friends.filter(usr => usr.id !== user1.id);
+        user1.friends = user1.friends.filter(usr => usr.id !== user2.id);
         this.userRepository.save(user1);
-        this.userRepository.save(user2);
         return HttpStatus.OK;
     }
 

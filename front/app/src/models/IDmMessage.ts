@@ -1,8 +1,12 @@
+import IUser from "./IUser"
+
 interface	IDmMessage
 {
-	content:string,
 	id: number,
-    timestamp: string
+	content: string,
+	sender: IUser,
+	receiver: IUser,
+    timestamp: Date
 }
 
 export default IDmMessage

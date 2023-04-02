@@ -1,4 +1,4 @@
-import { AfterLoad, BeforeInsert, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { AfterLoad, BeforeInsert, BeforeRemove, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, Unique } from 'typeorm';
 import { Channel } from './Channel';
 import { Game } from './Game';
 import * as bcrypt from 'bcrypt'
@@ -39,32 +39,40 @@ export class User {
   @Column({nullable: true, type:'varchar'})
   twoFactorAuthenticationSecret: string;
 
-  @Column({type:'boolean'})
-  TwoFactorAuthenticated: boolean = false;
+  @Column({type:'boolean', default: false})
+  TwoFactorAuthenticated: boolean;
 
-  @Column({type:'boolean'})
-  isTwoFactorAuthenticationEnabled: boolean = false;
+  @Column({type:'boolean', default: false})
+  isTwoFactorAuthenticationEnabled: boolean;
 
   @Column({type: 'timestamp', nullable: true})
   lastSuccessfulAuth: Date;
 
-  @ManyToMany(() => User)
-  @JoinTable()
+  @ManyToMany(() => User, user => user.friendOf, {cascade: true, onUpdate: 'CASCADE'})
+  @JoinTable({name: "friends"})
   friends: User[];
 
-  @ManyToMany(() => User)
-  @JoinTable()
+  @ManyToMany(() => User, user => user.friends, {onUpdate: 'CASCADE'})
+  friendOf: User[]
+
+  @ManyToMany(() => User, user => user.blockedBy, {cascade: true, onUpdate: 'CASCADE'})
+  @JoinTable({name: "blocked"})
   blocked: User[];
 
-  @ManyToMany(() => Channel)
-  @JoinTable()
-  channels: Channel[]
+  @ManyToMany(() => User, user => user.blocked, {onUpdate: 'CASCADE'})
+  blockedBy: User[];
 
-  @OneToMany(() => Game, (game) => game.player1)
-  games: Game[]
+  @ManyToMany(() => Channel, (chan) => chan.users, {onUpdate: 'CASCADE'})
+  channels: Channel[];
 
-  @OneToMany(() => Game, (game) =>game.player2)
-  games2: Game[]
+  @ManyToMany(() => Channel, (chan) => chan.mods, {onUpdate: 'CASCADE'})
+  modOn: Channel[];
+
+  @OneToMany(() => Game, (game) => game.player1, {cascade: true})
+  games: Game[];
+
+  @OneToMany(() => Game, (game) => game.player2, {cascade: true})
+  games2: Game[];
 
   @AfterLoad()
   removeToken() {
@@ -83,10 +91,15 @@ export class User {
   }
 
   public isFriend(user: User) {
-    return (this.friends.filter(u => u.id == user.id) != null)
+    return (this.friends.find(u => u.id == user.id) != null)
   }
 
   public isBlocked(user: User) {
-    return (this.blocked.filter(u => u.id == user.id) != null)
+    return (this.blocked.find(u => u.id == user.id) != null)
+  }
+
+  @BeforeRemove()
+  public logRemoval() {
+    console.log("deleted " + this.username);
   }
 }

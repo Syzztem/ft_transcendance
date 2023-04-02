@@ -1,37 +1,54 @@
 <script lang="ts">
 
-import vuetify from "@/plugins/vuetify";
-import {reactive, ref, onMounted} from "vue";
-import IMessage from "@/models/IMessage";
 import IChannel from "@/models/IChannel";
-import IUser from "@/models/IUser";
-import store from "@/store";
 import { defineComponent } from 'vue';
-import { mapActions ,mapState} from "vuex";
+import { mapActions} from "vuex";
 import { chatSocket } from "@/websocket";
-import { onBeforeMount } from "vue";
-import router from "@/router";
+import IDmList from "@/models/IDmList";
+import IUser from "@/models/IUser";
+import IDmMessage from "@/models/IDmMessage";
+import { thisTypeAnnotation } from "@babel/types";
 
 /*
-
 	TODO :
 
-	current : leave : debug
-	getmessages inside leave , ban , join
+	listen sockets dm?
 
-	gestion de channel prive (send DTO OK)
-	add friend
-	moderation front -> todo : basic request tests
-	persistance des messages
-	no creation of channels with empty name
-	hide joined channels in the getAllChannels panel
-	
+	block
+	PATCH bugs 2FA -> le controller "me" renvoie toujours false sur is2FAenabled
+	creer getAllJoinedChannels qui return les channels de l user -louis
+	private channel
+	invite to game(lina)
+	change password channel
+	promote
+	ban (limited time)
+	mute
+	kick
+
+	BACK
+	change channel password
+	kick (limited time)
+	gestion de channel prive (front is sending the good DTO)
+
+	- v-if display only available options (don t block if already blocked etc)
 	- clickable profile on user -> opens 	OPTIONS PANEL	:	dm, profile page, add to friends, remove from friend block user, unblock user
 											ADVANCED PANEL	:	promote/demote/ban/kick/unban
-	- v-if (blocked) -> display red block icon
-	- v-if display only available options (don t block if already blocked etc)
-
+	persistance des messages
 */
+
+enum opts {
+	SEND_DM,
+	PROFILE,
+	ADD_FRIEND,
+	DEL_FRIEND,
+	BLK_USER,
+	UNBLK_USER,
+	INVITE,
+	BAN,
+	MUTE,
+	PROMOTE,
+	DEMOTE,
+}
 
 export default defineComponent({
 	data() {
@@ -39,13 +56,17 @@ export default defineComponent({
 			id: Number(localStorage.getItem('id')),
 			options:
 			[
-				{ id: 1, title: 'Send DM' },
-				{ id: 2, title: 'profile page' },
-				{ id: 3, title: 'add friend' },
-				{ id: 4, title: 'remove friend' },
-				{ id: 5, title: 'block user' },
-				{ id: 6, title: 'unblock user' },
-				{ id: 7, title: 'invite to game' },
+				{ id: 0, title: 'Send DM' },
+				{ id: 1, title: 'profile page' },
+				{ id: 2, title: 'add friend' },
+				{ id: 3, title: 'remove friend' },
+				{ id: 4, title: 'block user' },
+				{ id: 5, title: 'unblock user' },
+				{ id: 6, title: 'invite to game' },
+				{ id: 7, title: 'ban'},
+				{ id: 8, title: 'mute'},
+				{ id: 9, title: 'promote'},
+				{ id: 10, title: 'demote'}
 			],
 			dialog: false,
 			allchans_dialog: false,
@@ -66,7 +87,7 @@ export default defineComponent({
 	},
 	methods: {
 		...mapActions(
-			["selectChannel", "rmChannel", "receiveMessage", "joinChannel",
+			["selectChannel", "rmChannel", "receiveMessage", "joinChannel", "receiveDM",
 			"stopReceiving", "getUserChannels", "getAllChannelsStore", "updateChannelsStore"],),
 		createPublicChannel(newChan : any)
 		{
@@ -82,8 +103,11 @@ export default defineComponent({
 			})
 			this.dialog = false;
 		},
-		async selectChannel(channel: IChannel) {
+		async selectChannel(channel: IChannel | IDmList) {
+			console.log("switch", channel);
 			await this.$store.dispatch('selectChannel', channel)
+			this.$store.state.current_channel = channel;
+			this.current_channel = channel;
 		},
 		getAllChannels()
 		{
@@ -91,34 +115,35 @@ export default defineComponent({
 			chatSocket.emit('getAll');
 			this.allchans_dialog = true;
 		},
-		sendDM(message: string) {
-			if (!this.current_channel)
-				return
-			console.log('obj: ', this.current_channel)
-			const send = {
-				message: message,
-				id1: this.id,
-				id2: this.current_channel.receiver.id
-			}
-			this.chatSocket.emit('sendDM', send)
-		},
 		sendMessage(newMessage: string)
 		{
 			if (!this.current_channel)
 				return
-			if (this.current_channel.sender)
-				return this.sendDM(newMessage)
-			const message_dto = {
-				message : newMessage,
-				channelId : this.current_channel.id,
-				senderId : this.id,
-			};
+			if (!this.isChannel(this.current_channel))
+			{
+				const send = {
+					message: newMessage,
+					id1: this.id,
+					id2: this.current_channel.friend.id
+				}
+				this.chatSocket.emit('sendDM', send)
+			}
+			else {
+				const message_dto = {
+					message : newMessage,
+					channelId : this.current_channel.id,
+					senderId : this.id,
+				};
+				this.chatSocket.emit('newmsg' , message_dto);
+			}
 			this.newMessage = '';
-			this.chatSocket.emit('newmsg' , message_dto);
 		},
 
 		async startReceivingMessages() {
 			await this.receiveMessage();
+		},
+		async startReceivingDMs() {
+			await this.receiveDM();
 		},
 		async stopReceivingMessages()
 		{
@@ -131,53 +156,128 @@ export default defineComponent({
 		joinChannel(channel : any, password : string)
 		{
 			const join_dto = {chanId: channel.id, uid: this.id, password : password};
-			console.log('join dto :', join_dto);
 			this.chatSocket.emit('join', join_dto);
 		},
 		leaveChannel(id : any)
 		{
 			const leave_dto = {chanId: id, uid: this.id, password : ''};
-			console.log('leave DTO', leave_dto);
 			this.chatSocket.emit('leave', leave_dto);
 		},
-		handleChatUsers(item: any, user: any) {
+		async handleChatUsers(item: any, user: IUser) {
 			switch(item.id) {
-				case 1: {
-					// this.chatSocket.emit('sendDM', dmDTO);
+				case opts.SEND_DM: {
+					this.$store.commit("createDMList", {
+						me: this.user,
+						friend: user,
+						messages: [],
+						users: [this.user, user]
+					})
+					this.chatSocket.emit('sendDM', {id1: this.id, id2: user.id, message : this.newMessage});
+					break
 				}
-				case 2: {
+				case opts.PROFILE: {
 					this.$router.push('/profile/' + user.id)
+					break
 				}
-				// case 3: {
-				// 	this.chatSocket.emit('addfriend', addfriendDTO)
-				// }
-				// case 4: {
-				// 	this.chatSocket.emit('rmfriend', rmfriendDto)
-				// }
-				// case 5: {
-				// 	this.chatSocket.emit('block user', )
+				 case opts.ADD_FRIEND: {
+					await this.$store.dispatch('addFriend', user.id)
+				 	break
+				 }
+				 case opts.DEL_FRIEND: {
+				 	this.$store.dispatch('deleteFriend', user.id)
+				 	break
+				 }
+				 case opts.BLK_USER: {
+				 	this.$store.dispatch('block', user.id)
+				 	break
+				 }
+				 case opts.UNBLK_USER: {
+				 	this.$store.dispatch('unblock', user.id)
+				 	break
+				 }
+				 case opts.BAN: {
+					if (this.isChannel(this.current_channel))
+						this.$store.dispatch('ban', {
+						chanId: this.current_channel.id,
+						uid: user.id,
+						isBan: true,
+						date: new Date(2023, 12)
+					})
 
-				// }
-				// case 6: {
-				// 	this.chatSocket.emit('unblock user')
-				// }
-				// case 7: {}
+					break
+				 }
+				 case opts.MUTE: {
+
+					break
+				 }
+				 case opts.PROMOTE: {
+
+					break
+				 }
+				 case opts.DEMOTE: {
+
+					break
+				 }
+				 case opts.INVITE: {
+
+					break
+				 }
 			}
+		},
+		updateCurrentChannel(user : any)
+		{
+			if (this.isChannel(this.current_channel)) {
+				this.current_channel.users.push(user);
+				this.$store.dispatch('getChatPic', user.username)
+			}
+		},
+		isChannel(item: IChannel | IDmList) : item is IChannel {
+			return ((item as IChannel).name ? true : false)
+		},
+		filterOptions(options: any[], target: IUser) : any[] {
+			const out: any[] = [options[opts.PROFILE], options[opts.INVITE]];
+			out.push(this.friends.find(f => f.id == target.id) ? options[opts.DEL_FRIEND] : options[opts.ADD_FRIEND]);
+			out.push(this.blocked_users.find(b => b.id == target.id) ? options[opts.UNBLK_USER] : options[opts.BLK_USER]);
+			if (this.isChannel(this.current_channel)) {
+				out.push(options[opts.SEND_DM]);
+				if (this.current_channel.mods.findIndex(mod => mod.id = this.user.id) != -1)
+				{
+					out.push([
+						options[opts.BAN],
+						options[opts.MUTE],
+						options[opts.PROMOTE],
+						options[opts.DEMOTE]
+					])
+				}
+			}
+			return out;
+		},
+		rmUserInChannel(channel : IChannel , uid : number)
+		{
+			const channel_leave = (this.$store.state.chat.joined_channels as IChannel[]).find(chan => chan.id = channel.id);
+			if (!channel_leave) return;
+			channel_leave.users = channel.users;
+			channel_leave.mods = channel.mods;
 		}
 	},
     computed: {
-		user() {return this.$store.state.userInfos},
+		user() : IUser {return this.$store.state.userInfos},
 		username() {return this.$store.state.userInfos.username},
 		channels() {return this.$store.state.chat.channels},
-		joined_channels() {return this.$store.state.chat.joined_channels},
+		joined_channels() {
+			return this.$store.state.chat.joined_channels},
+		friends() : IUser[] {return this.$store.state.userInfos.friends},
 		dms_list() {return this.$store.state.chat.dms_list},
-		current_channel() {return this.$store.state.chat.current_channel},
-		blocked_users() {return this.$store.state.chat.blocked_users},
+		current_channel() : IChannel | IDmList {return this.$store.state.chat.current_channel},
+		blocked_users() : IUser[] {return this.$store.state.chat.blocked_users},
 		available_channels() {return this.$store.state.chat.available_channels},
+		mergedChannels() {return this.$store.state.chat.dms_list.concat(this.$store.state.chat.joined_channels)}
 	},
-	mounted() {
+	async mounted() {
+		await this.$store.dispatch('getUserInfos')
 		this.startReceivingMessages();
-		chatSocket.on('sendAllChannels', (channels : any) => {
+		this.startReceivingDMs();
+		chatSocket.on('sendAllChannels', (channels : IChannel[]) => {
 			const res: any = []
 			for (const chan of channels) {
 				const index = this.$store.state.chat.joined_channels.findIndex((element: any) => element.id === chan.id)
@@ -186,12 +286,34 @@ export default defineComponent({
 			}
 			this.$store.state.chat.available_channels = res
 		})
-		chatSocket.on('joined_channel', (channel : any ) => {
-			this.updateChannels(channel);
-			console.log('updateChannels')
+		chatSocket.on('joined_channel', (res : any ) => {
+			if (res.user.id == this.id)
+			{
+				this.updateChannels(res.channel);
+			}
+			else
+			{
+				this.updateCurrentChannel(res.user);
+			}
+
 		})
-		chatSocket.on('left_channel' , (channel : any) => {
-			this.rmChannel(channel.id);
+		chatSocket.on('left_channel' , (res: any) => {
+			if (res.uid == this.id)
+				this.rmChannel(res.channel.id);
+			else
+				this.rmUserInChannel( res.channel , res.uid)
+		})
+		chatSocket.on('banned', (res:any) => {
+			if (res.uid == this.id)
+				this.rmChannel(res.channel.id);
+		})
+		chatSocket.on('mod', (res: IChannel) => {
+		})
+		chatSocket.on('deleteChannel', (res: IChannel) => {
+			this.rmChannel(res.id);
+		})
+
+		chatSocket.on('error', args => {
 		})
 	},
 	unmounted() {
@@ -199,6 +321,11 @@ export default defineComponent({
 		chatSocket.off('sendAllChannels');
 		chatSocket.off('joined_channel');
 		chatSocket.off('left_channel');
+		chatSocket.off('error');
+		chatSocket.off('deleteChannel')
+		chatSocket.off('mod')
+		chatSocket.off('banned')
+
 	},
 })
 
@@ -215,7 +342,7 @@ export default defineComponent({
 					</v-card-title>
 					<ul v-if="current_channel">
 						<li>
-							<v-list-item v-for="user in current_channel.users">
+							<v-list-item v-if="isChannel(current_channel)" v-for="user in current_channel.users">
 								<v-card id="Usercard" class="d-flex align-center justify-center mt-4">
 										<v-avatar size="60">
 											<img
@@ -228,7 +355,30 @@ export default defineComponent({
 										{{user.username}}
 										<v-menu activator="parent">
 											<v-list id="LighterCard">
-												<v-list-item v-for="(item, index) in options" :key="index" :value="index" @click="handleChatUsers(item, user)">
+												<v-list-item v-for="(item, index) in filterOptions(options, user)" :key="index" :value="index" @click="handleChatUsers(item, user)">
+													<v-list-item-title>
+														{{ item.title }}
+													</v-list-item-title>
+												</v-list-item>
+											</v-list>
+										</v-menu>
+									</v-card-text>
+								</v-card>
+							</v-list-item>
+							<v-list-item v-if="!isChannel(current_channel)">
+								<v-card id="Usercard" class="d-flex align-center justify-center mt-4">
+										<v-avatar size="60">
+											<img
+											:src="avatar.get(current_channel.friend.username)"
+											alt="John"
+											height="60"
+											>
+										</v-avatar>
+									<v-card-text>
+										{{current_channel.friend.username}}
+										<v-menu activator="parent">
+											<v-list id="LighterCard">
+												<v-list-item v-for="(item, index) in filterOptions(options, user)" :key="index" :value="index" @click="handleChatUsers(item, user)">
 													<v-list-item-title>
 														{{ item.title }}
 													</v-list-item-title>
@@ -246,14 +396,14 @@ export default defineComponent({
 			<!-- Messages -->
 			<v-col id="ChatColumn">
 				<v-card id="Messagebox" width="100%">
-					<v-card-title class="CardTitle" id="ChanTitle" v-if="current_channel">
-						{{current_channel.name}}
+					<v-card-title class="CardTitle" id="ChanTitle" v-if="current_channel != null">
+						{{isChannel(current_channel) ? current_channel.name : current_channel.friend.username}}
 					</v-card-title>
 					<v-card-text class="Messagesscroller" height="100%" align="left">
 						<ul v-if="current_channel">
 							<div v-for="message in current_channel.messages">
 								<li id="messContent" v-if="message.content != ''">
-									<span id="username">{{message.sender.username}}</span>: {{message.content}}
+									<span id="username">{{message.sender.username }}</span>: {{message.content}}
 								</li>
 							</div>
 						</ul>
@@ -285,7 +435,7 @@ export default defineComponent({
 							<p class="alttxt">
 								Add
 							</p>
-							<img class="alticon" src="@/assets/add.png" />
+							<img class="alticon" src="@/assets/addchan.png" />
 						</v-btn>
 						<v-dialog v-model="dialog" max-width="500px">
 						<v-card id="Dialogbox">
@@ -309,7 +459,7 @@ export default defineComponent({
 							<p class="alttxt">
 								Search
 							</p>
-							<img class="alticon" src="@/assets/magnifying-glass.png" />
+							<img class="alticon" src="@/assets/quest.png" />
 						</v-btn>
 						<v-dialog v-model="allchans_dialog" max-width="500">
 						<v-card id="Dialogbox">
@@ -348,36 +498,34 @@ export default defineComponent({
 							</v-card>
 						</v-dialog>
 					</v-card>
-					<v-card id="ChanContent" v-if="joined_channels">
-								<v-list-item v-for="dm in dms_list">
-									<v-card id="DMcard" class="d-flex align-center justify-center mt-4" height="5vh" @click="selectChannel(dm)">
-										{{ dm.receiver.username }}
-									</v-card>
-								</v-list-item>
-						<v-list-item v-for="channel in joined_channels" :key="channel.id">
+					<v-card id="ChanContent" v-if="joined_channels || dms_list">
+						
+						<v-list-item v-for="chat, index in mergedChannels" :key="index">
 							<v-card
 								id="Channelcard"
 								class="d-flex align-center justify-center mt-4"
 								height="5vh"
-								@click="selectChannel(channel)"
-								v-bind:class="{ 'highlight': current_channel && current_channel.id == channel.id}"
-							>
-								{{channel.name}}
+								@click="selectChannel(chat)"
+								v-bind:class="{
+									'highlight': current_channel && isChannel(current_channel) && current_channel.id == chat.id,
+									'DMhighlight': current_channel && !isChannel(current_channel) && current_channel.friend.id == chat.id}"
+								>
+								{{chat.name ? chat.name : chat.friend.username}}
 							</v-card>
 						</v-list-item>
 					</v-card>
 					<v-card id="Channelactions">
-						<v-card-actions class="justify-center">
+						<v-card-actions class="justify-center" v-if="current_channel && isChannel(current_channel)">
 							<v-btn
 								class="altbtn"
 								id="Btnchannel"
-								@click="leaveChannel(current_channel ? current_channel.id : -1)"
+								@click="leaveChannel(isChannel(current_channel) ? current_channel.id : -1)"
 								
 							>
 								<p class="alttxt">
 								leave channel
 								</p>
-								<img class="alticon" src="@/assets/fleche-droite.png" />
+								<img class="alticon" src="@/assets/sign-out.png" />
 							</v-btn>
 						</v-card-actions>
 					</v-card>
@@ -462,7 +610,7 @@ export default defineComponent({
 	height:				35px!important;
 	min-height:			35px!important;
 	flex-shrink: 0;
-	flex-grow: 1;
+	/* flex-grow: 1; */
 	flex-basis: 0;
 	letter-spacing:		1.5px!important;
 	color:				#ffae00;
@@ -494,6 +642,7 @@ export default defineComponent({
 	padding-left:		20px!important;
 	display:			flex;
 	overflow-x:			auto;
+	overflow-y: hidden;
 }
 
 #Messagebox
@@ -591,7 +740,12 @@ export default defineComponent({
 
 .highlight {
     color:				#ffae00!important;
-    background-color:	#162680!important;
+    background-color:	#1b2c8f!important;
+}
+
+.DMhighlight {
+    color:				#ffae00!important;
+    background-color:	#cc2727!important;
 }
 
 .alticon {
@@ -618,9 +772,13 @@ export default defineComponent({
 
 .alticon {
 	display: 			block;
+	padding:			2px;
 	width: 				35px!important;
 	height: 			35px!important;
-	filter: 			invert(7%) sepia(33%) saturate(7480%) hue-rotate(242deg) brightness(95%) contrast(101%);
+}
+
+.alticon:hover {
+	filter: brightness(1.4);
 }
 
 .alttxt {

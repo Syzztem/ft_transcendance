@@ -12,6 +12,7 @@ import 'material-design-icons-iconfont/dist/material-design-icons.css'
 import VOtpInput from "vue3-otp-input";
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
 import '@mdi/font/css/materialdesignicons.css'
+import 'vuetify/dist/vuetify.min.css'
 
 const vuetify = createVuetify({
   components,

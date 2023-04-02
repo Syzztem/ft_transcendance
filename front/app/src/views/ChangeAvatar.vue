@@ -184,7 +184,6 @@ export default defineComponent({
                 formData: formData
               })
               .then((response: any) => {
-                console.log('Profile pic update response:', response)
                 this.$store.dispatch('getProfilePic', this.$store.state.userInfos.username)
               })
             }, "image/jpg")

@@ -16,15 +16,15 @@ export class Channel {
     @JoinColumn()
     admin: User;
 
-    @ManyToMany(() => User)
-    @JoinTable()
+    @ManyToMany(() => User, user => user.modOn)
+    @JoinTable({name: "mods"})
     mods: User[];
 
-    @ManyToMany(() => User)
-    @JoinTable()
+    @ManyToMany(() => User, (user) => user.channels, {cascade: true, onUpdate: 'CASCADE'})
+    @JoinTable({name: "users"})
     users: User[];
 
-    @OneToMany(() => ChannelMessage, message => message.channel)
+    @OneToMany(() => ChannelMessage, message => message.channel, {cascade: true})
     @JoinColumn()
     messages: ChannelMessage[]
 
@@ -34,7 +34,7 @@ export class Channel {
     @Column({type: "varchar", nullable: true, default: null})
     password?: string;
 
-    @OneToMany(() => BanAndMute, ban => ban.channel)
+    @OneToMany(() => BanAndMute, ban => ban.channel, {cascade: true})
     @JoinColumn()
     bannedOrMuted: BanAndMute[];
 
@@ -45,11 +45,15 @@ export class Channel {
 
     @BeforeInsert()
     async hashPassword() {
-        this.password = await bcrypt.hash(this.password, 15);
+        if (this.password && this.password.length == 0)
+            this.password = null;
+        else
+            this.password = await bcrypt.hash(this.password, 15);
     }
 
     public isMod(id: number) : boolean {
-        return (this.mods.filter(mod => mod.id == id) != null)
+        if (this.admin.id == id) return true;
+        return (this.mods.find(mod => mod.id == id) != null)
     }
 
     async verifyPassword(password: string) {
@@ -70,8 +74,18 @@ export class Channel {
 
     public removeUser(userId: number) : boolean {
         if (!this.isOn(userId)) return false;
-        this.users.filter(user => user.id !== userId)
-        this.mods.filter(user => user.id !== userId)
+        this.users = this.users.filter(user => user.id !== userId);
+        this.mods = this.mods.filter(user => user.id !== userId);
+        return true;
+    }
+
+    public updateBans() {
+        if (this.bannedOrMuted.length == 0)
+            return false
+        const bmcpy = this.bannedOrMuted.filter(ban => (ban.expires <= new Date()))
+        if (bmcpy.length == this.bannedOrMuted.length)
+            return false;
+        this.bannedOrMuted = bmcpy;
         return true;
     }
 }

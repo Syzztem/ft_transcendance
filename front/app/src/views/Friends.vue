@@ -6,10 +6,10 @@
           <div class="friends-list" :class="{ 'scrollable': friends.length > maxFriends }">
             <v-list>
               <v-list-item v-for="(friend, index) in friends" :key="index">
-                <v-list-item-avatar>
-                  <img :src="friend.avatar" :alt="friend.username" />
-                  <span :class="statusClass(friend.status)"></span>
-                </v-list-item-avatar>
+                <div class="avatar">
+                  <img class="pic" :src="avatar.get(friend.username)" :alt="friend.username" />
+                  <span class="status" :class="statusClass(friend.id)"></span>
+                </div>
                 <v-list-item-content>
                   <v-list-item-title>{{ friend.username }}</v-list-item-title>
                 </v-list-item-content>
@@ -32,30 +32,34 @@
     data() {
       return {
         friends: this.$store.state.userInfos.friends,
-        maxFriends: 2
+        maxFriends: 2,
+        avatar: this.$store.state.chat.avatars_list
       };
     },
     async mounted() {
-      await this.$store.dispatch('getStats');
-      console.log(this.friends)
+      await this.$store.dispatch('receiveIsOnline')
+      await this.$store.dispatch('isOnline')
+      await this.$store.dispatch('getUserInfos');
       this.friends = this.$store.state.userInfos.friends;
+      for (let friend of this.friends) {
+        await this.$store.dispatch('getChatPic', friend.username)
+      }
+    },
+    unmounted() {
+      this.$store.dispatch('stopOnline')
     },
     methods: {
       async removeFriend(id: any) {
-        await this.$store.dispatch('unfriend', id);
-        await this.$store.dispatch('getProfileInfos', id);
+        await this.$store.dispatch('deleteFriend', id)
+        //await this.$store.dispatch('getProfileInfos', id);
       },
-      statusClass(status: string) {
-        switch (status) {
-          case 'online':
-            return 'status-online';
-          case 'offline':
-            return 'status-offline';
-          case 'in-game':
-            return 'status-in-game';
-          default:
-            return '';
-        }
+      statusClass(id: number) {
+        const res: any = this.getStatus(id)
+        return res ? 'status-offline': 'status-online';
+      },
+      async getStatus(id: number) {
+        await this.$store.dispatch('isOnline', id)
+        return this.$store.state.status.get(id)
       }
     }
   });
@@ -69,27 +73,51 @@
       overflow-y: scroll; 
     }
     .status-online {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      background-color: green;
-      border-radius: 50%;
-      margin-left: 5px;
-    }
-    .status-offline {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      background-color: gray;
-      border-radius: 50%;
-      margin-left: 5px;
-    }
-    .status-in-game {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      background-color: orange;
-      border-radius: 50%;
-      margin-left: 5px;
-    }
+  height: 100%;
+  width: 100%;
+  padding: 7px;
+  background-color: green;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+.status-offline {
+  height: 100%;
+  width: 100%;
+  padding: 7px;
+  background-color: rgb(122, 122, 122);
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+    .avatar {
+  display: grid;
+  align-items: end;
+  justify-content: end;
+  width: 48px;
+  height: 48px;
+  /* border-radius: 50%; */
+  /* overflow: hidden; */
+}
+
+.pic {
+  border-radius: 50%;
+  align-self: stretch;
+  justify-self: stretch;
+  grid-column: 1;
+  grid-row: 1;
+  width: 48px;
+  height: 48px;
+}
+.status {
+  /* position: absolute; */
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  z-index: 5;
+  border: 2px solid white;
+  align-self: end;
+  justify-self: end;
+  grid-column: 1;
+  grid-row: 1;
+}
   </style>
