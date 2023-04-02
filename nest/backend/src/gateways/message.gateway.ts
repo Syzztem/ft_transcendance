@@ -399,14 +399,12 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
                     @ConnectedSocket() client: Socket) {
         this.verifyId(client, dto.id1);
         const user1 = await this.userRepository.findOne({
-            select: {id: true},
             relations: {
                 blocked: true
             },
             where :{id: dto.id1}
         });
         const user2 = await this.userRepository.findOne({
-            select: {id: true},
             relations: {
                 blocked: true
             },

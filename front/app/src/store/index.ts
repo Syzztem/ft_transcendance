@@ -6,6 +6,8 @@ import { chatSocket } from '@/websocket'
 import { statusSocket } from '@/websocket'
 import IDmList from '@/models/IDmList'
 import IUser from '@/models/IUser'
+import IDmMessage from '@/models/IDmMessage'
+import IMessage from '@/models/IMessage'
 
 const instance : AxiosInstance = axios.create({
   baseURL: 'http://' +  process.env.VUE_APP_URL + ':3000'
@@ -19,6 +21,10 @@ instance.interceptors.request.use(function (request) {
 
 let token: any = localStorage.getItem('token')
 let id: any = localStorage.getItem('id')
+
+function isChannel(item: IChannel | IDmList) : item is IChannel {
+  return ((item as IChannel).name ? true : false)
+}
 
 const store = createStore({
   state: {
@@ -106,8 +112,7 @@ const store = createStore({
     isOnline(state, infos) {
       state.status.set(infos.id, infos.online)
     },
-    createDMList(state, infos) {
-      const list = {me: infos.me, friend: infos.friend, users: [infos.me, infos.friend]} as IDmList
+    createDMList(state, list: IDmList) {
       const isAlreadyInList = state.chat.dms_list.some((item) => item.me === list.me && item.friend === list.friend && item.users[0] === list.users[0] && item.users[1] === list.users[1]);
       if (!isAlreadyInList)
         state.chat.dms_list.push(list);
@@ -140,19 +145,47 @@ const store = createStore({
     setTwoFA(state, infos) {
       state.twoFactorAuthenticated = infos
     },
-    broadcast(state, message)
+    broadcast(state, message: IMessage)
     {
-      const {channel, sender, content} = message;
-      const newMessage = {channel, sender, content};
-      const targetChannel = state.chat.joined_channels.find(ch => ch.id === channel.id);
+      const targetChannel = state.chat.joined_channels.find(ch => ch.id === message.channel.id);
       // Check if the target channel exists
       if (targetChannel) {
         // Push the new message to the target channel's messages array
         if (!targetChannel.messages)
           targetChannel.messages = [];
-        targetChannel.messages.push(newMessage);
+        targetChannel.messages.push(message);
       } else {
-        console.error(`Channel not found: ${channel}`);
+        console.error(`Channel not found: ${message.channel}`);
+      }
+    },
+    broadcastDM(state, message: IDmMessage) {
+      if (message.content.length == 0) return;
+      console.log("my id", state.userInfos.username);
+      console.log("receiver", message.receiver.username);
+      console.log("sender", message.sender.username);
+      if (state.userInfos.username == message.sender.username)
+      {
+        console.log("sender")
+        const dmList = state.chat.dms_list.find(list => list.friend.id == message.receiver.id)
+        if (!dmList) return console.log("Unexpected");
+        if (!dmList.messages) dmList.messages = [];
+        dmList.messages.push(message);
+        return;
+      }
+      const dmList = state.chat.dms_list.find(list => list.friend.id == message.sender.id)
+      if (!dmList) {
+        if (!state.chat.dms_list)
+          state.chat.dms_list = [];
+          state.chat.dms_list.push({
+            messages: [message],
+            me: message.receiver,
+            friend: message.sender,
+            users: [message.sender, message.receiver]
+          });
+      }
+      else {
+        if (!dmList.messages) dmList.messages = [];
+        dmList.messages.push(message);
       }
     },
     getAllChannels(state, channels)
@@ -401,12 +434,25 @@ const store = createStore({
         })
       })
     },
-    async selectChannel({ commit }, channel) {
-      if (!channel.users || channel.users.length === 0)
-        return
-      for (const user of channel.users) {
+    async selectChannel({ commit }, chat: IChannel | IDmList) {
+      if (isChannel(chat)) {
+        for (const user of chat.users) {
+          const res: any = await new Promise((resolve, reject) => {
+            instance.get("/user/profilepic/" + user.username)
+            .then((response: any) => {
+              resolve(response)
+            })
+            .catch((error: any) => {
+              resolve(error)
+            })
+          })
+          commit('setChatAvatars', { username: user.username, avatar: res.data })
+        }
+        commit("setCurrentChannel", chat);
+      }
+      else {
         const res: any = await new Promise((resolve, reject) => {
-          instance.get("/user/profilepic/" + user.username)
+          instance.get("/user/profilepic/" + chat.friend.username)
           .then((response: any) => {
             resolve(response)
           })
@@ -414,9 +460,9 @@ const store = createStore({
             resolve(error)
           })
         })
-        commit('setChatAvatars', { username: user.username, avatar: res.data })
+        commit("setChatAvatars", {username: chat.friend.username, avatar: res.data})
+        commit("setCurrentChannel", chat)
       }
-      commit("setCurrentChannel", channel);
     },
     rmChannel({ commit }, id) {
       if (id === -1)
@@ -438,6 +484,13 @@ const store = createStore({
         commit("broadcast", message);
 			})
 		},
+    receiveDM({commit})
+    {
+      chatSocket.on("dm", (message: any) =>
+      {
+        commit("broadcastDM", message)
+      })
+    },
     getAllChannelsStore()
     {
       chatSocket.emit('getAll');
@@ -445,6 +498,7 @@ const store = createStore({
     stopReceiving()
     {
       chatSocket.off('displayMessage');
+      chatSocket.off('dm');
     },
     updateChannelsStore({commit}, channel)
     {

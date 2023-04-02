@@ -3,9 +3,11 @@ import IUser from "./IUser"
 
 interface	IMessage
 {
+	id: number,
 	content:string,
 	sender: IUser,
-	channel: IChannel,
+	timestamp: Date,
+	channel: IChannel
 }
 
 export default IMessage
