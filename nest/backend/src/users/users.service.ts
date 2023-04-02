@@ -85,7 +85,6 @@ export class UserService {
             },
             where: {id}
         });
-        console.log(user);
         return user;
     }
 

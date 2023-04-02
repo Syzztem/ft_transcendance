@@ -104,7 +104,6 @@ export default defineComponent({
 			this.dialog = false;
 		},
 		async selectChannel(channel: IChannel | IDmList) {
-			console.log("switch", channel);
 			await this.$store.dispatch('selectChannel', channel)
 			this.$store.state.current_channel = channel;
 			this.current_channel = channel;

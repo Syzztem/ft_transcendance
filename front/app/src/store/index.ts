@@ -160,12 +160,8 @@ const store = createStore({
     },
     broadcastDM(state, message: IDmMessage) {
       if (message.content.length == 0) return;
-      console.log("my id", state.userInfos.username);
-      console.log("receiver", message.receiver.username);
-      console.log("sender", message.sender.username);
       if (state.userInfos.username == message.sender.username)
       {
-        console.log("sender")
         const dmList = state.chat.dms_list.find(list => list.friend.id == message.receiver.id)
         if (!dmList) return console.log("Unexpected");
         if (!dmList.messages) dmList.messages = [];

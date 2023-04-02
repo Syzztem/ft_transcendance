@@ -97,9 +97,4 @@ export class User {
   public isBlocked(user: User) {
     return (this.blocked.find(u => u.id == user.id) != null)
   }
-
-  @BeforeRemove()
-  public logRemoval() {
-    console.log("deleted " + this.username);
-  }
 }
